@@ -27,9 +27,7 @@
         "acclimate/container" : "~1.0"
     },
     "require-dev":{
-        "phpunit/phpunit" : "4.*",
-        "silex/web-profiler" : "1.*",
-        "symfony/var-dumper" : "*"
+        "phpunit/phpunit" : "4.*"
     },
     "autoload" : {
         "psr-4": {

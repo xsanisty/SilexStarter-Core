@@ -57,15 +57,16 @@ class ModuleManager
     /**
      * Check wether required modules is registered.
      *
-     * @param array $modules list of module identifiers
+     * @param string $moduleIdentifier the module indentifier
+     * @param array  $modules list of module identifiers
      *
      * @throws ModuleRequiredException
      */
-    protected function checkRequiredModules(array $modules)
+    protected function checkRequiredModules($moduleIdentifier, array $requiredModules)
     {
-        foreach ($modules as $requiredModule) {
+        foreach ($requiredModules as $requiredModule) {
             if (!$this->isRegistered($requiredModule)) {
-                throw new ModuleRequiredException($moduleAccessor.' module require '.$requiredModule.' as its dependency');
+                throw new ModuleRequiredException($moduleIdentifier.' module require '.$requiredModule.' as its dependency');
             }
         }
     }
@@ -79,7 +80,7 @@ class ModuleManager
     {
         $moduleIdentifier = $module->getModuleIdentifier();
 
-        $this->checkRequiredModules($module->getRequiredModules());
+        $this->checkRequiredModules($moduleIdentifier, $module->getRequiredModules());
 
         /* Get the module path via the class reflection */
         $moduleReflection = new \ReflectionClass($module);

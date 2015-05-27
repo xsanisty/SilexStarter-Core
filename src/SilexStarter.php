@@ -8,8 +8,6 @@ use Silex\Application;
 use FilesystemIterator;
 use RecursiveIteratorIterator;
 use RecursiveDirectoryIterator;
-/* to satisfy whom who always complain about laravel's facade */
-use Illuminate\Support\Facades\Facade as StaticProxy;
 
 class SilexStarter extends Application
 {
@@ -58,18 +56,6 @@ class SilexStarter extends Application
                     $this->controllerServiceClosureFactory($namespace.$controller)
                 );
             }
-        }
-    }
-
-    /**
-     * Register class aliases.
-     *
-     * @param array $classes the list of alias => fully qualified class name
-     */
-    public function registerAliases(array $classes)
-    {
-        foreach ($classes as $alias => $class) {
-            class_alias($class, $alias);
         }
     }
 

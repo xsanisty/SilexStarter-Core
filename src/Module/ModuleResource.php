@@ -9,6 +9,7 @@ class ModuleResource
         'routes',
         'middlewares',
         'controllers',
+        'commands',
         'views',
         'services',
         'config',

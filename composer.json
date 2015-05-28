@@ -20,6 +20,7 @@
         "twig/twig": "~1.16",
         "cartalyst/sentry" : "2.*",
         "symfony/filesystem" : "~2.6",
+        "symfony/console" : "~2.6",
         "illuminate/database": "5.*",
         "illuminate/events" : "5.*",
         "patchwork/utf8" : "*",

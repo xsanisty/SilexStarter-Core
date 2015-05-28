@@ -12,7 +12,7 @@ class ConsoleServiceProvider implements ServiceProviderInterface
     {
         $app['console'] = $app->share(
             function ($app) {
-                return new ConsoleApplication($app, 'xpress', '1.0');
+                return new ConsoleApplication($app, $app['console_name'], $app['console_version']);
             }
         );
     }

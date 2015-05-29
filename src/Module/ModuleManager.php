@@ -105,6 +105,21 @@ class ModuleManager
             );
         }
 
+        /* If command exists, register all command */
+        if ($moduleResources->commands) {
+
+            $commandPath = $modulePath.DIRECTORY_SEPARATOR.$moduleResources->commands;
+            $commandNamespace = $moduleReflection->getNamespaceName().'\\'.$moduleResources->commands;
+            $app = $this->app;
+
+            $this->app['dispatcher']->addListener(
+                'console.init',
+                function () use ($app, $commandPath, $commandNamespace) {
+                    $app['console']->registerCommandDirectory($commandPath, $commandNamespace);
+                }
+            );
+        }
+
         /* if route file exists, queue for later include */
         if ($moduleResources->routes) {
             $this->addRouteFile($modulePath.'/'.$moduleResources->routes);

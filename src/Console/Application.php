@@ -41,6 +41,7 @@ class Application extends ConsoleApplication
             if ($command->getExtension() == 'php') {
                 $command = str_replace([$dir, '.php', DIRECTORY_SEPARATOR], ['', '', '\\'], $command);
                 $command = ltrim($command, '\\');
+                $command = $namespace.$command;
 
                 $this->registerCommand(new $command);
             }

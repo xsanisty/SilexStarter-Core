@@ -10,9 +10,13 @@ class ModuleServiceProvider implements ServiceProviderInterface
 {
     public function register(Application $app)
     {
-        $app['module'] = $app->share(function (Application $app) {
-            return new ModuleManager($app);
-        });
+        $app['module'] = $app->share(
+            function (Application $app) {
+                return new ModuleManager($app);
+            }
+        );
+
+        $app->bind('SilexStarter\Module\ModuleManager', 'module');
     }
 
     public function boot(Application $app)

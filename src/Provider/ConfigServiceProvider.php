@@ -10,9 +10,13 @@ class ConfigServiceProvider implements ServiceProviderInterface
 {
     public function register(Application $app)
     {
-        $app['config'] = $app->share(function ($app) {
-            return new ConfigurationContainer($app, $app['config.path']);
-        });
+        $app['config'] = $app->share(
+            function ($app) {
+                return new ConfigurationContainer($app, $app['config.path']);
+            }
+        );
+
+        $app->bind('SilexStarter\Config\ConfigurationContainer', 'config');
     }
 
     public function boot(Application $app)

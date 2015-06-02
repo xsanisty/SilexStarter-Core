@@ -6,7 +6,7 @@ use Silex\Application;
 use Silex\ServiceProviderInterface;
 use SilexStarter\Migration\Migrator;
 
-class MigrationrServiceProvider implements ServiceProviderInterface
+class MigrationServiceProvider implements ServiceProviderInterface
 {
     public function register(Application $app)
     {

@@ -8,7 +8,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class SilexStarterInitCommand extends Command
+class MigrationCommand extends Command
 {
     protected function configure()
     {

@@ -14,6 +14,7 @@ class ModuleManager
     protected $middlewares  = [];
     protected $assets       = [];
     protected $config       = [];
+    protected $commands     = [];
 
     public function __construct(SilexStarter $app)
     {
@@ -100,24 +101,17 @@ class ModuleManager
         /* If controller_as_service enabled, register the controllers as service */
         if ($this->app['controller_as_service'] && $moduleResources->controllers) {
             $this->app->registerControllerDirectory(
-                $modulePath.DIRECTORY_SEPARATOR.$moduleResources->controllers,
+                $modulePath.'/'.$moduleResources->controllers,
                 $moduleReflection->getNamespaceName().'\\'.$moduleResources->controllers
             );
         }
 
         /* If command exists, register all command */
         if ($moduleResources->commands) {
-
-            $commandPath = $modulePath.DIRECTORY_SEPARATOR.$moduleResources->commands;
+            $commandPath = $modulePath.'/'.$moduleResources->commands;
             $commandNamespace = $moduleReflection->getNamespaceName().'\\'.$moduleResources->commands;
-            $app = $this->app;
 
-            $this->app['dispatcher']->addListener(
-                'console.init',
-                function () use ($app, $commandPath, $commandNamespace) {
-                    $app['console']->registerCommandDirectory($commandPath, $commandNamespace);
-                }
-            );
+            $this->commands[$commandNamespace] = $commandPath;
         }
 
         /* if route file exists, queue for later include */
@@ -155,6 +149,18 @@ class ModuleManager
         foreach ($this->modules as $module) {
             $module->boot();
         }
+
+        $commandDirectories = $this->commands;
+        $app = $this->app;
+
+        $this->app['dispatcher']->addListener(
+            'console.init',
+            function () use ($app, $commandDirectories) {
+                foreach ($commandDirectories as $namespace => $directory) {
+                    $app['console']->registerCommandDirectory($directory, $namespace);
+                }
+            }
+        );
     }
 
     /**

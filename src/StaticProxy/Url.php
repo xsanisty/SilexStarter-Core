@@ -25,6 +25,6 @@ class Url extends StaticProxy
     {
         $request = static::$container->get('request');
 
-        return $request->getScheme().'://'.$request->getHost().'/'.ltrim($path, '/');
+        return $request->getScheme().'://'.$request->getHost().$request->getBasePath().'/'.ltrim($path, '/');
     }
 }

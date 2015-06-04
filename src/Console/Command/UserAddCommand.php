@@ -35,7 +35,8 @@ class UserAddCommand extends Command
         $app['sentry']->register(
             [
                 'email' => $email,
-                'password' => $password
+                'password' => $password,
+                'activated' => 1
             ]
         );
     }

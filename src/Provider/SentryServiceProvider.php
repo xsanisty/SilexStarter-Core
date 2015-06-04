@@ -229,13 +229,14 @@ class SentryServiceProvider implements ServiceProviderInterface
     {
         $this->app['sentry'] = $this->app->share(
             function (Application $app) {
+                $clientIp = ($app['request_stack']->getCurrentRequest()) ? $app['request_stack']->getCurrentRequest()->getClientIp() : '';
                 return new Sentry(
                     $app['sentry.user'],
                     $app['sentry.group'],
                     $app['sentry.throttle'],
                     $app['sentry.session'],
                     $app['sentry.cookie'],
-                    $app['request']->getClientIp()
+                    $clientIp
                 );
             }
         );

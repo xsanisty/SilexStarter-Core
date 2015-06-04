@@ -39,5 +39,7 @@ class UserAddCommand extends Command
                 'activated' => 1
             ]
         );
+
+        $output->writeln('<info>User with email \''.$email.'\' is now registered!</info>');
     }
 }

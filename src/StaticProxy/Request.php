@@ -10,4 +10,9 @@ class Request extends StaticProxy
     {
         return 'request';
     }
+
+    public static function ajax()
+    {
+        return static::$container->get('request')-> isXmlHttpRequest();
+    }
 }

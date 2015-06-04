@@ -12,7 +12,7 @@ use RecursiveIteratorIterator;
 use RecursiveDirectoryIterator;
 use FilesystemIterator;
 
-class CacheClearCommand extends Command
+class UserAddCommand extends Command
 {
     protected function configure()
     {
@@ -25,8 +25,18 @@ class CacheClearCommand extends Command
     {
         $app = $this->getSilexStarter();
         $helper = $this->getHelper('question');
-        $question = new Question('Please provide user\s email: ');
+        $emailQuestion = new Question('Please provide user\'s email: ');
+        $passwordQuestion = (new Question('Please provide the password: '))->setHidden(true);
 
-        $helper->ask($input, $output, $question);
+
+        $email = $helper->ask($input, $output, $emailQuestion);
+        $password = $helper->ask($input, $output, $passwordQuestion);
+
+        $app['sentry']->register(
+            [
+                'email' => $email,
+                'password' => $password
+            ]
+        );
     }
 }

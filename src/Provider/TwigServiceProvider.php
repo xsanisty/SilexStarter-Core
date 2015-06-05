@@ -98,9 +98,6 @@ class TwigServiceProvider implements ServiceProviderInterface
                         $app['fragment.renderer.hinclude']->setTemplating($twigEnv);
 
                         $twigEnv->addExtension(new HttpKernelExtension($app['fragment.handler']));
-                    } else {
-                        // fallback for BC, to be removed in 1.3
-                        $twigEnv->addExtension(new TwigCoreExtension());
                     }
                 }
 

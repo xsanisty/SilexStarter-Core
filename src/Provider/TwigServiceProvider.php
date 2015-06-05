@@ -99,7 +99,7 @@ class TwigServiceProvider implements ServiceProviderInterface
 
                         $twigEnv->addExtension(new HttpKernelExtension($app['fragment.handler']));
                     } else {
-                        $twig->addExtension(new TwigCoreExtension());
+                        $twigEnv->addExtension(new TwigCoreExtension());
                     }
                 }
 

@@ -5,7 +5,6 @@ namespace SilexStarter\Provider;
 use Twig_Extension_Debug;
 use Silex\Application;
 use Silex\ServiceProviderInterface;
-use Silex\Provider\HttpFragmentServiceProvider;
 use SilexStarter\TwigExtension\TwigAssetExtension;
 use SilexStarter\TwigExtension\TwigMenuExtension;
 use SilexStarter\TwigExtension\TwigUrlExtension;
@@ -98,8 +97,6 @@ class TwigServiceProvider implements ServiceProviderInterface
                         $app['fragment.renderer.hinclude']->setTemplating($twigEnv);
 
                         $twigEnv->addExtension(new HttpKernelExtension($app['fragment.handler']));
-                    } else {
-                        $twigEnv->addExtension(new HttpFragmentServiceProvider());
                     }
                 }
 

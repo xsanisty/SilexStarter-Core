@@ -16,7 +16,7 @@
     "minimum-stability": "stable",
     "require" : {
         "php": ">= 5.4.0",
-        "silex/silex": "1.2.*",
+        "silex/silex": "1.2.4",
         "twig/twig": "~1.16",
         "cartalyst/sentry" : "2.*",
         "symfony/filesystem" : "2.6.*",

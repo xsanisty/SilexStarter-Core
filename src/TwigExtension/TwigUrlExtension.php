@@ -32,10 +32,10 @@ class TwigUrlExtension extends Twig_Extension
         ];
     }
 
-    public function urlFor($route)
+    public function urlFor($route, $parameters = [])
     {
         try {
-            return $this->urlGenerator->generate($route);
+            return $this->urlGenerator->generate($route, $parameters);
         } catch (RouteNotFoundException $e) {
             return $this->urlTo($route);
         }

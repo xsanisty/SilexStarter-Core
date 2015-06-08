@@ -21,8 +21,8 @@
         "cartalyst/sentry" : "2.*",
         "symfony/filesystem" : "2.7.*",
         "symfony/console" : "2.7.*",
-        "illuminate/database": "5.1.*",
-        "illuminate/events" : "5.1.*",
+        "illuminate/database": "5.*",
+        "illuminate/events" : "5.*",
         "patchwork/utf8" : "*",
         "jeremeamia/xstatic" : "1.*",
         "acclimate/container" : "1.*"

@@ -138,6 +138,11 @@ class SilexStarter extends Application
         return $this->filter($name, $callback);
     }
 
+    public function getEnvironment()
+    {
+        return $this['environment'];
+    }
+
     /**
      * Bind an interface into specific service.
      *

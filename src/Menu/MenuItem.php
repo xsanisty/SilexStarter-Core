@@ -23,7 +23,7 @@ class MenuItem
      *
      * @var array
      */
-    protected $fields = ['url', 'label', 'icon', 'class', 'id', 'name'];
+    protected $fields = ['url', 'label', 'icon', 'class', 'id', 'name', 'title'];
 
     /**
      * The children menu container.

@@ -78,6 +78,7 @@ class TwigServiceProvider implements ServiceProviderInterface
 
                 if ($app['enable_profiler']) {
                     $twigEnv->addGlobal('app', $app);
+                    $app->registerServices(['Silex\Provider\HttpFragmentServiceProvider']);
                 }
 
                 if (class_exists('Symfony\Bridge\Twig\Extension\RoutingExtension')) {

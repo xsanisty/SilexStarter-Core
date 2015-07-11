@@ -116,7 +116,7 @@ class MenuContainer
             throw new Exception("Can not find menu with name: $name");
         }
 
-        $item       = $this->items[$firstItem];
+        $item = $this->items[$firstItem];
 
         foreach ($names as $itemName) {
             $container  = $item->getChildren();

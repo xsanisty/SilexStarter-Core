@@ -96,7 +96,7 @@ class MenuItem
      */
     public function getMetaAttribute($name)
     {
-        if (isset($this->metaAttributes[$names])) {
+        if (isset($this->metaAttributes[$name])) {
             return $this->metaAttributes[$name];
         }
     }

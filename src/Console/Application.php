@@ -47,6 +47,21 @@ class Application extends ConsoleApplication
     }
 
     /**
+     * Register multiple commands at once
+     * @param  array  $command list of command class or command object
+     */
+    public function registerCommands(array $commands)
+    {
+        foreach ($commands as $command) {
+            if (is_string($command)) {
+                $this->registerCommand(new $command);
+            } else {
+                $this->registerCommand($command);
+            }
+        }
+    }
+
+    /**
      * Register command directory and add all available command in it.
      *
      * @param  string $dir       command directory

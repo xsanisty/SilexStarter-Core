@@ -155,19 +155,19 @@ class AssetManager
      * Resolve the public path of the asset, and determine if it link to external server or not.
      *
      * @param string $file     The asset file need to be resolved
-     * @param bool   $absolute Flag to generate absolute path or relative path
+     * @param bool   $absolute Flag to generate web absolute path or relative path
      *
      * @return string The proper path to the asset file
      */
     public function resolvePath($file, $absolute = false)
     {
-        $namespace = [];
-        preg_match("/@(.*?)\//s", $file, $namespace);
-
         /* if refer to external path, return immediately (begin with //, http://, https://) */
         if ('http:' == substr($file, 0, 5) || '//' == substr($file, 0, 2) || 'https:' == substr($file, 0, 6)) {
             return $file;
         }
+
+        $namespace = [];
+        preg_match("/@(.*?)\//s", $file, $namespace);
 
         /* if namespace exists, resolve the namespace */
         if ($namespace) {

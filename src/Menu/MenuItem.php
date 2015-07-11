@@ -166,13 +166,28 @@ class MenuItem
     }
 
     /**
-     * Get the Children menu container object.
+     * Get the Children menu container object *deprecated*.
      *
      * @return ChildMenuContainer
      */
     public function getChildContainer()
     {
         return $this->childContainer;
+    }
+
+    /**
+     * Get child item if name is specified, else return the container
+     *
+     * @param  string $name                 menu item name
+     * @return MenuItem|ChildMenuContainer  menu item or menu item container
+     */
+    public function getChildren($name = null)
+    {
+        if (!$name) {
+            return $this->childContainer;
+        } else {
+            return $this->childContainer->getItem($name);
+        }
     }
 
     /**

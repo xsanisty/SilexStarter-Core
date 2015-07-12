@@ -23,7 +23,7 @@ class Url extends StaticProxy
 
     public static function path($path = '/')
     {
-        $request = static::$container->get('request');
+        $request = static::$container->get('request_stack')->getCurrentRequest();
 
         return $request->getScheme().'://'.$request->getHost().$request->getBasePath().'/'.ltrim($path, '/');
     }

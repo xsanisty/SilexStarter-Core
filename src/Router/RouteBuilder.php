@@ -301,17 +301,59 @@ class RouteBuilder
     {
         $prefix     = '/'.ltrim($prefix, '/');
         $routeMaps  = [
-            'get'           => new RouteMap('get', '/', "$controller:index"),
-            'get_paginate'  => new RouteMap('get', '/page/{page}', "$controller:index"),
-            'get_create'    => new RouteMap('get', '/create', "$controller:create"),
-            'get_edit'      => new RouteMap('get', '/{id}/edit', "$controller:edit"),
-            'get_show'      => new RouteMap('get', '/{id}', "$controller:show"),
-            'post'          => new RouteMap('post', '/', "$controller:store"),
-            'put'           => new RouteMap('put', '/{id}', "$controller:update"),
-            'delete'        => new RouteMap('delete', '/{id}', "$controller:destroy"),
+            'get' => new RouteMap(
+                'get',
+                '/',
+                "$controller:index",
+                isset($options['as']) ? ['as' => $options['as'] . '.index'] : []
+            ),
+            'get_paginate' => new RouteMap(
+                'get',
+                '/page/{page}',
+                "$controller:index",
+                isset($options['as']) ? ['as' => $options['as'] . '.paginate'] : []
+            ),
+            'get_create' => new RouteMap(
+                'get',
+                '/create',
+                "$controller:create",
+                isset($options['as']) ? ['as' => $options['as'] . '.create'] : []
+            ),
+            'get_edit' => new RouteMap(
+                'get',
+                '/{id}/edit',
+                "$controller:edit",
+                isset($options['as']) ? ['as' => $options['as'] . '.edit'] : []
+            ),
+            'get_show' => new RouteMap(
+                'get',
+                '/{id}',
+                "$controller:show",
+                isset($options['as']) ? ['as' => $options['as'] . '.show'] : []
+            ),
+            'post' => new RouteMap(
+                'post',
+                '/',
+                "$controller:store",
+                isset($options['as']) ? ['as' => $options['as'] . '.store'] : []
+            ),
+            'put' => new RouteMap(
+                'put',
+                '/{id}',
+                "$controller:update",
+                isset($options['as']) ? ['as' => $options['as'] . '.put'] : []
+            ),
+            'delete' => new RouteMap(
+                'delete',
+                '/{id}',
+                "$controller:destroy",
+                isset($options['as']) ? ['as' => $options['as'] . '.delete'] : []
+            ),
         ];
 
-        $routeCollection    = $this->buildControllerRoute($this->app['controllers_factory'], $routeMaps);
+        unset($options['as']);
+
+        $routeCollection = $this->buildControllerRoute($this->app['controllers_factory'], $routeMaps);
 
         $this->applyControllerOption($routeCollection, $options);
 
@@ -332,9 +374,11 @@ class RouteBuilder
     public function controller($prefix, $controller, array $options = [])
     {
         $prefix             = '/'.ltrim($prefix, '/');
-        $routeMaps          = $this->createControllerRouteMap($controller);
+        $routeMaps          = $this->createControllerRouteMap($controller, $options);
 
         $routeCollection    = $this->buildControllerRoute($this->app['controllers_factory'], $routeMaps);
+
+        unset($options['as']);
 
         $this->applyControllerOption($routeCollection, $options);
         $this->getContext()->mount($prefix, $routeCollection);
@@ -349,7 +393,7 @@ class RouteBuilder
      *
      * @return array array of SilexStarter\Router\RouteMap
      */
-    protected function createControllerRouteMap($controller)
+    protected function createControllerRouteMap($controller, $options)
     {
         $class              = new \ReflectionClass($controller);
         $controllerActions  = $class->getMethods(\ReflectionMethod::IS_PUBLIC);
@@ -390,6 +434,11 @@ class RouteBuilder
 
             $routeOptions['default'] = $defaultParams;
 
+            if (isset($options['as'])) {
+                $routeOptions['as'] = $option['as'] . '.' . $routeName;
+            }
+
+
             $routeMaps[$routeName]  = new RouteMap($httpMethod, $routePattern, $routeAction, $routeOptions);
         }
 
@@ -399,7 +448,7 @@ class RouteBuilder
     /**
      * Apply route maps into route collection.
      *
-     * @param ControllerCollection $router    The VontrollerCollection instance
+     * @param ControllerCollection $router    The ControllerCollection instance
      * @param array                $routeMaps List of RouteMap object
      *
      * @return ControllerCollection
@@ -416,6 +465,10 @@ class RouteBuilder
                 foreach ($options['default'] as $field => $value) {
                     $route->value($field, $value);
                 }
+            }
+
+            if (isset($options['as'])) {
+                $route->bind($options['as']);
             }
         }
 

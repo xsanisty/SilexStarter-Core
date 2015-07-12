@@ -29,9 +29,8 @@ class RouteDebugCommand extends Command
                 require $route;
             }
         }
-        require $app['path.app'] . 'routes.php';
 
-        $table->setHeaders(['Name', 'Path', 'Requirements']);
+        require $app['path.app'] . 'routes.php';
 
         $controllers    = $app['controllers'];
         $collection     = $controllers->flush();
@@ -42,9 +41,10 @@ class RouteDebugCommand extends Command
                 $requirements[] = $key . ' => ' . $requirement;
             }
 
-            $rows[] = [$name, $route->getPath(), join(', ', $requirements)];
+            $rows[] = [$name, $route->getPath(), implode(', ', $requirements)];
         }
 
+        $table->setHeaders(['Name', 'Path', 'Requirements']);
         $table->setRows($rows);
 
         $table->render();

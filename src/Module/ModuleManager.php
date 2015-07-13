@@ -129,7 +129,7 @@ class ModuleManager
         if ($moduleResources->views) {
             $this->views[$moduleIdentifier] = $modulePath.'/'.$moduleResources->views;
 
-            $publishedDir   = $this->app['config']['twig.template_dir'] . '/' . $moduleResources->views;
+            $publishedDir   = $this->app['config']['twig.template_dir'] . '/module/' . $moduleResources->views;
             $templateDir    = $this->app['filesystem']->exists($publishedDir)
                             ? $publishedDir
                             : $this->views[$moduleIdentifier];
@@ -247,7 +247,7 @@ class ModuleManager
     public function publishTemplate($module)
     {
         $moduleTemplate = $this->views[$module];
-        $publicTemplate = $this->app['config']['twig.template_dir'] . '/' . $module;
+        $publicTemplate = $this->app['config']['twig.template_dir'] . '/module/' . $module;
 
         $this->app['filesystem']->mirror($moduleTemplate, $publicTemplate);
     }

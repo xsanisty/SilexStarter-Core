@@ -15,6 +15,7 @@ class ModuleManager
     protected $assets       = [];
     protected $config       = [];
     protected $commands     = [];
+    protected $views        = [];
 
     public function __construct(SilexStarter $app)
     {
@@ -126,10 +127,15 @@ class ModuleManager
 
         /* if template file exists, register new template path under new namespace */
         if ($moduleResources->views) {
-            $this->app['twig.loader.filesystem']->addPath(
-                $modulePath.'/'.$moduleResources->views,
-                $moduleIdentifier
-            );
+            $this->views[$moduleIdentifier] = $modulePath.'/'.$moduleResources->views;
+
+            $publishedDir   = $this->app['config']['twig.template_dir'] . '/' . $moduleResources->views;
+            $templateDir    = $this->app['filesystem']->exists($publishedDir)
+                            ? $publishedDir
+                            : $this->views[$moduleIdentifier];
+
+
+            $this->app['twig.loader.filesystem']->addPath($templateDir, $moduleIdentifier);
         }
 
         /* keep assets path of the module */
@@ -231,5 +237,18 @@ class ModuleManager
         $publicConfig = $this->app['path.app'].'config/'.$module;
 
         $this->app['filesystem']->mirror($moduleConfig, $publicConfig);
+    }
+
+    /**
+     * Publish template into application template path
+     *
+     * @param  string $module The module identifier
+     */
+    public function publishTemplate($module)
+    {
+        $moduleTemplate = $this->views[$module];
+        $publicTemplate = $this->app['config']['twig.template_dir'] . '/' . $module;
+
+        $this->app['filesystem']->mirror($moduleTemplate, $publicTemplate);
     }
 }

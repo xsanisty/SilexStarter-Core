@@ -129,7 +129,7 @@ class ModuleManager
         if ($moduleResources->views) {
             $this->views[$moduleIdentifier] = $modulePath.'/'.$moduleResources->views;
 
-            $publishedDir   = $this->app['config']['twig.template_dir'] . '/module/' . $moduleResources->views;
+            $publishedDir   = $this->app['config']['twig.template_dir'] . '/module/' . $moduleIdentifier;
             $templateDir    = $this->app['filesystem']->exists($publishedDir)
                             ? $publishedDir
                             : $this->views[$moduleIdentifier];

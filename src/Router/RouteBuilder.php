@@ -311,7 +311,7 @@ class RouteBuilder
                 'get',
                 '/page/{page}',
                 "$controller:index",
-                isset($options['as']) ? ['as' => $options['as'] . '.paginate'] : []
+                isset($options['as']) ? ['as' => $options['as'] . '.page'] : []
             ),
             'get_create' => new RouteMap(
                 'get',

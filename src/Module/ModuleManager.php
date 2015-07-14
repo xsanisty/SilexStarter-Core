@@ -136,6 +136,7 @@ class ModuleManager
 
 
             $this->app['twig.loader.filesystem']->addPath($templateDir, $moduleIdentifier);
+            $this->app['twig.loader.filesystem']->addPath($this->views[$moduleIdentifier], $moduleIdentifier);
         }
 
         /* keep assets path of the module */

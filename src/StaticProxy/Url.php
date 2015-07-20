@@ -12,10 +12,10 @@ class Url extends StaticProxy
         return 'url_generator';
     }
 
-    public static function to($route)
+    public static function to($route, array $parameter = [])
     {
         try {
-            return static::$container->get('url_generator')->generate($route);
+            return static::$container->get('url_generator')->generate($route, $parameter);
         } catch (RouteNotFoundException $e) {
             return static::path($route);
         }
@@ -25,6 +25,11 @@ class Url extends StaticProxy
     {
         $request = static::$container->get('request_stack')->getCurrentRequest();
 
-        return $request->getScheme().'://'.$request->getHost().$request->getBasePath().'/'.ltrim($path, '/');
+        if ($request) {
+            return $request->getScheme().'://'.$request->getHost().$request->getBasePath().'/'.ltrim($path, '/');
+        } else {
+            //$_SERVER['HTTP_HOST'] for now return false
+            return false;
+        }
     }
 }

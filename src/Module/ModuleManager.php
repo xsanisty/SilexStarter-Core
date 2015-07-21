@@ -45,6 +45,22 @@ class ModuleManager
     }
 
     /**
+     * Ge module provider instance
+     *
+     * @param  string $moduleIdentifier
+     *
+     * @return ModuleProvider
+     */
+    public function getModule($moduleIdentifier)
+    {
+        if ($this->isRegistered($moduleIdentifier)) {
+            return $this->modules[$moduleIdentifier];
+        }
+
+        return false;
+    }
+
+    /**
      * Register multiple module provider at once.
      *
      * @param array $modules array of SilexStarter\Module\ModuleProvider

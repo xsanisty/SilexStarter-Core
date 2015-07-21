@@ -13,7 +13,7 @@ class ModuleResourceTest extends \PHPUnit_Framework_TestCase
         'assets'        => 'Resources/assets',
         'controllers'   => 'Controller',
         'services'      => ['SomeServiceProvider'],
-        'migration'     => 'Migration',
+        'migrations'    => 'Migration',
     ];
 
     protected $moduleResource;

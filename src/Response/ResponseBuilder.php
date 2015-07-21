@@ -128,4 +128,16 @@ class ResponseBuilder
     {
         return new RedirectResponse($url, $status);
     }
+
+    /**
+     * Return unified ajax json status response
+     *
+     * @param  AjaxResponseFormat $response [description]
+     *
+     * @return \Symfony\Component\HttpFoundation\JsonResponse
+     */
+    public function ajax(AjaxStatusResponse $response)
+    {
+        return $this->json($response);
+    }
 }

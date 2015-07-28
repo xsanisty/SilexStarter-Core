@@ -229,7 +229,7 @@ class RouteBuilder
     public function match($pattern, $to = null, array $options = [])
     {
         $ns    = $this->getNamespace(isset($options['namespace']) ? $options['namespace'] : null);
-        $route = $this->getContext()->match($pattern, $ns . '\\' .$to);
+        $route = $this->getContext()->match($pattern, $ns ? $ns . '\\' .$to : $to);
         $route = $this->applyControllerOption($route, $options);
 
         return $route;
@@ -238,7 +238,7 @@ class RouteBuilder
     public function get($pattern, $to = null, array $options = [])
     {
         $ns    = $this->getNamespace(isset($options['namespace']) ? $options['namespace'] : null);
-        $route = $this->getContext()->get($pattern, $ns . '\\' .$to);
+        $route = $this->getContext()->get($pattern, $ns ? $ns . '\\' .$to : $to);
         $route = $this->applyControllerOption($route, $options);
 
         return $route;
@@ -247,7 +247,7 @@ class RouteBuilder
     public function post($pattern, $to = null, array $options = [])
     {
         $ns    = $this->getNamespace(isset($options['namespace']) ? $options['namespace'] : null);
-        $route = $this->getContext()->post($pattern, $ns . '\\' .$to);
+        $route = $this->getContext()->post($pattern, $ns ? $ns . '\\' .$to : $to);
         $route = $this->applyControllerOption($route, $options);
 
         return $route;
@@ -256,7 +256,7 @@ class RouteBuilder
     public function put($pattern, $to = null, array $options = [])
     {
         $ns    = $this->getNamespace(isset($options['namespace']) ? $options['namespace'] : null);
-        $route = $this->getContext()->put($pattern, $ns . '\\' .$to);
+        $route = $this->getContext()->put($pattern, $ns ? $ns . '\\' .$to : $to);
         $route = $this->applyControllerOption($route, $options);
 
         return $route;
@@ -265,7 +265,7 @@ class RouteBuilder
     public function delete($pattern, $to = null, array $options = [])
     {
         $ns    = $this->getNamespace(isset($options['namespace']) ? $options['namespace'] : null);
-        $route = $this->getContext()->delete($pattern, $ns . '\\' .$to);
+        $route = $this->getContext()->delete($pattern, $ns ? $ns . '\\' .$to : $to);
         $route = $this->applyControllerOption($route, $options);
 
         return $route;
@@ -274,7 +274,7 @@ class RouteBuilder
     public function patch($pattern, $to = null, array $options = [])
     {
         $ns    = $this->getNamespace(isset($options['namespace']) ? $options['namespace'] : null);
-        $route = $this->getContext()->patch($pattern, $ns . '\\' .$to);
+        $route = $this->getContext()->patch($pattern, $ns ? $ns . '\\' .$to : $to);
         $route = $this->applyControllerOption($route, $options);
 
         return $route;

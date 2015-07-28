@@ -17,6 +17,9 @@ class RouteBuilder
     /** after handler stack */
     protected $afterHandlerStack = [];
 
+    /** namespace stack */
+    protected $namespaceStack = [];
+
     /** Silex\Application instance */
     protected $app;
 
@@ -182,6 +185,28 @@ class RouteBuilder
         }
     }
 
+    public function pushNamespace($namespace)
+    {
+        $namespace = trim($namespace, '\\');
+        $this->namespaceStack[] = $namespace;
+    }
+
+    public function popNamespace()
+    {
+        return array_pop($this->namespaceStack);
+    }
+
+    public function getNamespace($lastNs = null)
+    {
+        $namespace = implode('\\', $this->namespaceStack);
+
+        if ($lastNs) {
+            return implode('\\', [$namespace, trim($lastNs, '\\')]);
+        }
+
+        return $namespace;
+    }
+
     /**
      * @param $route
      * @param mixed $afterHandler
@@ -203,7 +228,8 @@ class RouteBuilder
 
     public function match($pattern, $to = null, array $options = [])
     {
-        $route = $this->getContext()->match($pattern, $to);
+        $ns    = $this->getNamespace(isset($options['namespace']) ? $options['namespace'] : null);
+        $route = $this->getContext()->match($pattern, $ns . '\\' .$to);
         $route = $this->applyControllerOption($route, $options);
 
         return $route;
@@ -211,7 +237,8 @@ class RouteBuilder
 
     public function get($pattern, $to = null, array $options = [])
     {
-        $route = $this->getContext()->get($pattern, $to);
+        $ns    = $this->getNamespace(isset($options['namespace']) ? $options['namespace'] : null);
+        $route = $this->getContext()->get($pattern, $ns . '\\' .$to);
         $route = $this->applyControllerOption($route, $options);
 
         return $route;
@@ -219,7 +246,8 @@ class RouteBuilder
 
     public function post($pattern, $to = null, array $options = [])
     {
-        $route = $this->getContext()->post($pattern, $to);
+        $ns    = $this->getNamespace(isset($options['namespace']) ? $options['namespace'] : null);
+        $route = $this->getContext()->post($pattern, $ns . '\\' .$to);
         $route = $this->applyControllerOption($route, $options);
 
         return $route;
@@ -227,7 +255,8 @@ class RouteBuilder
 
     public function put($pattern, $to = null, array $options = [])
     {
-        $route = $this->getContext()->put($pattern, $to);
+        $ns    = $this->getNamespace(isset($options['namespace']) ? $options['namespace'] : null);
+        $route = $this->getContext()->put($pattern, $ns . '\\' .$to);
         $route = $this->applyControllerOption($route, $options);
 
         return $route;
@@ -235,7 +264,8 @@ class RouteBuilder
 
     public function delete($pattern, $to = null, array $options = [])
     {
-        $route = $this->getContext()->delete($pattern, $to);
+        $ns    = $this->getNamespace(isset($options['namespace']) ? $options['namespace'] : null);
+        $route = $this->getContext()->delete($pattern, $ns . '\\' .$to);
         $route = $this->applyControllerOption($route, $options);
 
         return $route;
@@ -243,7 +273,8 @@ class RouteBuilder
 
     public function patch($pattern, $to = null, array $options = [])
     {
-        $route = $this->getContext()->patch($pattern, $to);
+        $ns    = $this->getNamespace(isset($options['namespace']) ? $options['namespace'] : null);
+        $route = $this->getContext()->patch($pattern, $ns . '\\' .$to);
         $route = $this->applyControllerOption($route, $options);
 
         return $route;
@@ -268,6 +299,10 @@ class RouteBuilder
             $this->pushAfterHandler($options['after']);
         }
 
+        if (isset($options['namespace'])) {
+            $this->pushNamespace($options['namespace']);
+        }
+
         /* push the context to be accessed to callable route */
         $this->pushContext($this->app['controllers_factory']);
 
@@ -281,6 +316,10 @@ class RouteBuilder
 
         if (isset($options['after'])) {
             $this->popAfterHandler();
+        }
+
+        if (isset($options['namespace'])) {
+            $this->popNamespace();
         }
 
         $this->getContext()->mount($prefix, $routeCollection);

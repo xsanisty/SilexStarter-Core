@@ -37,14 +37,20 @@ class RouteDebugCommand extends Command
 
         foreach ($collection as $name => $route) {
             $requirements = [];
+            $defaults = [];
+
             foreach ($route->getRequirements() as $key => $requirement) {
-                $requirements[] = $key . ' => ' . $requirement;
+                $requirements[] = $key . "\n" . $requirement . "\n";
             }
 
-            $rows[] = [$name, $route->getPath(), implode(', ', $requirements)];
+            foreach ($route->getDefaults() as $key => $default) {
+                $defaults[] = $key . "\n" . $default . "\n";
+            }
+
+            $rows[] = [$name, $route->getPath(), implode("\n", $requirements), implode("\n", $defaults)];
         }
 
-        $table->setHeaders(['Name', 'Path', 'Requirements']);
+        $table->setHeaders(['Name', 'Path', 'Requirements', 'Defaults']);
         $table->setRows($rows);
 
         $table->render();

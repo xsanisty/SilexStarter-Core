@@ -339,6 +339,9 @@ class RouteBuilder
     public function resource($prefix, $controller, array $options = [])
     {
         $prefix     = '/'.ltrim($prefix, '/');
+        $ns         = $this->getNamespace(isset($options['namespace']) ? $options['namespace'] : null);
+        $controller = $ns ? $ns . '\\' .$controller : $controller;
+
         $routeMaps  = [
             'get' => new RouteMap(
                 'get',
@@ -413,6 +416,8 @@ class RouteBuilder
     public function controller($prefix, $controller, array $options = [])
     {
         $prefix             = '/'.ltrim($prefix, '/');
+        $ns                 = $this->getNamespace(isset($options['namespace']) ? $options['namespace'] : null);
+        $controller         = $ns ? $ns . '\\' .$controller : $controller;
         $routeMaps          = $this->createControllerRouteMap($controller, $options);
 
         $routeCollection    = $this->buildControllerRoute($this->app['controllers_factory'], $routeMaps);

@@ -141,6 +141,6 @@ class ResponseBuilder
      */
     public function ajax($data, $status = 200, $success = true, $errors = [])
     {
-        return $this->json(new AjaxStatusResponse($data, $status, $success, $errors));
+        return $this->json(new AjaxStatusResponse($data, $status, $success, $errors), $status);
     }
 }

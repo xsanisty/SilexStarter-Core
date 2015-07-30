@@ -27,6 +27,7 @@ class TwigUrlExtension extends Twig_Extension
     public function getFunctions()
     {
         return [
+            new Twig_SimpleFunction('url', [$this, 'urlFor']),
             new Twig_SimpleFunction('url_for', [$this, 'urlFor']),
             new Twig_SimpleFunction('url_to', [$this, 'urlTo']),
         ];

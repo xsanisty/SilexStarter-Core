@@ -132,12 +132,15 @@ class ResponseBuilder
     /**
      * Return unified ajax json status response
      *
-     * @param  AjaxResponseFormat $response [description]
+     * @param  mixed   $data    Additional response data
+     * @param  integer $status  Valid http status
+     * @param  boolean $success Success flag
+     * @param  array   $errors  Errors description if success = false
      *
      * @return \Symfony\Component\HttpFoundation\JsonResponse
      */
-    public function ajax(AjaxStatusResponse $response)
+    public function ajax($data, $status = 200, $success = true, $errors = [])
     {
-        return $this->json($response);
+        return $this->json(AjaxStatusResponse($data, $status, $success, $errors));
     }
 }

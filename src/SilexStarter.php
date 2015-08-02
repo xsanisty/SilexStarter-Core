@@ -18,6 +18,7 @@ class SilexStarter extends Application
         $this['app'] = $this;
 
         $this->bind('Silex\Application', 'app');
+        $this->bind('SilexStarter\SilexStarter', 'app');
         $this->bind('Symfony\Component\HttpFoundation\Request', 'request');
         $this->bind($this['dispatcher_class'], $this['dispatcher']);
     }
@@ -73,6 +74,11 @@ class SilexStarter extends Application
      */
     protected function controllerServiceClosureFactory($controller)
     {
+        /**
+         * @param Application $app
+         * @return object
+         * @throws Exception
+         */
         return function (Application $app) use ($controller) {
             $controllerReflection   = new ReflectionClass($controller);
             $controllerConstructor  = $controllerReflection->getConstructor();
@@ -96,14 +102,24 @@ class SilexStarter extends Application
                     }
                 }
 
-                return $controllerReflection->newInstanceArgs($invocationParameters);
+                $callback = $controllerReflection->newInstanceArgs($invocationParameters);
 
                 /*
                  * Else, Instantiate the class directly
                  */
             } else {
-                return $controllerReflection->newInstance();
+                $callback = $controllerReflection->newInstance();
             }
+
+            if ($controllerReflection->implementsInterface('\SilexStarter\Contracts\ContainerAwareInterface')) {
+                $callback->setContainer($app);
+            }
+
+            if ($controllerReflection->implementsInterface('\SilexStarter\Contracts\DispatcherAwareInterface')) {
+                $callback->setDispatcher($app['dispatcher']);
+            }
+
+            return $callback;
         };
     }
 

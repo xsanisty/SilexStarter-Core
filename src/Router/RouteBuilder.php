@@ -3,6 +3,7 @@
 namespace SilexStarter\Router;
 
 use Illuminate\Support\Str;
+use SilexStarter\SilexStarter;
 use Silex\Application;
 use Silex\ControllerCollection;
 
@@ -29,10 +30,10 @@ class RouteBuilder
     /**
      * Construct the RouteBuilder object.
      *
-     * @param Application $app
+     * @param SilexStarter $app
      * @param Str         $str
      */
-    public function __construct(Application $app, Str $str)
+    public function __construct(SilexStarter $app, Str $str)
     {
         $this->app            = $app;
         $this->stringHelper   = $str;
@@ -40,7 +41,7 @@ class RouteBuilder
 
     /**
      * Push the ControllerCollection into context stack,
-     * the lastest instance in context will be used by get, match, etc for route grouping.
+     * the latest instance in context will be used by get, match, etc for route grouping.
      *
      * @param ControllerCollection $context
      */
@@ -75,7 +76,7 @@ class RouteBuilder
     /**
      * Add new before handler to the end of middleware stack.
      *
-     * @param array|string|Closure $beforeHandler The before middleware handler
+     * @param array|string|\Closure $beforeHandler The before middleware handler
      */
     protected function pushBeforeHandler($beforeHandler)
     {
@@ -86,7 +87,7 @@ class RouteBuilder
     /**
      * Retrieve latest middleware from the middleware stack.
      *
-     * @return array|Closure Closure or array of closure
+     * @return callable Closure or array of closure
      */
     protected function popBeforeHandler()
     {
@@ -106,7 +107,7 @@ class RouteBuilder
     /**
      * Add new after handler to the top of middleware stack.
      *
-     * @param array|string|Closure $afterHandler The after middleware handler
+     * @param array|string|callable $afterHandler The after middleware handler
      */
     protected function pushAfterHandler($afterHandler)
     {
@@ -117,7 +118,7 @@ class RouteBuilder
     /**
      * Retrieve first middleware from the middleware stack.
      *
-     * @return array|Closure Closure or array of closure
+     * @return array|callable Closure or array of closure
      */
     protected function popAfterHandler()
     {
@@ -137,10 +138,10 @@ class RouteBuilder
     /**
      * Apply the middleware and binding to the controller.
      *
-     * @param Controller|ControllerCollection $route   The controller or controller collection
+     * @param mixed $route   The controller or controller collection
      * @param array                           $options the route options
      *
-     * @return Controller|ControllerCollection
+     * @return mixed
      */
     protected function applyControllerOption($route, array $options)
     {
@@ -168,7 +169,7 @@ class RouteBuilder
 
     /**
      * @param $route
-     * @param mixed beforeHandler
+     * @param callable $beforeHandler
      */
     protected function applyBeforeHandlerStack($route, $beforeHandler = null)
     {
@@ -287,7 +288,7 @@ class RouteBuilder
      * @param \Closure $callable the route collection handler
      * @param array    $options  the route options
      *
-     * @return Silex\ControllerCollection controller collection that already mounted to $prefix
+     * @return \Silex\ControllerCollection controller collection that already mounted to $prefix
      */
     public function group($prefix, \Closure $callable, array $options = [])
     {
@@ -334,7 +335,7 @@ class RouteBuilder
      * @param string $controller the controller class
      * @param array  $options    the route options
      *
-     * @return Silex\ControllerCollection
+     * @return \Silex\ControllerCollection
      */
     public function resource($prefix, $controller, array $options = [])
     {
@@ -347,13 +348,13 @@ class RouteBuilder
                 'get',
                 '/',
                 "$controller:index",
-                isset($options['as']) ? ['as' => $options['as'] . '.index'] : []
+                isset($options['as']) ? ['as' => $options['as'] . '.read'] : []
             ),
             'get_paginate' => new RouteMap(
                 'get',
                 '/page/{page}',
                 "$controller:index",
-                isset($options['as']) ? ['as' => $options['as'] . '.page'] : []
+                isset($options['as']) ? ['as' => $options['as'] . '.read'] : []
             ),
             'get_create' => new RouteMap(
                 'get',
@@ -371,19 +372,19 @@ class RouteBuilder
                 'get',
                 '/{id}',
                 "$controller:show",
-                isset($options['as']) ? ['as' => $options['as'] . '.show'] : []
+                isset($options['as']) ? ['as' => $options['as'] . '.read'] : []
             ),
             'post' => new RouteMap(
                 'post',
                 '/',
                 "$controller:store",
-                isset($options['as']) ? ['as' => $options['as'] . '.store'] : []
+                isset($options['as']) ? ['as' => $options['as'] . '.create'] : []
             ),
             'put' => new RouteMap(
                 'put',
                 '/{id}',
                 "$controller:update",
-                isset($options['as']) ? ['as' => $options['as'] . '.put'] : []
+                isset($options['as']) ? ['as' => $options['as'] . '.edit'] : []
             ),
             'delete' => new RouteMap(
                 'delete',
@@ -411,7 +412,7 @@ class RouteBuilder
      * @param string $controller the controller class name or object
      * @param array  $options    the route options
      *
-     * @return Silex\ControllerCollection
+     * @return \Silex\ControllerCollection
      */
     public function controller($prefix, $controller, array $options = [])
     {
@@ -479,7 +480,7 @@ class RouteBuilder
             $routeOptions['default'] = $defaultParams;
 
             if (isset($options['as'])) {
-                $routeOptions['as'] = $option['as'] . '.' . $routeName;
+                $routeOptions['as'] = $options['as'] . '.' . $routeName;
             }
 
 

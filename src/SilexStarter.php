@@ -16,6 +16,10 @@ class SilexStarter extends Application
     {
         parent::__construct();
         $this['app'] = $this;
+
+        $this->bind('Silex\Application', 'app');
+        $this->bind('Symfony\Component\HttpFoundation\Request', 'request');
+        $this->bind($this['dispatcher_class'], $this['dispatcher']);
     }
 
     /**
@@ -38,6 +42,7 @@ class SilexStarter extends Application
      * Search for controllers in the controllers dir and register it as a service.
      *
      * @param string $controllerDir The directory where controllers is located
+     * @param string $namespace     The root namespace of the controller directory
      */
     public function registerControllerDirectory($controllerDir, $namespace = '')
     {
@@ -64,11 +69,11 @@ class SilexStarter extends Application
      *
      * @param string $controller Fully qualified controller class name
      *
-     * @return Closure
+     * @return \Closure
      */
     protected function controllerServiceClosureFactory($controller)
     {
-        return function ($app) use ($controller) {
+        return function (Application $app) use ($controller) {
             $controllerReflection   = new ReflectionClass($controller);
             $controllerConstructor  = $controllerReflection->getConstructor();
 
@@ -82,23 +87,12 @@ class SilexStarter extends Application
                 foreach ($constructorParameters as $parameterReflection) {
                     $parameterClassName = $parameterReflection->getClass()->getName();
 
-                    switch ($parameterClassName) {
-                        case 'Silex\Application':
-                            $invocationParameters[] = $app;
-                            break;
-                        case 'Symfony\Component\HttpFoundation\Request':
-                            $invocationParameters[] = $app['request'];
-                            break;
-                        default:
-                            if ($app->offsetExists($parameterClassName)) {
-                                $invocationParameters[] = $app[$parameterClassName];
-                            } elseif (class_exists($parameterClassName)) {
-                                $invocationParameters[] = new $parameterClassName();
-                            } else {
-                                throw new Exception("Can not resolve either $parameterClassName or it's instance from the container", 1);
-                            }
-
-                            break;
+                    if ($app->offsetExists($parameterClassName)) {
+                        $invocationParameters[] = $app[$parameterClassName];
+                    } elseif (class_exists($parameterClassName)) {
+                        $invocationParameters[] = new $parameterClassName();
+                    } else {
+                        throw new Exception("Can not resolve either $parameterClassName or it's instance from the container", 1);
                     }
                 }
 
@@ -117,27 +111,39 @@ class SilexStarter extends Application
      * Register filter middleware to the ap container.
      *
      * @param string        $name     The name of the filter callback
-     * @param \Closure|null $callback The closure callback to be registered
+     * @param callable|null $callback The callable callback to be registered
      *
-     * @return \Closure|null
+     * @return callable|null
      */
-    public function filter($name, \Closure $callback = null)
+    public function filter($name, callable $callback = null)
     {
         if (is_null($callback)) {
             return $this['filter.'.$name];
         }
 
         $this['filter.'.$name] = $this->protect($callback);
+
+        return null;
     }
 
     /**
      * Alias for filter method.
+     *
+     * @param string        $name       The middleware name
+     * @param callable|null $callback   The callable callback to be registered
+     *
+     * @return callable|null
      */
-    public function middleware($name, \Closure $callback = null)
+    public function middleware($name, callable $callback = null)
     {
         return $this->filter($name, $callback);
     }
 
+    /**
+     * Get current application environment.
+     *
+     * @return string
+     */
     public function getEnvironment()
     {
         return $this['environment'];
@@ -164,12 +170,12 @@ class SilexStarter extends Application
      * Group route into specific pattern and apply same middleware.
      *
      * @param string  $pattern  Matched route pattern
-     * @param Closure $callback The route callback
+     * @param callable $callback The route callback
      * @param array   $options  The route options, including before and after middleware
      *
-     * @return Controller
+     * @return \Silex\Controller
      */
-    public function group($pattern, \Closure $callback, array $options = [])
+    public function group($pattern, callable $callback, array $options = [])
     {
         return $this['route_builder']->group($pattern, $callback, $options);
     }
@@ -181,7 +187,7 @@ class SilexStarter extends Application
      * @param string $controller The fully qualified controller class name
      * @param array  $options    The route options, including before and after middleware
      *
-     * @return Controller
+     * @return \Silex\Controller
      */
     public function resource($pattern, $controller, array $options = [])
     {
@@ -195,7 +201,7 @@ class SilexStarter extends Application
      * @param string $controller The fully qualified controller class name
      * @param array  $options    The route options, including before and after middleware
      *
-     * @return Controller
+     * @return \Silex\Controller
      */
     public function controller($pattern, $controller, array $options = [])
     {
@@ -211,7 +217,7 @@ class SilexStarter extends Application
      * @param mixed  $to      Callback that returns the response when matched
      * @param array  $options The route options, including before and after middleware
      *
-     * @return Controller
+     * @return \Silex\Controller
      */
     public function match($pattern, $to = null, array $options = [])
     {
@@ -225,7 +231,7 @@ class SilexStarter extends Application
      * @param mixed  $to      Callback that returns the response when matched
      * @param array  $options The route options, including before and after middleware
      *
-     * @return Controller
+     * @return \Silex\Controller
      */
     public function get($pattern, $to = null, array $options = [])
     {
@@ -239,7 +245,7 @@ class SilexStarter extends Application
      * @param mixed  $to      Callback that returns the response when matched
      * @param array  $options The route options, including before and after middleware
      *
-     * @return Controller
+     * @return \Silex\Controller
      */
     public function post($pattern, $to = null, array $options = [])
     {
@@ -253,7 +259,7 @@ class SilexStarter extends Application
      * @param mixed  $to      Callback that returns the response when matched
      * @param array  $options The route options, including before and after middleware
      *
-     * @return Controller
+     * @return \Silex\Controller
      */
     public function put($pattern, $to = null, array $options = [])
     {
@@ -267,7 +273,7 @@ class SilexStarter extends Application
      * @param mixed  $to      Callback that returns the response when matched
      * @param array  $options The route options, including before and after middleware
      *
-     * @return Controller
+     * @return \Silex\Controller
      */
     public function delete($pattern, $to = null, array $options = [])
     {
@@ -281,7 +287,7 @@ class SilexStarter extends Application
      * @param mixed  $to      Callback that returns the response when matched
      * @param array  $options The route options, including before and after middleware
      *
-     * @return Controller
+     * @return \Silex\Controller
      */
     public function patch($pattern, $to = null, array $options = [])
     {

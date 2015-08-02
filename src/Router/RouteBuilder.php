@@ -348,13 +348,13 @@ class RouteBuilder
                 'get',
                 '/',
                 "$controller:index",
-                isset($options['as']) ? ['as' => $options['as'] . '.read'] : []
+                isset($options['as']) ? ['as' => $options['as'] . '.index'] : []
             ),
             'get_paginate' => new RouteMap(
                 'get',
                 '/page/{page}',
                 "$controller:index",
-                isset($options['as']) ? ['as' => $options['as'] . '.read'] : []
+                isset($options['as']) ? ['as' => $options['as'] . '.paged'] : []
             ),
             'get_create' => new RouteMap(
                 'get',
@@ -372,19 +372,19 @@ class RouteBuilder
                 'get',
                 '/{id}',
                 "$controller:show",
-                isset($options['as']) ? ['as' => $options['as'] . '.read'] : []
+                isset($options['as']) ? ['as' => $options['as'] . '.show'] : []
             ),
             'post' => new RouteMap(
                 'post',
                 '/',
                 "$controller:store",
-                isset($options['as']) ? ['as' => $options['as'] . '.create'] : []
+                isset($options['as']) ? ['as' => $options['as'] . '.store'] : []
             ),
             'put' => new RouteMap(
                 'put',
                 '/{id}',
                 "$controller:update",
-                isset($options['as']) ? ['as' => $options['as'] . '.edit'] : []
+                isset($options['as']) ? ['as' => $options['as'] . '.update'] : []
             ),
             'delete' => new RouteMap(
                 'delete',

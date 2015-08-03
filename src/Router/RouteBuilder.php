@@ -6,6 +6,7 @@ use Illuminate\Support\Str;
 use SilexStarter\SilexStarter;
 use Silex\Application;
 use Silex\ControllerCollection;
+use Symfony\Component\HttpFoundation\Response;
 
 class RouteBuilder
 {
@@ -227,58 +228,56 @@ class RouteBuilder
         }
     }
 
-    public function match($pattern, $to = null, array $options = [])
+    protected function forwardRouteMethod($method, $pattern, $to = null, array $options = [])
     {
         $ns    = $this->getNamespace(isset($options['namespace']) ? $options['namespace'] : null);
-        $route = $this->getContext()->match($pattern, $ns ? $ns . '\\' .$to : $to);
+        $route = $this->getContext()->{$method}($pattern, $ns ? $ns . '\\' .$to : $to);
+
+        if (isset($options['permission'])) {
+            $permission = $options['permission'];
+
+            $route->before(
+                function (Application $app) use ($permission) {
+                    if (!$app['route_permission_checker']->check($permission)) {
+                        return new Response('No sufficient permission to access this page', 401);
+                    }
+                }
+            );
+        }
+
         $route = $this->applyControllerOption($route, $options);
 
         return $route;
+    }
+
+    public function match($pattern, $to = null, array $options = [])
+    {
+        return $this->forwardRouteMethod('match', $pattern, $to, $options);
     }
 
     public function get($pattern, $to = null, array $options = [])
     {
-        $ns    = $this->getNamespace(isset($options['namespace']) ? $options['namespace'] : null);
-        $route = $this->getContext()->get($pattern, $ns ? $ns . '\\' .$to : $to);
-        $route = $this->applyControllerOption($route, $options);
-
-        return $route;
+        return $this->forwardRouteMethod('get', $pattern, $to, $options);
     }
 
     public function post($pattern, $to = null, array $options = [])
     {
-        $ns    = $this->getNamespace(isset($options['namespace']) ? $options['namespace'] : null);
-        $route = $this->getContext()->post($pattern, $ns ? $ns . '\\' .$to : $to);
-        $route = $this->applyControllerOption($route, $options);
-
-        return $route;
+        return $this->forwardRouteMethod('post', $pattern, $to, $options);
     }
 
     public function put($pattern, $to = null, array $options = [])
     {
-        $ns    = $this->getNamespace(isset($options['namespace']) ? $options['namespace'] : null);
-        $route = $this->getContext()->put($pattern, $ns ? $ns . '\\' .$to : $to);
-        $route = $this->applyControllerOption($route, $options);
-
-        return $route;
+        return $this->forwardRouteMethod('put', $pattern, $to, $options);
     }
 
     public function delete($pattern, $to = null, array $options = [])
     {
-        $ns    = $this->getNamespace(isset($options['namespace']) ? $options['namespace'] : null);
-        $route = $this->getContext()->delete($pattern, $ns ? $ns . '\\' .$to : $to);
-        $route = $this->applyControllerOption($route, $options);
-
-        return $route;
+        return $this->forwardRouteMethod('delete', $pattern, $to, $options);
     }
 
     public function patch($pattern, $to = null, array $options = [])
     {
-        $ns    = $this->getNamespace(isset($options['namespace']) ? $options['namespace'] : null);
-        $route = $this->getContext()->patch($pattern, $ns ? $ns . '\\' .$to : $to);
-        $route = $this->applyControllerOption($route, $options);
-
-        return $route;
+        return $this->forwardRouteMethod('patch', $pattern, $to, $options);
     }
 
     /**

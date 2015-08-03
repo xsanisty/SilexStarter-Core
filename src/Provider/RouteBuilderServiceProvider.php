@@ -6,6 +6,7 @@ use Silex\Application;
 use Silex\ServiceProviderInterface;
 use Illuminate\Support\Str;
 use SilexStarter\Router\RouteBuilder;
+use SilexStarter\Router\RoutePermissionChecker;
 
 class RouteBuilderServiceProvider implements ServiceProviderInterface
 {
@@ -14,6 +15,12 @@ class RouteBuilderServiceProvider implements ServiceProviderInterface
         $app['route_builder'] = $app->share(
             function (Application $app) {
                 return new RouteBuilder($app, new Str());
+            }
+        );
+
+        $app['route_permission_checker'] = $app->share(
+            function (Application $app) {
+                return new RoutePermissionChecker($app['sentry']->getUser());
             }
         );
     }

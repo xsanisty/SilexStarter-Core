@@ -6,16 +6,19 @@ use Exception;
 use Cartalyst\Sentry\Users\UserInterface;
 use SilexStarter\Response\ResponseBuilder;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\Routing\Generator\UrlGenerator;
 
 class RoutePermissionChecker
 {
     protected $user;
     protected $response;
+    protected $urlGenerator;
 
-    public function __construct(ResponseBuilder $response, UserInterface $user = null)
+    public function __construct(ResponseBuilder $response, UrlGenerator $urlGenerator, UserInterface $user = null)
     {
         $this->setUser($user);
         $this->response = $response;
+        $this->urlGenerator = $urlGenerator;
 
     }
 
@@ -41,7 +44,7 @@ class RoutePermissionChecker
         }
 
         if (!$this->user) {
-            return $response;
+            return $this->response->redirect($this->urlGenerator->generate('admin.login'));
         }
 
         try {

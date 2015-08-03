@@ -6,7 +6,6 @@ use Illuminate\Support\Str;
 use SilexStarter\SilexStarter;
 use Silex\Application;
 use Silex\ControllerCollection;
-use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Request;
 
 class RouteBuilder
@@ -170,7 +169,7 @@ class RouteBuilder
     }
 
     /**
-     * @param $route
+     * @param \Silex\Controller|\Silex\ControllerCollection $route
      * @param callable $beforeHandler
      */
     protected function applyBeforeHandlerStack($route, $beforeHandler = null)
@@ -211,7 +210,7 @@ class RouteBuilder
     }
 
     /**
-     * @param $route
+     * @param \Silex\Controller|\Silex\ControllerCollection $route
      * @param mixed $afterHandler
      */
     protected function applyAfterHandlerStack($route, $afterHandler = null)
@@ -442,8 +441,9 @@ class RouteBuilder
      * Create list of route map based on controller's public method.
      *
      * @param object|string $controller Fully qualified controller class name or class instance
+     * @param array         $options    Route options
      *
-     * @return array array of SilexStarter\Router\RouteMap
+     * @return array                    Array of SilexStarter\Router\RouteMap
      */
     protected function createControllerRouteMap($controller, $options)
     {

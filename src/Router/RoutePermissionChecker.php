@@ -32,7 +32,8 @@ class RoutePermissionChecker
         }
 
         try {
-            return $this->user->hasAnyAccess((array) $permission);
+            $permission = array_merge(['admin'], (array) $permission);
+            return $this->user->hasAnyAccess($permission);
         } catch (Exception $e) {
             return false;
         }

@@ -233,7 +233,7 @@ class RouteBuilder
         $ns    = $this->getNamespace(isset($options['namespace']) ? $options['namespace'] : null);
         $route = $this->getContext()->{$method}($pattern, $ns ? $ns . '\\' .$to : $to);
 
-        if (isset($options['permission'])) {
+        if (isset($options['permission']) && $options['permission']) {
             $permission = $options['permission'];
 
             $route->before(
@@ -291,15 +291,32 @@ class RouteBuilder
      */
     public function group($prefix, \Closure $callable, array $options = [])
     {
-        if (isset($options['before'])) {
+        $permissionEnabled      = isset($options['permission']) && $options['permission'];
+        $beforeHandlerEnabled   = isset($options['before']) && $options['before'];
+        $afterHandlerEnabled    = isset($options['after']) && $options['after'];
+        $namespaceEnabled       = isset($options['namespace']) && $options['namespace'];
+
+        if ($permissionEnabled) {
+            $permission = $options['permission'];
+
+            $this->pushBeforeHandler(
+                function (Application $app) use ($permission) {
+                    if (!$app['route_permission_checker']->check($permission)) {
+                        return new Response('No sufficient permission to access this page', 401);
+                    }
+                }
+            );
+        }
+
+        if ($beforeHandlerEnabled) {
             $this->pushBeforeHandler($options['before']);
         }
 
-        if (isset($options['after'])) {
+        if ($afterHandlerEnabled) {
             $this->pushAfterHandler($options['after']);
         }
 
-        if (isset($options['namespace'])) {
+        if ($namespaceEnabled) {
             $this->pushNamespace($options['namespace']);
         }
 
@@ -310,15 +327,19 @@ class RouteBuilder
 
         $routeCollection = $this->popContext();
 
-        if (isset($options['before'])) {
+        if ($beforeHandlerEnabled) {
             $this->popBeforeHandler();
         }
 
-        if (isset($options['after'])) {
+        if ($permissionEnabled) {
+            $this->popBeforeHandler();
+        }
+
+        if ($afterHandlerEnabled) {
             $this->popAfterHandler();
         }
 
-        if (isset($options['namespace'])) {
+        if ($namespaceEnabled) {
             $this->popNamespace();
         }
 
@@ -341,57 +362,45 @@ class RouteBuilder
         $prefix     = '/'.ltrim($prefix, '/');
         $ns         = $this->getNamespace(isset($options['namespace']) ? $options['namespace'] : null);
         $controller = $ns ? $ns . '\\' .$controller : $controller;
-
-        $routeMaps  = [
-            'get' => new RouteMap(
-                'get',
-                '/',
-                "$controller:index",
-                isset($options['as']) ? ['as' => $options['as'] . '.index'] : []
-            ),
-            'get_paginate' => new RouteMap(
-                'get',
-                '/page/{page}',
-                "$controller:index",
-                isset($options['as']) ? ['as' => $options['as'] . '.paged'] : []
-            ),
-            'get_create' => new RouteMap(
-                'get',
-                '/create',
-                "$controller:create",
-                isset($options['as']) ? ['as' => $options['as'] . '.create'] : []
-            ),
-            'get_edit' => new RouteMap(
-                'get',
-                '/{id}/edit',
-                "$controller:edit",
-                isset($options['as']) ? ['as' => $options['as'] . '.edit'] : []
-            ),
-            'get_show' => new RouteMap(
-                'get',
-                '/{id}',
-                "$controller:show",
-                isset($options['as']) ? ['as' => $options['as'] . '.show'] : []
-            ),
-            'post' => new RouteMap(
-                'post',
-                '/',
-                "$controller:store",
-                isset($options['as']) ? ['as' => $options['as'] . '.store'] : []
-            ),
-            'put' => new RouteMap(
-                'put',
-                '/{id}',
-                "$controller:update",
-                isset($options['as']) ? ['as' => $options['as'] . '.update'] : []
-            ),
-            'delete' => new RouteMap(
-                'delete',
-                '/{id}',
-                "$controller:destroy",
-                isset($options['as']) ? ['as' => $options['as'] . '.delete'] : []
-            ),
+        $only       = isset($options['only']) ? $options['only'] : [];
+        $except     = isset($options['except']) ? $options['except'] : [];
+        $routeMaps  = [];
+        $registered = [];
+        $methods    = [
+            'index'     => ['method' => 'get'   , 'path' => '/'            , 'permission' => 'read'    ],
+            'page'      => ['method' => 'get'   , 'path' => '/page/{page}' , 'permission' => 'read'    ],
+            'show'      => ['method' => 'get'   , 'path' => '/{id}'        , 'permission' => 'read'    ],
+            'create'    => ['method' => 'get'   , 'path' => '/create'      , 'permission' => 'create'  ],
+            'store'     => ['method' => 'post'  , 'path' => '/'            , 'permission' => 'create'  ],
+            'edit'      => ['method' => 'get'   , 'path' => '/{id}/edit'   , 'permission' => 'edit'    ],
+            'update'    => ['method' => 'put'   , 'path' => '/{id}'        , 'permission' => 'edit'    ],
+            'delete'    => ['method' => 'delete', 'path' => '/{id}'        , 'permission' => 'delete'  ]
         ];
+
+        if ($only) {
+            foreach ($only as $included) {
+                $registered[$included] = $methods[$included];
+            }
+        }
+
+        foreach ($registered as $method => $route) {
+
+            if (in_array($method, $except)) {
+                continue;
+            }
+
+            $routeOptions    = [];
+
+            if (isset($options['as']) && $options['as']) {
+                $routeOptions['as'] = $options['as'] . '.' .$method;
+            }
+
+            if (isset($options['permission']) && $options['permission']) {
+                $routeOptions['permission'] = $options['permission'] . '.' .$route['permission'];
+            }
+
+            $routeMaps[]    = new RouteMap($route['method'], $route['path'], $controller . ':' .$method, $routeOptions);
+        }
 
         unset($options['as']);
 
@@ -444,6 +453,15 @@ class RouteBuilder
 
         $uppercase          = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
         $acceptedMethod     = ['get', 'post', 'put', 'delete', 'head', 'options', 'patch'];
+        $permissions        = [
+            'get'    => 'read',
+            'post'   => 'create',
+            'put'    => 'edit',
+            'delete' => 'delete',
+            'head'   => 'read',
+            'options'=> 'read',
+            'patch'  => 'edit'
+        ];
 
         $routeMaps          = [];
 
@@ -478,8 +496,12 @@ class RouteBuilder
 
             $routeOptions['default'] = $defaultParams;
 
-            if (isset($options['as'])) {
+            if (isset($options['as']) && $options['as']) {
                 $routeOptions['as'] = $options['as'] . '.' . $routeName;
+            }
+
+            if (isset($options['permission']) && $options['permission']) {
+                $routeOptions['permission'] = $options['permission'] . '.' . $permissions[$httpMethod];
             }
 
 
@@ -505,14 +527,26 @@ class RouteBuilder
             $method  = $map->getHttpMethod() ? $map->getHttpMethod() : 'match';
             $route   = $router->$method($pattern, $map->getAction());
 
-            if (isset($options['default'])) {
+            if (isset($options['default']) && is_array($options['default'])) {
                 foreach ($options['default'] as $field => $value) {
                     $route->value($field, $value);
                 }
             }
 
-            if (isset($options['as'])) {
+            if (isset($options['as']) && $options['as']) {
                 $route->bind($options['as']);
+            }
+
+            if (isset($options['permission']) && $options['permission']) {
+                $permission = $options['permission'];
+
+                $route->before(
+                    function (Application $app) use ($permission) {
+                        if (!$app['route_permission_checker']->check($permission)) {
+                            return new Response('No sufficient permission to access this page', 401);
+                        }
+                    }
+                );
             }
         }
 

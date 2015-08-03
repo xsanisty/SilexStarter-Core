@@ -3,18 +3,23 @@
 namespace SilexStarter\Router;
 
 use Exception;
-use Cartalyst\Sentry\Users\Eloquent\User;
+use Cartalyst\Sentry\Users\UserInterface;
+use SilexStarter\Response\ResponseBuilder;
+use Symfony\Component\HttpFoundation\Request;
 
 class RoutePermissionChecker
 {
-    protected $sentry;
+    protected $user;
+    protected $response;
 
-    public function __construct(User $user = null)
+    public function __construct(ResponseBuilder $response, UserInterface $user = null)
     {
         $this->setUser($user);
+        $this->response = $response;
+
     }
 
-    public function setUser(User $user = null)
+    public function setUser(UserInterface $user = null)
     {
         $this->user = $user;
     }
@@ -25,17 +30,29 @@ class RoutePermissionChecker
      * @param  string|array $permission The required permission.
      * @return bool                     Return true if required permission is satisfied
      */
-    public function check($permission)
+    public function check(Request $request, $permission)
     {
+        $message  = 'Insufficient permission to acces this page';
+
+        if ($request->isXmlHttpRequest()) {
+            $response = $this->response->ajax($message, 401, false, [['code' => 401, 'message' => $message]]);
+        } else {
+            $response = $this->response->make($message, 401);
+        }
+
         if (!$this->user) {
-            return false;
+            return $response;
         }
 
         try {
             $permission = array_merge(['admin'], (array) $permission);
-            return $this->user->hasAnyAccess($permission);
+            if (!$this->user->hasAnyAccess($permission)) {
+                return $response;
+            }
         } catch (Exception $e) {
-            return false;
+            $response->setContent($e->getMessage());
+
+            return $response;
         }
     }
 }

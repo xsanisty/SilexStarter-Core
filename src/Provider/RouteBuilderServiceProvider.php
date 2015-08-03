@@ -20,7 +20,7 @@ class RouteBuilderServiceProvider implements ServiceProviderInterface
 
         $app['route_permission_checker'] = $app->share(
             function (Application $app) {
-                return new RoutePermissionChecker($app['sentry']->getUser());
+                return new RoutePermissionChecker($app['response_builder'], $app['sentry']->getUser());
             }
         );
     }

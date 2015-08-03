@@ -7,6 +7,7 @@ use SilexStarter\SilexStarter;
 use Silex\Application;
 use Silex\ControllerCollection;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\Request;
 
 class RouteBuilder
 {
@@ -237,10 +238,8 @@ class RouteBuilder
             $permission = $options['permission'];
 
             $route->before(
-                function (Application $app) use ($permission) {
-                    if (!$app['route_permission_checker']->check($permission)) {
-                        return new Response('No sufficient permission to access this page', 401);
-                    }
+                function (Request $request, Application $app) use ($permission) {
+                    return $app['route_permission_checker']->check($request, $permission);
                 }
             );
         }
@@ -300,10 +299,8 @@ class RouteBuilder
             $permission = $options['permission'];
 
             $this->pushBeforeHandler(
-                function (Application $app) use ($permission) {
-                    if (!$app['route_permission_checker']->check($permission)) {
-                        return new Response('No sufficient permission to access this page', 401);
-                    }
+                function (Request $request, Application $app) use ($permission) {
+                    return $app['route_permission_checker']->check($request, $permission);
                 }
             );
         }
@@ -381,6 +378,8 @@ class RouteBuilder
             foreach ($only as $included) {
                 $registered[$included] = $methods[$included];
             }
+        } else {
+            $registered = $methods;
         }
 
         foreach ($registered as $method => $route) {
@@ -541,10 +540,8 @@ class RouteBuilder
                 $permission = $options['permission'];
 
                 $route->before(
-                    function (Application $app) use ($permission) {
-                        if (!$app['route_permission_checker']->check($permission)) {
-                            return new Response('No sufficient permission to access this page', 401);
-                        }
+                    function (Request $request, Application $app) use ($permission) {
+                        return $app['route_permission_checker']->check($request, $permission);
                     }
                 );
             }

@@ -44,7 +44,11 @@ class TwigUrlExtension extends Twig_Extension
 
     public function urlTo($path = '/')
     {
-        $request = $this->requestStack->getCurrentRequest();
-        return $request->getScheme().'://'.$request->getHost().$request->getBasePath().'/'.ltrim($path, '/');
+        if (substr($path, 0, 7) == 'http://' || substr($path, 0, 8) == 'https://' || substr($path, 0, 2) == '//') {
+            return $path;
+        } else {
+            $request = $this->requestStack->getCurrentRequest();
+            return $request->getScheme().'://'.$request->getHost().$request->getBasePath().'/'.ltrim($path, '/');
+        }
     }
 }

@@ -168,7 +168,7 @@ class AssetManager
         }
 
         /* if file is single file, render immediately */
-        return sprintf($tagFormat, $this->resolvePath($file));
+        return sprintf($tagFormat, $this->resolvePath($files));
     }
 
     /**

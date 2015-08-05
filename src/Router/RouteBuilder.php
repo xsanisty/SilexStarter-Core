@@ -159,6 +159,12 @@ class RouteBuilder
             }
         }
 
+        if (isset($options['convert'])) {
+            foreach ($options['convert'] as $placeholder => $rule) {
+                $route->convert($placeholder, $rule);
+            }
+        }
+
         if (isset($options['default'])) {
             foreach ($options['default'] as $placeholder => $value) {
                 $route->value($placeholder, $value);

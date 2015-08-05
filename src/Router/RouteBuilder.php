@@ -383,14 +383,14 @@ class RouteBuilder
         $routeMaps  = [];
         $registered = [];
         $methods    = [
-            'index'     => ['http_method' => 'get'   , 'path' => '/'            , 'assert' => ''   , 'permission' => 'read'    ],
-            'page'      => ['http_method' => 'get'   , 'path' => '/page/{page}' , 'assert' => '\d+', 'permission' => 'read'    ],
-            'show'      => ['http_method' => 'get'   , 'path' => '/{id}'        , 'assert' => '\d+', 'permission' => 'read'    ],
-            'create'    => ['http_method' => 'get'   , 'path' => '/create'      , 'assert' => ''   , 'permission' => 'create'  ],
-            'store'     => ['http_method' => 'post'  , 'path' => '/'            , 'assert' => ''   , 'permission' => 'create'  ],
-            'edit'      => ['http_method' => 'get'   , 'path' => '/{id}/edit'   , 'assert' => '\d+', 'permission' => 'edit'    ],
-            'update'    => ['http_method' => 'put'   , 'path' => '/{id}'        , 'assert' => '\d+', 'permission' => 'edit'    ],
-            'delete'    => ['http_method' => 'delete', 'path' => '/{id}'        , 'assert' => '\d+', 'permission' => 'delete'  ]
+            'index'     => ['http_method' => 'get'   , 'path' => '/'           , 'assert' => ''               , 'permission' => 'read'  ],
+            'page'      => ['http_method' => 'get'   , 'path' => '/page/{page}', 'assert' => ['page' => '\d+'], 'permission' => 'read'  ],
+            'show'      => ['http_method' => 'get'   , 'path' => '/{id}'       , 'assert' => ['id' => '\d+']  , 'permission' => 'read'  ],
+            'create'    => ['http_method' => 'get'   , 'path' => '/create'     , 'assert' => ''               , 'permission' => 'create'],
+            'store'     => ['http_method' => 'post'  , 'path' => '/'           , 'assert' => ''               , 'permission' => 'create'],
+            'edit'      => ['http_method' => 'get'   , 'path' => '/{id}/edit'  , 'assert' => ['id' => '\d+']  , 'permission' => 'edit'  ],
+            'update'    => ['http_method' => 'put'   , 'path' => '/{id}'       , 'assert' => ['id' => '\d+']  , 'permission' => 'edit'  ],
+            'delete'    => ['http_method' => 'delete', 'path' => '/{id}'       , 'assert' => ['id' => '\d+']  , 'permission' => 'delete']
         ];
 
         if ($only) {

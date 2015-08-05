@@ -36,6 +36,12 @@ class SentryServiceProvider implements ServiceProviderInterface
         $this->registerCookie();
         $this->registerSentry();
 
+        $app['user'] = $app->share(
+            function (Application $app) {
+                return $app['sentry']->getUser();
+            }
+        );
+
         $app->bind('Cartalyst\Sentry\Sentry', 'sentry');
     }
 

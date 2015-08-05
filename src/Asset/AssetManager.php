@@ -82,16 +82,16 @@ class AssetManager
     /**
      * Queue the asset file into the asset manager.
      *
-     * @param string $assetfile the asset file need to be loaded,
+     * @param string $assetFile the asset file need to be loaded,
      */
-    public function load($assetfile)
+    public function load($assetFile)
     {
-        if ('.js' == substr($assetfile, -3, 3)) {
-            $this->js($assetfile);
+        if ('.js' == substr($assetFile, -3, 3)) {
+            $this->js($assetFile);
         }
 
-        if ('.css' == substr($assetfile, -4, 4)) {
-            $this->css($assetfile);
+        if ('.css' == substr($assetFile, -4, 4)) {
+            $this->css($assetFile);
         }
     }
 
@@ -128,20 +128,40 @@ class AssetManager
     }
 
     /**
+     * Render image file into proper img tag
+     * @param  string $image   The image location
+     * @param  array  $options Option for the image tag, class, style, and id
+     *
+     * @return string          rendered img tag
+     */
+    public function renderImage($image, array $options = [])
+    {
+        $tagFormat = "<img type=\"text/css\" src=\"%s\" class=\"%s\" id=\"%s\" style=\"%s\">\n";
+
+        return sprintf(
+            $tagFormat,
+            $this->resolvePath($image),
+            isset($options['class']) ? $options['class'] : '',
+            isset($options['id']) ? $options['id'] : '',
+            isset($options['style']) ? $options['style'] : ''
+        );
+    }
+
+    /**
      * Render the path, or array of path into given tag format.
      *
-     * @param array|string $file      the asset path, or array of asset path
+     * @param array|string $files     the asset path, or array of asset path
      * @param string       $tagFormat the tag format used for rendering the asset tag
      *
      * @return string the formatted tag with proper asset path
      */
-    protected function render($file, $tagFormat)
+    protected function render($files, $tagFormat)
     {
         /* if file is array of file, render each file respectively */
-        if (is_array($file)) {
+        if (is_array($files)) {
             $tag = '';
-            foreach ($file as $cssfile) {
-                $tag .= sprintf($tagFormat, $this->resolvePath($cssfile));
+            foreach ($files as $file) {
+                $tag .= sprintf($tagFormat, $this->resolvePath($file));
             }
 
             return $tag;
@@ -176,8 +196,11 @@ class AssetManager
             $file = $this->assetBasePath.'/'.$file;
         }
 
-        return  (($absolute) ? $this->request->getCurrentRequest()->getScheme().'://'.$this->request->getCurrentRequest()->getHost() : '').
-                $this->request->getCurrentRequest()->getBasePath().'/'.
-                ltrim($file, '/');
+        return  (
+                    ($absolute)
+                    ? $this->request->getCurrentRequest()->getScheme().'://'.$this->request->getCurrentRequest()->getHost()
+                    : ''
+                ).
+                $this->request->getCurrentRequest()->getBasePath() .'/'. ltrim($file, '/');
     }
 }

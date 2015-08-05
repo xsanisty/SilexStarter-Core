@@ -44,7 +44,7 @@ class TwigUrlExtension extends Twig_Extension
 
     public function urlTo($path = '/')
     {
-        if (substr($path, 0, 7) == 'http://' || substr($path, 0, 8) == 'https://' || substr($path, 0, 2) == '//') {
+        if ('http:' == substr($path, 0, 5) || '//' == substr($path, 0, 2) || 'https:' == substr($path, 0, 6)) {
             return $path;
         } else {
             $request = $this->requestStack->getCurrentRequest();

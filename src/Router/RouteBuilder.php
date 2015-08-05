@@ -139,36 +139,50 @@ class RouteBuilder
     /**
      * Apply the middleware and binding to the controller.
      *
-     * @param mixed $route   The controller or controller collection
-     * @param array                           $options the route options
+     * @param \Silex\Controller|\Silex\ControllerCollection     The controller or controller collection
+     * @param array $options                                    The route options
      *
-     * @return mixed
+     * @return \Silex\Controller|\Silex\ControllerCollection
      */
     protected function applyControllerOption($route, array $options)
     {
         $this->applyBeforeHandlerStack($route, isset($options['before']) ? $options['before'] : null);
         $this->applyAfterHandlerStack($route, isset($options['after']) ? $options['after'] : null);
 
-        if (isset($options['as'])) {
+        if ($route instanceof ControllerCollection) {
+            return $route;
+        }
+
+        if (isset($options['as']) && $options['as']) {
             $route->bind($options['as']);
         }
 
-        if (isset($options['assert'])) {
+        if (isset($options['assert']) && is_array($options['assert'])) {
             foreach ($options['assert'] as $placeholder => $rule) {
                 $route->assert($placeholder, $rule);
             }
         }
 
-        if (isset($options['convert'])) {
+        if (isset($options['convert']) && is_array($options['convert'])) {
             foreach ($options['convert'] as $placeholder => $rule) {
                 $route->convert($placeholder, $rule);
             }
         }
 
-        if (isset($options['default'])) {
+        if (isset($options['default']) && is_array($options['default'])) {
             foreach ($options['default'] as $placeholder => $value) {
                 $route->value($placeholder, $value);
             }
+        }
+
+        if (isset($options['permission']) && $options['permission']) {
+            $permission = $options['permission'];
+
+            $route->before(
+                function (Request $request, Application $app) use ($permission) {
+                    return $app['route_permission_checker']->check($request, $permission);
+                }
+            );
         }
 
         return $route;
@@ -369,14 +383,14 @@ class RouteBuilder
         $routeMaps  = [];
         $registered = [];
         $methods    = [
-            'index'     => ['method' => 'get'   , 'path' => '/'            , 'permission' => 'read'    ],
-            'page'      => ['method' => 'get'   , 'path' => '/page/{page}' , 'permission' => 'read'    ],
-            'show'      => ['method' => 'get'   , 'path' => '/{id}'        , 'permission' => 'read'    ],
-            'create'    => ['method' => 'get'   , 'path' => '/create'      , 'permission' => 'create'  ],
-            'store'     => ['method' => 'post'  , 'path' => '/'            , 'permission' => 'create'  ],
-            'edit'      => ['method' => 'get'   , 'path' => '/{id}/edit'   , 'permission' => 'edit'    ],
-            'update'    => ['method' => 'put'   , 'path' => '/{id}'        , 'permission' => 'edit'    ],
-            'delete'    => ['method' => 'delete', 'path' => '/{id}'        , 'permission' => 'delete'  ]
+            'index'     => ['http_method' => 'get'   , 'path' => '/'            , 'assert' => ''   , 'permission' => 'read'    ],
+            'page'      => ['http_method' => 'get'   , 'path' => '/page/{page}' , 'assert' => '\d+', 'permission' => 'read'    ],
+            'show'      => ['http_method' => 'get'   , 'path' => '/{id}'        , 'assert' => '\d+', 'permission' => 'read'    ],
+            'create'    => ['http_method' => 'get'   , 'path' => '/create'      , 'assert' => ''   , 'permission' => 'create'  ],
+            'store'     => ['http_method' => 'post'  , 'path' => '/'            , 'assert' => ''   , 'permission' => 'create'  ],
+            'edit'      => ['http_method' => 'get'   , 'path' => '/{id}/edit'   , 'assert' => '\d+', 'permission' => 'edit'    ],
+            'update'    => ['http_method' => 'put'   , 'path' => '/{id}'        , 'assert' => '\d+', 'permission' => 'edit'    ],
+            'delete'    => ['http_method' => 'delete', 'path' => '/{id}'        , 'assert' => '\d+', 'permission' => 'delete'  ]
         ];
 
         if ($only) {
@@ -403,10 +417,12 @@ class RouteBuilder
                 $routeOptions['permission'] = $options['permission'] . '.' .$route['permission'];
             }
 
-            $routeMaps[]    = new RouteMap($route['method'], $route['path'], $controller . ':' .$method, $routeOptions);
-        }
+            if ($route['assert']) {
+                $routeOptions['assert'] = $route['assert'];
+            }
 
-        unset($options['as']);
+            $routeMaps[]    = new RouteMap($route['http_method'], $route['path'], $controller . ':' .$method, $routeOptions);
+        }
 
         $routeCollection = $this->buildControllerRoute($this->app['controllers_factory'], $routeMaps);
 
@@ -434,8 +450,6 @@ class RouteBuilder
         $routeMaps          = $this->createControllerRouteMap($controller, $options);
 
         $routeCollection    = $this->buildControllerRoute($this->app['controllers_factory'], $routeMaps);
-
-        unset($options['as']);
 
         $this->applyControllerOption($routeCollection, $options);
         $this->getContext()->mount($prefix, $routeCollection);
@@ -532,25 +546,7 @@ class RouteBuilder
             $method  = $map->getHttpMethod() ? $map->getHttpMethod() : 'match';
             $route   = $router->$method($pattern, $map->getAction());
 
-            if (isset($options['default']) && is_array($options['default'])) {
-                foreach ($options['default'] as $field => $value) {
-                    $route->value($field, $value);
-                }
-            }
-
-            if (isset($options['as']) && $options['as']) {
-                $route->bind($options['as']);
-            }
-
-            if (isset($options['permission']) && $options['permission']) {
-                $permission = $options['permission'];
-
-                $route->before(
-                    function (Request $request, Application $app) use ($permission) {
-                        return $app['route_permission_checker']->check($request, $permission);
-                    }
-                );
-            }
+            $this->applyControllerOption($route, $options);
         }
 
         return $router;

@@ -53,4 +53,14 @@ class ModuleResource
             $this->resources[$resource] = $value;
         }
     }
+
+    /**
+     * Check if resources field exists
+     * @param  string  $name
+     * @return boolean
+     */
+    public function __isset($name)
+    {
+        return array_key_exists($name, $this->resources);
+    }
 }

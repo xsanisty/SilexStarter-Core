@@ -25,9 +25,9 @@ class ModuleInfo
     /**
      * info getter, so it possible to access $object->info.
      *
-     * @param string $info [description]
+     * @param string $info
      *
-     * @return mixed [description]
+     * @return mixed
      */
     public function __get($info)
     {
@@ -41,13 +41,23 @@ class ModuleInfo
     /**
      * info setter, so it possible to assign value to info using $object->info = value.
      *
-     * @param string $info  [description]
-     * @param mixeed $value [description]
+     * @param string $info
+     * @param mixeed $value
      */
     public function __set($info, $value)
     {
         if (in_array($info, $this->infoFields)) {
             $this->info[$info] = $value;
         }
+    }
+
+    /**
+     * Check if info field exists
+     * @param  string  $name
+     * @return boolean
+     */
+    public function __isset($name)
+    {
+        return array_key_exists($name, $this->info);
     }
 }

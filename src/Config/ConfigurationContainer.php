@@ -31,7 +31,6 @@ class ConfigurationContainer implements ArrayAccess
      * Load the configuration file and save the value into array container.
      *
      * @param mixed  $config    filename or @namespace.filename
-     * @param string $configKey override the config key, if not specified, the filename will be used
      */
     public function load($configFile)
     {
@@ -112,7 +111,7 @@ class ConfigurationContainer implements ArrayAccess
             return $originalPath;
         }
 
-        throw new Exception("Can not resolve the path of $file in $namespace namespace");
+        throw new Exception("Can not resolve config path of $file in $namespace namespace");
     }
 
     /**
@@ -245,11 +244,11 @@ class ConfigurationContainer implements ArrayAccess
      */
     protected function getNamespacedValue($namespace, $key)
     {
-        $configFile = explode('.', $key, 2)[0];
-
         if (!isset($this->namespacedConfig[$namespace])) {
             throw new Exception("Namespace $namespace is not registered");
         }
+
+        $configFile = explode('.', $key, 2)[0];
 
         if (!isset($this->namespacedConfig[$namespace][$configFile])) {
             $this->load("@{$namespace}.{$configFile}");
@@ -327,6 +326,35 @@ class ConfigurationContainer implements ArrayAccess
     public function remove($key)
     {
         //
+    }
+
+    /**
+     * Write the modified config value into configuration file.
+     *
+     * @param  string $configFile
+     * @param  mixed  $configValue
+     *
+     */
+    public function save($configFile, $configValue = null)
+    {
+        $filesystem = $this->app['filesystem'];
+
+        if ($this->isNamespaced($configFile)) {
+            $namespace  = $this->getNamespace($configFile);
+            $key        = $this->getKey($configFile);
+
+            $file       = explode('.', $key, 2)[0];
+            $path       = $this->resolveNamespacedPath("@{$namespace}.{$file}");
+            $configValue= $configValue ? $configValue : $this->namespacedConfig[$namespace][$file];
+
+            $filesystem->dumpFile($path, "<?php \nreturn ".var_export($configValue, true). ";\n");
+        } else {
+            $file       = explode('.', $configFile, 2)[0];
+            $path       = $this->resolvePath($file);
+            $configValue= $configValue ? $configValue : $this->config[$file];
+
+            $filesystem->dumpFile($path, "<?php \nreturn ".var_export($configValue, true). ";\n");
+        }
     }
 
     /**

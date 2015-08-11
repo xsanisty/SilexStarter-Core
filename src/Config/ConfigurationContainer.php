@@ -347,13 +347,40 @@ class ConfigurationContainer implements ArrayAccess
             $path       = $this->resolveNamespacedPath("@{$namespace}.{$file}");
             $configValue= $configValue ? $configValue : $this->namespacedConfig[$namespace][$file];
 
-            $filesystem->dumpFile($path, "<?php \nreturn ".var_export($configValue, true). ";\n");
+            $filesystem->dumpFile($path, "<?php \n\nreturn ".$this->export($configValue). ";\n");
         } else {
             $file       = explode('.', $configFile, 2)[0];
             $path       = $this->resolvePath($file);
             $configValue= $configValue ? $configValue : $this->config[$file];
 
-            $filesystem->dumpFile($path, "<?php \nreturn ".var_export($configValue, true). ";\n");
+            $filesystem->dumpFile($path, "<?php \n\nreturn ".$this->export($configValue). ";\n");
+        }
+    }
+
+    /**
+     * Export variable into pretty formatted parsable string
+     * @param  mixed  $var    the variable
+     * @param  string $indent first indentation
+     * @return string         pretty formatted expression
+     */
+    protected function export($var, $indent = '')
+    {
+        switch (gettype($var)) {
+            case 'string':
+                return '"' . addcslashes($var, "\\\$\"\r\n\t\v\f") . '"';
+            case 'array':
+                $indexed = array_keys($var) === range(0, count($var) - 1);
+                $r = [];
+                foreach ($var as $key => $value) {
+                    $r[] = $indent . '    '
+                         . ($indexed ? '' : $this->export($key) . ' => ')
+                         . $this->export($value, $indent . '    ');
+                }
+                return "[\n" . implode(",\n", $r) . "\n" . $indent . "]";
+            case 'boolean':
+                return $var ? 'true' : 'false';
+            default:
+                return var_export($var, true);
         }
     }
 

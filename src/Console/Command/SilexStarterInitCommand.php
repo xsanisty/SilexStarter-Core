@@ -2,10 +2,13 @@
 
 namespace SilexStarter\Console\Command;
 
+use Exception;
+use InvalidArgumentException;
 use SilexStarter\Console\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
+use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Question\ConfirmationQuestion;
 use Symfony\Component\Console\Question\ChoiceQuestion;
@@ -24,27 +27,71 @@ class SilexStarterInitCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $app = $this->getSilexStarter();
-        $helper = $this->getHelper('question');
-        $question = new ConfirmationQuestion('This action will initiate the SilexStarter app from the scratch, do you want to continue? [Y/n]');
+        $app        = $this->getSilexStarter();
+        $helper     = $this->getHelper('question');
+        $question   = new ConfirmationQuestion('<info>This action will initiate the SilexStarter app from the scratch, do you want to continue?</info> <comment>[Y/n]</comment>');
 
         if ($helper->ask($input, $output, $question)) {
             $dbConfig = $this->populateDatabaseInfo($input, $output);
+            $database = $app['db'];
 
+            /** Try initiate  database connection */
             try {
-                $app['db']->addConnection($dbConfig);
-                $app['db']->connection()->getDatabaseName();
+                $database->addConnection($dbConfig);
+                $database->connection()->getDatabaseName();
 
-            } catch (\Exception $e) {
+                if (!$dbConfig['database'] || $dbConfig['database'] !== $database->connection()->getDatabaseName()) {
+                    throw new InvalidArgumentException("Database is invalid");
+                }
+
+                if ($helper->ask($input, $output, new ConfirmationQuestion('<info>Database is connected, write the configuration?</info> <comment>[Y/n]</comment>'))) {
+                    $app['config']->set('database.default', $dbConfig['driver']);
+                    $app['config']->set('database.connections.'.$dbConfig['driver'], $dbConfig);
+                    $app['config']->save('database');
+                } else {
+                    return;
+                }
+
+            } catch (Exception $e) {
 
                 $output->writeln('<error>Error occured with message:</error>');
                 $output->writeln('<error>'.$e->getMessage().'</error>');
 
-                if ($helper->ask($input, $output, new ConfirmationQuestion('Do you want to retry? [Y/n]'))) {
+                if ($helper->ask($input, $output, new ConfirmationQuestion('Do you want to retry to reconfigure the database? <comment>[Y/n]</comment>'))) {
                     $this->execute($input, $output);
                 }
-
             }
+
+            /** Try to add new user */
+            try {
+                $output->writeln("\n<info>Since database is now connected, let's add new user</info>");
+
+                $this->addDefaultUser($input, $output);
+            } catch (Exception $e) {
+                $output->writeln('<error>Error occured with message:</error>');
+                $output->writeln('<error>'.$e->getMessage().'</error>');
+
+                if ($helper->ask($input, $output, new ConfirmationQuestion('Do you want to retry to add new user? <comment>[Y/n]</comment>'))) {
+                    $this->addDefaultUser($input, $output);
+                }
+            }
+
+            /** Try to publish all assets */
+            try {
+                $output->writeln("\n<comment>Publishing assets...</comment>");
+
+                $this->publishAssets($output);
+            } catch (Exception $e) {
+                $output->writeln('<error>Error occured with message:</error>');
+                $output->writeln('<error>'.$e->getMessage().'</error>');
+
+                if ($helper->ask($input, $output, new ConfirmationQuestion('Do you want to retry to publish assets? <comment>[Y/n]</comment>'))) {
+                    $this->publishAssets($output);
+                }
+            }
+
+            $output->writeln("\n<info>Your application is now up, try to access it via your browser at ".$app['url_generator']->generate('admin.home')."</info>");
+
         }
     }
 
@@ -60,15 +107,15 @@ class SilexStarterInitCommand extends Command
     {
         $helper = $this->getHelper('question');
 
-        $output->writeln('<info>This first step will try to initiate database connection</info>');
+        $output->writeln("<comment>This first step will try to initiate database connection\n</comment>");
 
         $dbType = $helper->ask(
             $input,
             $output,
-            new ChoiceQuestion('What kind of database server do you use? [mysql]', ['mysql', 'sqlite', 'pgsql', 'mssql'], 0)
+            new ChoiceQuestion('What kind of database server do you use? <comment>[mysql]</comment>', ['mysql', 'sqlite', 'pgsql', 'mssql'], 0)
         );
 
-        if ($dbType == 'sqlite') {
+        if ('sqlite' == $dbType) {
             $dbName = $helper->ask(
                 $input,
                 $output,
@@ -81,37 +128,13 @@ class SilexStarterInitCommand extends Command
             ];
         }
 
-        $dbHost = $helper->ask(
-            $input,
-            $output,
-            new Question('What is you database server address? [localhost] ', 'localhost')
-        );
+        $dbHost = $helper->ask($input, $output, new Question('What is you database server address? <comment>[localhost]</comment> ', 'localhost'));
+        $dbPort = $helper->ask($input, $output, new Question('What is the database port? ', ''));
+        $dbName = $helper->ask($input, $output, new Question('What is the database name? ', ''));
+        $dbUser = $helper->ask($input, $output, new Question('What is the username? <comment>[root]</comment> ', 'root'));
+        $dbPass = $helper->ask($input, $output, (new Question('What is the password? ', ''))->setHidden(true));
 
-        $dbPort = $helper->ask(
-            $input,
-            $output,
-            new Question('What is the database port? ', '')
-        );
-
-        $dbName = $helper->ask(
-            $input,
-            $output,
-            new Question('What is the database name? ')
-        );
-
-        $dbUser = $helper->ask(
-            $input,
-            $output,
-            new Question('What is the username? [root] ', 'root')
-        );
-
-        $dbPass = $helper->ask(
-            $input,
-            $output,
-            (new Question('What is the password? ', ''))->setHidden(true)
-        );
-
-        return [
+        $config = [
             'driver'    => $dbType,
             'host'      => $dbHost,
             'database'  => $dbName,
@@ -120,7 +143,38 @@ class SilexStarterInitCommand extends Command
             'charset'   => 'utf8',
             'collation' => 'utf8_unicode_ci',
             'prefix'    => '',
-            'schema'    => 'public',
         ];
+
+        if ('pgsql' == $dbType) {
+            $dbSchema = $helper->ask($input, $output, new Question('What is you database schema? <comment>[public]</comment> ', 'public'));
+
+            $config['schema'] = $dbSchema;
+        }
+
+        return $config;
+    }
+
+    /**
+     * Add default user to the application
+     * @param InputInterface  $input
+     * @param OutputInterface $output
+     */
+    protected function addDefaultUser(InputInterface $input, OutputInterface $output)
+    {
+        $command = $this->getApplication()->find('user:add');
+        $command->execute($input, $output);
+    }
+
+    protected function publishAssets(OutputInterface $output)
+    {
+        $command = $this->getApplication()->find('module:publish-asset');
+        $input   = new ArrayInput(
+            [
+                'command'   => 'module:publish-asset',
+                'module'    => ''
+            ]
+        );
+
+        $command->run($input, $output);
     }
 }

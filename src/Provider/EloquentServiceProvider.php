@@ -5,33 +5,39 @@ namespace SilexStarter\Provider;
 use Silex\Application;
 use Illuminate\Events\Dispatcher;
 use Silex\ServiceProviderInterface;
-use Illuminate\Database\Capsule\Manager as DatabaseManager;
+use Illuminate\Database\Capsule\Manager as CapsuleManager;
 
 class EloquentServiceProvider implements ServiceProviderInterface
 {
     public function register(Application $app)
     {
-        $app['db'] = $app->share(
+        $app['capsule'] = $app->share(
             function ($app) {
-                $databaseManager = new DatabaseManager();
+                $capsule = new CapsuleManager();
                 $eventDispatcher = new Dispatcher();
 
                 $defaultConnection  = $app['config']['database']['default'];
                 $connectionConfig   = $app['config']['database']['connections'];
 
-                $databaseManager->addConnection($connectionConfig[$defaultConnection]);
-                $databaseManager->setEventDispatcher($eventDispatcher);
-                $databaseManager->setAsGlobal();
+                $capsule->addConnection($connectionConfig[$defaultConnection]);
+                $capsule->setEventDispatcher($eventDispatcher);
+                $capsule->setAsGlobal();
 
-                return $databaseManager;
+                return $capsule;
             }
         );
 
-        $app->bind('Illuminate\Database\Capsule\Manager', 'db');
+        $app['db'] = $app->share(
+            function ($app) {
+                return $app['capsule']->getDatabaseManager();
+            }
+        );
+
+        $app->bind('Illuminate\Database\Manager', 'db');
     }
 
     public function boot(Application $app)
     {
-        $app['db']->bootEloquent();
+        $app['capsule']->bootEloquent();
     }
 }

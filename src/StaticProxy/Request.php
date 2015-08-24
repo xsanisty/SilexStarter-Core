@@ -50,4 +50,11 @@ class Request extends StaticProxy
                 ? static::$container->get('request')->server->get($key)
                 : static::$container->get('request')->server->all();
     }
+
+    public static function header($key = null)
+    {
+        return ($key)
+                ? static::$container->get('request')->headers->get($key)
+                : static::$container->get('request')->headers->all();
+    }
 }

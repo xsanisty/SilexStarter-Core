@@ -15,7 +15,8 @@ class ModuleResource
         'config',
         'assets',
         'migrations',
-        'installer'
+        'installer',
+        'translations'
     ];
 
     public function __construct(array $resources)

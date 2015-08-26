@@ -16,6 +16,7 @@ class ModuleManager
     protected $config       = [];
     protected $commands     = [];
     protected $views        = [];
+    protected $path         = [];
 
     public function __construct(SilexStarter $app)
     {
@@ -45,7 +46,7 @@ class ModuleManager
     }
 
     /**
-     * Ge module provider instance
+     * Get module provider instance
      *
      * @param  string $moduleIdentifier
      *
@@ -55,6 +56,20 @@ class ModuleManager
     {
         if ($this->isRegistered($moduleIdentifier)) {
             return $this->modules[$moduleIdentifier];
+        }
+
+        return false;
+    }
+
+    /**
+     * Get the root path of specidied module
+     * @param  string $moduleIdentifier     The module identifier
+     * @return string                       The module directory path
+     */
+    public function getModulePath($moduleIdentifier)
+    {
+        if ($this->isRegistered($moduleIdentifier)) {
+            return $this->path[$moduleIdentifier];
         }
 
         return false;
@@ -104,6 +119,8 @@ class ModuleManager
         $moduleReflection = new \ReflectionClass($module);
         $modulePath       = dirname($moduleReflection->getFileName());
         $moduleResources  = $module->getResources();
+
+        $this->path[$moduleIdentifier] = $modulePath;
 
         /* if config dir exists, add namespace to the config reader */
         if ($moduleResources->config) {

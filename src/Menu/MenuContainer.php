@@ -3,6 +3,7 @@
 namespace SilexStarter\Menu;
 
 use Exception;
+use InvalidArgumentException;
 use SilexStarter\Contracts\MenuRendererInterface;
 
 class MenuContainer
@@ -85,19 +86,53 @@ class MenuContainer
     public function createItem($name, array $attributes)
     {
         $attributes['name'] = $name;
-        $this->items[$name] = new MenuItem($attributes);
 
-        return $this->items[$name];
+        $menuItem = new MenuItem($attributes);
+        $options  = isset($attributes['options']) ? $attributes['options'] : [];
+
+        $this->addItem($menuItem, $options);
+
+        return $menuItem;
     }
 
     /**
      * Add new MenuItem object into container item lists.
      *
-     * @param SilexStarter\Menu\MenuItem $menu MenuItem object
+     * @param SilexStarter\Menu\MenuItem    $menu       MenuItem object
+     * @param array                         $options    Menu options
+     * [
+     *     'position'   => 'first' | 'last' | 'before:item' | 'after:item'
+     * ]
      */
-    public function addItem(MenuItem $menu)
+    public function addItem(MenuItem $menu, array $options = [])
     {
-        $this->items[$menu->getName()] = $menu;
+        $position   = isset($options['position']) ? explode(':', $options['position']) : ['last'];
+
+        switch ($position[0]) {
+            case 'first':
+                $this->items = array_merge([$menu->name => $menu], $this->items);
+                break;
+            case 'before':
+            case 'after':
+                if (!isset($position[1])) {
+                    throw new InvalidArgumentException("'before' and 'after' position require specified menu id, e.g: 'after:somemenu'");
+                }
+
+                $keys   = array_keys($this->items);
+                $index  = array_search($position[1], $keys);
+
+                $index  = ('after' === $position[0]) ? $index+1 : $index;
+
+                $firstChunk     = array_slice($this->items, 0, $index, true);
+                $secondChunk    = array_slice($this->items, $index, null, true);
+                $this->items    = array_merge($firstChunk, [$menu->name => $menu], $secondChunk);
+
+                break;
+            case 'last':
+            default:
+                $this->items[$menu->name] = $menu;
+                break;
+        }
     }
 
     /**
@@ -125,6 +160,16 @@ class MenuContainer
 
         return $item;
 
+    }
+
+    /**
+     * Check if current menu container has item in it.
+     *
+     * @return bool
+     */
+    public function hasItem()
+    {
+        return count($this->items) !== 0;
     }
 
     /**

@@ -46,4 +46,16 @@ class AjaxStatusResponse
             'code' => $code
         ];
     }
+
+    public function __toString()
+    {
+        return json_encode(
+            [
+                'data'      => $this->data,
+                'status'    => $this->status,
+                'success'   => $this->success,
+                'errors'    => $this->errors
+            ]
+        );
+    }
 }

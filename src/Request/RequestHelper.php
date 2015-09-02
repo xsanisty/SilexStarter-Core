@@ -2,6 +2,7 @@
 
 namespace SilexStarter\Request;
 
+use RuntimeException;
 use Symfony\Component\HttpFoundation\RequestStack;
 
 class RequestHelper
@@ -15,7 +16,13 @@ class RequestHelper
 
     protected function getRequest()
     {
-        return $this->stack->getCurrentRequest();
+        $request = $this->stack->getCurrentRequest();
+
+        if ($request) {
+            return $request;
+        };
+
+        throw new RuntimeException("Error Processing Request");
     }
 
     public function ajax()

@@ -75,6 +75,15 @@ class ModuleManager
         return false;
     }
 
+    public function getPublicAssetPath($moduleIdentifier)
+    {
+        if ($this->isRegistered($moduleIdentifier)) {
+            return $this->app['path.public'].'assets/'.$moduleIdentifier;
+        }
+
+        return false;
+    }
+
     /**
      * Register multiple module provider at once.
      *

@@ -19,7 +19,14 @@ class MigrationCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $app = $this->getSilexStarter();
+        $app                = $this->getSilexStarter();
+        $migrator           = $app['migrator'];
+        $migrationRepository= $app['migrator.repository'];
+
+        $migrationRepository->update();
+
+        $migratior->upgrade($migrationRepository->getLatestMigration());
+
         $output->writeln('<info>Migrating...</info>');
     }
 }

@@ -14,7 +14,7 @@ interface MigrationInterface
     public function up();
 
     /**
-     * Downgrade the table structure into previous one.
+     * Rollback the table structure into previous one.
      */
     public function down();
 }

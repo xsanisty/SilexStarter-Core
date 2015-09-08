@@ -16,7 +16,7 @@ class Application extends ConsoleApplication
     /**
      * Init the SilexStarter console application.
      *
-     * @param SilexStarter $silexStarter silexStarter application instance
+     * @param SilexStarter $silexStarter SilexStarter application instance
      * @param string       $name         console application name
      * @param string       $version      console application version
      */

@@ -29,14 +29,13 @@ class AjaxStatusResponse
      * Is operation sucessfull
      * @var boolean
      */
-    public $success;
+    public $success = true;
 
-    public function __construct($data, $status = 200, $success = true, $errors = [])
+    public function __construct($data, $status = 200, $errors = [])
     {
-        $this->data = $data;
-        $this->status = $status;
-        $this->errors = $errors;
-        $this->success = $success;
+        $this->data     = $data;
+        $this->status   = $status;
+        $this->errors   = $errors;
     }
 
     public function addError($message, $code = 0)
@@ -47,13 +46,18 @@ class AjaxStatusResponse
         ];
     }
 
+    public function setData($data)
+    {
+        $this->data = $data;
+    }
+
     public function __toString()
     {
         return json_encode(
             [
                 'data'      => $this->data,
                 'status'    => $this->status,
-                'success'   => $this->success,
+                'success'   => !$this->success,
                 'errors'    => $this->errors
             ]
         );

@@ -11,8 +11,12 @@ class Session extends StaticProxy
         return 'session';
     }
 
-    public static function flash($name, $message)
+    public static function flash($name, $message = null)
     {
+        if (null === $message) {
+            return static::getFlash($name);
+        }
+
         static::$container->get('session')->getFlashBag()->add($name, $message);
     }
 

@@ -345,13 +345,13 @@ class ConfigurationContainer implements ArrayAccess
 
             $file       = explode('.', $key, 2)[0];
             $path       = $this->resolveNamespacedPath("@{$namespace}.{$file}");
-            $configValue= $configValue ? $configValue : $this->namespacedConfig[$namespace][$file];
+            $configValue= null === $configValue ? $configValue : $this->namespacedConfig[$namespace][$file];
 
             $filesystem->dumpFile($path, "<?php \n\nreturn ".$this->export($configValue). ";\n");
         } else {
             $file       = explode('.', $configFile, 2)[0];
             $path       = $this->resolvePath($file);
-            $configValue= $configValue ? $configValue : $this->config[$file];
+            $configValue= null === $configValue ? $configValue : $this->config[$file];
 
             $filesystem->dumpFile($path, "<?php \n\nreturn ".$this->export($configValue). ";\n");
         }

@@ -33,7 +33,7 @@ class SilexStarterInitCommand extends Command
 
         if ($helper->ask($input, $output, $question)) {
             $dbConfig = $this->populateDatabaseInfo($input, $output);
-            $database = $app['db'];
+            $database = $app['capsule'];
 
             /** Try initiate  database connection */
             try {

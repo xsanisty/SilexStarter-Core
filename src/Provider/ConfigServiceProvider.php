@@ -4,6 +4,7 @@ namespace SilexStarter\Provider;
 
 use Silex\Application;
 use Silex\ServiceProviderInterface;
+use SilexStarter\SilexStarter;
 use SilexStarter\Config\ConfigurationContainer;
 
 class ConfigServiceProvider implements ServiceProviderInterface
@@ -16,7 +17,9 @@ class ConfigServiceProvider implements ServiceProviderInterface
             }
         );
 
-        $app->bind('SilexStarter\Config\ConfigurationContainer', 'config');
+        if ($app instanceof SilexStarter) {
+            $app->bind('SilexStarter\Config\ConfigurationContainer', 'config');
+        }
     }
 
     public function boot(Application $app)

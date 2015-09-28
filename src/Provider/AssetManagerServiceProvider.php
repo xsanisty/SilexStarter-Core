@@ -4,6 +4,7 @@ namespace SilexStarter\Provider;
 
 use Silex\Application;
 use Silex\ServiceProviderInterface;
+use SilexStarter\SilexStarter;
 use SilexStarter\Asset\AssetManager;
 
 class AssetManagerServiceProvider implements ServiceProviderInterface
@@ -19,7 +20,9 @@ class AssetManagerServiceProvider implements ServiceProviderInterface
             }
         );
 
-        $app->bind('SilexStarter\Asset\AssetManager', 'asset_manager');
+        if ($app instanceof SilexStarter) {
+            $app->bind('SilexStarter\Asset\AssetManager', 'asset_manager');
+        }
     }
 
     public function boot(Application $app)

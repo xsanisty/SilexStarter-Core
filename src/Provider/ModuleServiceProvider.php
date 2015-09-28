@@ -4,6 +4,7 @@ namespace SilexStarter\Provider;
 
 use Silex\Application;
 use Silex\ServiceProviderInterface;
+use SilexStarter\SilexStarter;
 use SilexStarter\Module\ModuleManager;
 
 class ModuleServiceProvider implements ServiceProviderInterface
@@ -16,7 +17,9 @@ class ModuleServiceProvider implements ServiceProviderInterface
             }
         );
 
-        $app->bind('SilexStarter\Module\ModuleManager', 'module');
+        if ($app instanceof SilexStarter) {
+            $app->bind('SilexStarter\Module\ModuleManager', 'module');
+        }
     }
 
     public function boot(Application $app)

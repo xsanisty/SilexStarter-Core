@@ -42,7 +42,9 @@ class SentryServiceProvider implements ServiceProviderInterface
             }
         );
 
-        $app->bind('Cartalyst\Sentry\Sentry', 'sentry');
+        if ($app instanceof SilexStarter\SilexStarter) {
+            $app->bind('Cartalyst\Sentry\Sentry', 'sentry');
+        }
     }
 
     /**

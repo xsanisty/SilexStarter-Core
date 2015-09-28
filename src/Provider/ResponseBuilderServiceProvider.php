@@ -4,6 +4,7 @@ namespace SilexStarter\Provider;
 
 use Silex\Application;
 use Silex\ServiceProviderInterface;
+use SilexStarter\SilexStarter;
 use SilexStarter\Response\ResponseBuilder;
 
 class ResponseBuilderServiceProvider implements ServiceProviderInterface
@@ -16,7 +17,9 @@ class ResponseBuilderServiceProvider implements ServiceProviderInterface
             }
         );
 
-        $app->bind('SilexStarter\Response\ResponseBuilder', 'response_builder');
+        if ($app instanceof SilexStarter) {
+            $app->bind('SilexStarter\Response\ResponseBuilder', 'response_builder');
+        }
     }
 
     public function boot(Application $app)

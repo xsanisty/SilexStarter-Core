@@ -3,8 +3,9 @@
 namespace SilexStarter\Provider;
 
 use Silex\Application;
-use Illuminate\Events\Dispatcher;
 use Silex\ServiceProviderInterface;
+use SilexStarter\SilexStarter;
+use Illuminate\Events\Dispatcher;
 use Illuminate\Database\Capsule\Manager as CapsuleManager;
 
 class EloquentServiceProvider implements ServiceProviderInterface
@@ -33,7 +34,9 @@ class EloquentServiceProvider implements ServiceProviderInterface
             }
         );
 
-        $app->bind('Illuminate\Database\Manager', 'db');
+        if ($app instanceof SilexStarter) {
+            $app->bind('Illuminate\Database\Manager', 'db');
+        }
     }
 
     public function boot(Application $app)

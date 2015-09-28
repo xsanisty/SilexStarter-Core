@@ -44,6 +44,10 @@ class RouteDebugCommand extends Command
             }
 
             foreach ($route->getDefaults() as $key => $default) {
+                if ($default instanceof \Closure) {
+                    $default = 'Closure';
+                }
+
                 $defaults[] = $key . "\n" . $default . "\n";
             }
 

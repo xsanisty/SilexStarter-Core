@@ -14,6 +14,7 @@ class AssetManager
     protected $request;
     protected $js   = [];
     protected $css  = [];
+    protected $jsVar= [];
 
     public function __construct(RequestStack $request, $assetBasePath = '')
     {
@@ -29,6 +30,26 @@ class AssetManager
     public function getBasePath()
     {
         return $this->assetBasePath;
+    }
+
+    /**
+     * Export server variable into javascript world to be rendered later.
+     *
+     * @param   mixed    $var   Variable to be exported
+     */
+    public function exportVariable($varName, $varValue)
+    {
+        $this->jsVar[$varName] = $varValue;
+    }
+
+    /**
+     * Render exported variable into valid javascript variable under specified namespace.
+     *
+     * @return string   Json encoded variable with specified variable name, default is "global = {}"
+     */
+    public function renderExportedVariable($namespace = 'global')
+    {
+        return '<script type="text/javascript">' . 'var ' . $namespace . ' = ' . json_encode($this->jsVar) .';' . '</script>';
     }
 
     /**

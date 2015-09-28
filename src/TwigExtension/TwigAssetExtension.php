@@ -29,6 +29,8 @@ class TwigAssetExtension extends Twig_Extension
             new Twig_SimpleFunction('js', [$this, 'javascript'], ['is_safe' => ['html']]),
             new Twig_SimpleFunction('image', [$this, 'image'], ['is_safe' => ['html']]),
             new Twig_SimpleFunction('asset', [$this, 'asset']),
+            new Twig_SimpleFunction('variable', [$this, 'variable'], ['is_safe' => ['html']]),
+            new Twig_SimpleFunction('export_variable', [$this, 'variable'], ['is_safe' => ['html']]),
         ];
     }
 
@@ -50,5 +52,10 @@ class TwigAssetExtension extends Twig_Extension
     public function image($image, array $options = [])
     {
         return $this->manager->renderImage($image, $options);
+    }
+
+    public function variable($namespace = 'global')
+    {
+        return $this->manager->renderExportedVariable($namespace);
     }
 }

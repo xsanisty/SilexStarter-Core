@@ -17,10 +17,11 @@ class ModuleManager
     protected $commands     = [];
     protected $views        = [];
     protected $path         = [];
+    protected $namespace    = [];
 
     public function __construct(SilexStarter $app)
     {
-        $this->app          = $app;
+        $this->app = $app;
     }
 
     /**
@@ -75,6 +76,28 @@ class ModuleManager
         return false;
     }
 
+    /**
+     * Get base namespace of the specified module.
+     *
+     * @param  string $moduleIdentifier The module identifier
+     *
+     * @return string                   Base namespace of the module
+     */
+    public function getModuleNamespace($moduleIdentifier)
+    {
+        if ($this->isRegistered($moduleIdentifier)) {
+            return $this->namespace[$moduleIdentifier];
+        }
+
+        return false;
+    }
+
+    /**
+     * Get public asset path of specified module.
+     *
+     * @param  string $moduleIdentifier The module identifier
+     * @return string                   Path to public asset
+     */
     public function getPublicAssetPath($moduleIdentifier)
     {
         if ($this->isRegistered($moduleIdentifier)) {
@@ -130,6 +153,7 @@ class ModuleManager
         $moduleResources  = $module->getResources();
 
         $this->path[$moduleIdentifier] = $modulePath;
+        $this->namespace[$moduleIdentifier] = $moduleReflection->getNamespaceName();
 
         /* if config dir exists, add namespace to the config reader */
         if ($moduleResources->config) {
@@ -145,14 +169,14 @@ class ModuleManager
         if ($this->app['controller_as_service'] && $moduleResources->controllers) {
             $this->app->registerControllerDirectory(
                 $modulePath.'/'.$moduleResources->controllers,
-                $moduleReflection->getNamespaceName().'\\'.$moduleResources->controllers
+                $this->namespace[$moduleIdentifier].'\\'.$moduleResources->controllers
             );
         }
 
         /* If command exists, register all command */
         if ($moduleResources->commands) {
             $commandPath = $modulePath.'/'.$moduleResources->commands;
-            $commandNamespace = $moduleReflection->getNamespaceName().'\\'.$moduleResources->commands;
+            $commandNamespace = $this->namespace[$moduleIdentifier].'\\'.$moduleResources->commands;
 
             $this->commands[$commandNamespace] = $commandPath;
         }

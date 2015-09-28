@@ -6,16 +6,37 @@ class ModuleResource
 {
     protected $resources;
     protected $resourceFields = [
+        /** Routes configuration file */
         'routes',
+
+        /** Middleware configuration file */
         'middlewares',
+
+        /** Base controllers directory */
         'controllers',
+
+        /** Base commands directory */
         'commands',
+
+        /** Base views directory */
         'views',
+
+        /** Array of registered services */
         'services',
+
+        /** Base config directory */
         'config',
+
+        /** Base public assets directory */
         'assets',
+
+        /** Base migrations directory */
         'migrations',
+
+        /** Intaller class used to install module */
         'installer',
+
+        /** Base translations directory */
         'translations'
     ];
 

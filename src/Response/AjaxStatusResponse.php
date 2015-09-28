@@ -11,7 +11,7 @@ class AjaxStatusResponse
      * Could be array, string or object
      * @var mixed
      */
-    public $data;
+    public $content;
 
     /**
      * Array of error message and/or error code
@@ -20,7 +20,7 @@ class AjaxStatusResponse
     public $errors;
 
     /**
-     * Valid http status message (with proper response code on main response object)
+     * Valid http status code (with proper response code on main response object)
      * @var int
      */
     public $status;
@@ -31,33 +31,34 @@ class AjaxStatusResponse
      */
     public $success = true;
 
-    public function __construct($data, $status = 200, $errors = [])
+    public function __construct($content, $status = 200, array $errors = [])
     {
-        $this->data     = $data;
+        $this->content  = $content;
         $this->status   = $status;
         $this->errors   = $errors;
+        $this->success  = !$this->errors && $this->status >= 400;
     }
 
     public function addError($message, $code = 0)
     {
         $this->errors[] = [
-            'message' => $message,
-            'code' => $code
+            'message'   => $message,
+            'code'      => $code
         ];
     }
 
-    public function setData($data)
+    public function setData($content)
     {
-        $this->data = $data;
+        $this->content = $content;
     }
 
     public function __toString()
     {
         return json_encode(
             [
-                'data'      => $this->data,
+                'content'   => $this->content,
                 'status'    => $this->status,
-                'success'   => !$this->success,
+                'success'   => $this->success,
                 'errors'    => $this->errors
             ]
         );

@@ -130,17 +130,16 @@ class ResponseBuilder
     }
 
     /**
-     * Return unified ajax json status response
+     * Return unified ajax json status response.
      *
-     * @param  mixed   $data    Additional response data
-     * @param  integer $status  Valid http status
-     * @param  boolean $success Success flag
-     * @param  array   $errors  Errors description if success = false
+     * @param  mixed   $content     Response content
+     * @param  integer $status      Valid http status
+     * @param  array   $errors      Error message collection.
      *
      * @return \Symfony\Component\HttpFoundation\JsonResponse
      */
-    public function ajax($data, $status = 200, $success = true, $errors = [])
+    public function ajax($content, $status = 200, array $errors = [])
     {
-        return $this->json(new AjaxStatusResponse($data, $status, $success, $errors), $status);
+        return $this->json(new AjaxStatusResponse($content, $status, $errors), $status);
     }
 }

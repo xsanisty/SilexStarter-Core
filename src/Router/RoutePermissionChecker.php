@@ -35,27 +35,24 @@ class RoutePermissionChecker
      */
     public function check(Request $request, $permission)
     {
-        $message  = 'Insufficient permission to acces this page';
-
-        if ($request->isXmlHttpRequest()) {
-            $response = $this->response->ajax($message, 401, false, [['code' => 401, 'message' => $message]]);
-        } else {
-            $response = $this->response->make($message, 401);
-        }
-
         if (!$this->user) {
-            return $this->response->redirect($this->urlGenerator->generate('admin.login'));
+            $message = 'You are currently not logged in';
+            return  ($request->isXmlHttpRequest())
+                    ? $this->response->ajax($message, 401, [['code' => 401, 'message' => $message]])
+                    : $this->response->make($message, 401);
         }
 
         try {
             $permission = array_merge(['admin'], (array) $permission);
+            $message    = 'Insufficient permission to acces this page';
+
             if (!$this->user->hasAnyAccess($permission)) {
-                return $response;
+                return  ($request->isXmlHttpRequest())
+                        ? $this->response->ajax($message, 401, [['code' => 401, 'message' => $message]])
+                        : $this->response->make($message, 401);
             }
         } catch (Exception $e) {
-            $response->setContent($e->getMessage());
-
-            return $response;
+            return $this->response->make($e->getMessage(), 500);
         }
     }
 }

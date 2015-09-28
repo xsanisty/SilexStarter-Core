@@ -17,4 +17,11 @@ interface MigrationInterface
      * Rollback the table structure into previous one.
      */
     public function down();
+
+    /**
+     * Get the migration order.
+     *
+     * @return int  The migration order
+     */
+    public function order();
 }

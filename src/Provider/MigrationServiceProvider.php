@@ -25,9 +25,16 @@ class MigrationServiceProvider implements ServiceProviderInterface
                 return new MigrationRepository($app['storage.json'], $app['filesystem']);
             }
         );
+
         $app['migrator'] = $app->share(
             function (Application $app) {
-                return new Migrator($app['migration.repository'], $app['module']);
+                return new Migrator(
+                    $app['migration.repository'],
+                    $app['module'],
+                    [
+                        'path' => $app['path.app'].'migrations'
+                    ]
+                );
             }
         );
 

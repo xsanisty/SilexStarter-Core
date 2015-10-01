@@ -12,21 +12,24 @@ class MigrationCommand extends Command
 {
     protected function configure()
     {
-        $this
-            ->setName('migrate')
-            ->setDescription('Migrate the schema into database');
+        $this->setName('migrate')
+            ->setDescription('Migrate the schema into database')
+            ->addOption(
+                'module',
+                'm',
+                InputOption::VALUE_REQUIRED,
+                'If set, the command will migrate specific module'
+            );
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $app                = $this->getSilexStarter();
-        $migrator           = $app['migrator'];
-        $migrationRepository= $app['migrator.repository'];
+        $app        = $this->getSilexStarter();
+        $migrator   = $app['migrator'];
+        $module     = $input->getOption('module');
 
-        $migrationRepository->update();
+        $migrator->migrate($module);
 
-        $migratior->upgrade($migrationRepository->getLatestMigration());
-
-        $output->writeln('<info>Migrating...</info>');
+        $output->writeln('<info>Migrating '.$module.'...</info>');
     }
 }

@@ -13,11 +13,11 @@ class Event extends StaticProxy
 
     public static function listen($event, callable $listener, $priority = 0)
     {
-        return static::$container['dispatcher']->addListener($event, $listener, $priority);
+        return static::$container->get('dispatcher')->addListener($event, $listener, $priority);
     }
 
     public static function fire($event)
     {
-        return static::$container['dispatcher']->dispatch($event);
+        return static::$container->get('dispatcher')->dispatch($event);
     }
 }

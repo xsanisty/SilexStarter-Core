@@ -174,7 +174,7 @@ class ConfigurationContainer implements ArrayAccess
     /**
      * Convert dot notation into array access (key.subkey => [key][subkey]).
      *
-     * @param string $key   The dit delimited string
+     * @param string $key   The dot delimited string
      * @param array  $array The array
      *
      * @return mixed
@@ -345,13 +345,13 @@ class ConfigurationContainer implements ArrayAccess
 
             $file       = explode('.', $key, 2)[0];
             $path       = $this->resolveNamespacedPath("@{$namespace}.{$file}");
-            $configValue= null === $configValue ? $configValue : $this->namespacedConfig[$namespace][$file];
+            $configValue= null !== $configValue ? $configValue : $this->namespacedConfig[$namespace][$file];
 
             $filesystem->dumpFile($path, "<?php \n\nreturn ".$this->export($configValue). ";\n");
         } else {
             $file       = explode('.', $configFile, 2)[0];
             $path       = $this->resolvePath($file);
-            $configValue= null === $configValue ? $configValue : $this->config[$file];
+            $configValue= null !== $configValue ? $configValue : $this->config[$file];
 
             $filesystem->dumpFile($path, "<?php \n\nreturn ".$this->export($configValue). ";\n");
         }

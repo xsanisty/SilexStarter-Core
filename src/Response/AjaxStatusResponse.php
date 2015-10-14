@@ -36,7 +36,7 @@ class AjaxStatusResponse
         $this->content  = $content;
         $this->status   = $status;
         $this->errors   = $errors;
-        $this->success  = !$this->errors && $this->status >= 400;
+        $this->success  = !$this->errors && $this->status < 400;
     }
 
     public function addError($message, $code = 0)

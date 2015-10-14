@@ -50,9 +50,9 @@ class ConfigurationContainer implements ArrayAccess
                 foreach ($configVal as $key => $value) {
                     $this->app[$key] = $value;
                 }
-            } else {
-                $this->config[$configFile] = $configVal;
             }
+
+            $this->config[$configFile] = $configVal;
         }
     }
 

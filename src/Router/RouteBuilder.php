@@ -31,8 +31,8 @@ class RouteBuilder
     /**
      * Construct the RouteBuilder object.
      *
-     * @param SilexStarter $app
-     * @param Str         $str
+     * @param SilexStarter $app     The SilexStarter instance
+     * @param Str          $str     String helper instance
      */
     public function __construct(SilexStarter $app, Str $str)
     {
@@ -77,7 +77,7 @@ class RouteBuilder
     /**
      * Add new before handler to the end of middleware stack.
      *
-     * @param array|string|\Closure $beforeHandler The before middleware handler
+     * @param array|string|callable $beforeHandler The before middleware handler
      */
     protected function pushBeforeHandler($beforeHandler)
     {
@@ -88,7 +88,7 @@ class RouteBuilder
     /**
      * Retrieve latest middleware from the middleware stack.
      *
-     * @return callable Closure or array of closure
+     * @return callable     Closure or array of closure
      */
     protected function popBeforeHandler()
     {
@@ -314,6 +314,10 @@ class RouteBuilder
         $afterHandlerEnabled    = isset($options['after']) && $options['after'];
         $namespaceEnabled       = isset($options['namespace']) && $options['namespace'];
 
+        if ($beforeHandlerEnabled) {
+            $this->pushBeforeHandler($options['before']);
+        }
+
         if ($permissionEnabled) {
             $permission = $options['permission'];
 
@@ -322,10 +326,6 @@ class RouteBuilder
                     return $app['route_permission_checker']->check($request, $permission);
                 }
             );
-        }
-
-        if ($beforeHandlerEnabled) {
-            $this->pushBeforeHandler($options['before']);
         }
 
         if ($afterHandlerEnabled) {
@@ -343,11 +343,11 @@ class RouteBuilder
 
         $routeCollection = $this->popContext();
 
-        if ($beforeHandlerEnabled) {
+        if ($permissionEnabled) {
             $this->popBeforeHandler();
         }
 
-        if ($permissionEnabled) {
+        if ($beforeHandlerEnabled) {
             $this->popBeforeHandler();
         }
 

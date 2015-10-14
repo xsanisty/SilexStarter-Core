@@ -4,6 +4,7 @@ namespace SilexStarter\Module;
 
 use SilexStarter\SilexStarter;
 use SilexStarter\Exception\ModuleRequiredException;
+use SilexStarter\Exception\ModuleNotRegisteredException;
 use SilexStarter\Contracts\ModuleProviderInterface;
 
 class ModuleManager
@@ -59,7 +60,7 @@ class ModuleManager
             return $this->modules[$moduleIdentifier];
         }
 
-        return false;
+        throw new ModuleNotRegisteredException("Module $moduleIdentifier is not registered");
     }
 
     /**
@@ -73,7 +74,7 @@ class ModuleManager
             return $this->path[$moduleIdentifier];
         }
 
-        return false;
+        throw new ModuleNotRegisteredException("Module $moduleIdentifier is not registered");
     }
 
     /**
@@ -89,7 +90,7 @@ class ModuleManager
             return $this->namespace[$moduleIdentifier];
         }
 
-        return false;
+        throw new ModuleNotRegisteredException("Module $moduleIdentifier is not registered");
     }
 
     /**
@@ -104,7 +105,7 @@ class ModuleManager
             return $this->app['path.public'].'assets/'.$moduleIdentifier;
         }
 
-        return false;
+        throw new ModuleNotRegisteredException("Module $moduleIdentifier is not registered");
     }
 
     /**
@@ -145,15 +146,20 @@ class ModuleManager
     {
         $moduleIdentifier = $module->getModuleIdentifier();
 
+        if ($this->isRegistered($moduleIdentifier)) {
+            return;
+        }
+
         $this->checkRequiredModules($moduleIdentifier, $module->getRequiredModules());
 
         /* Get the module path via the class reflection */
         $moduleReflection = new \ReflectionClass($module);
         $modulePath       = dirname($moduleReflection->getFileName());
         $moduleResources  = $module->getResources();
+        $moduleNamespace  = $moduleReflection->getNamespaceName();
 
-        $this->path[$moduleIdentifier] = $modulePath;
-        $this->namespace[$moduleIdentifier] = $moduleReflection->getNamespaceName();
+        $this->path[$moduleIdentifier]      = $modulePath;
+        $this->namespace[$moduleIdentifier] = $moduleNamespace;
 
         /* if config dir exists, add namespace to the config reader */
         if ($moduleResources->config) {
@@ -169,14 +175,14 @@ class ModuleManager
         if ($this->app['controller_as_service'] && $moduleResources->controllers) {
             $this->app->registerControllerDirectory(
                 $modulePath.'/'.$moduleResources->controllers,
-                $this->namespace[$moduleIdentifier].'\\'.$moduleResources->controllers
+                $moduleNamespace.'\\'.$moduleResources->controllers
             );
         }
 
         /* If command exists, register all command */
         if ($moduleResources->commands) {
             $commandPath = $modulePath.'/'.$moduleResources->commands;
-            $commandNamespace = $this->namespace[$moduleIdentifier].'\\'.$moduleResources->commands;
+            $commandNamespace = $moduleNamespace.'\\'.$moduleResources->commands;
 
             $this->commands[$commandNamespace] = $commandPath;
         }

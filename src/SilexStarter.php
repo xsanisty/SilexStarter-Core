@@ -8,6 +8,7 @@ use Silex\Application;
 use FilesystemIterator;
 use RecursiveIteratorIterator;
 use RecursiveDirectoryIterator;
+use RecursiveCallbackFilterIterator;
 
 class SilexStarter extends Application
 {
@@ -47,21 +48,31 @@ class SilexStarter extends Application
      */
     public function registerControllerDirectory($controllerDir, $namespace = '')
     {
-        $fileList = new RecursiveIteratorIterator(
-            new RecursiveDirectoryIterator($controllerDir, FilesystemIterator::SKIP_DOTS)
+        $files  = new RecursiveCallbackFilterIterator(
+            new RecursiveDirectoryIterator($controllerDir, FilesystemIterator::SKIP_DOTS),
+            function ($file, $key, $iterator) {
+                if ($iterator->hasChildren()) {
+                    return true;
+                }
+
+                if ($file->isFile() && $file->getExtension() == 'php') {
+                    return true;
+                }
+
+                return false;
+            }
         );
 
-        $namespace = ($namespace) ? rtrim($namespace, '\\').'\\' : '';
+        $fileIter   = new RecursiveIteratorIterator($files);
+        $namespace  = ($namespace) ? rtrim($namespace, '\\').'\\' : '';
 
-        foreach ($fileList as $file) {
-            if ($file->getExtension() == 'php') {
-                $controller = str_replace([$controllerDir, '.php', DIRECTORY_SEPARATOR], ['', '', '\\'], $file);
-                $controller = ltrim($controller, '\\');
+        foreach ($fileIter as $file) {
+            $controller = str_replace([$controllerDir, '.php', DIRECTORY_SEPARATOR], ['', '', '\\'], $file);
+            $controller = ltrim($controller, '\\');
 
-                $this[$namespace.$controller] = $this->share(
-                    $this->controllerServiceClosureFactory($namespace.$controller)
-                );
-            }
+            $this[$namespace.$controller] = $this->share(
+                $this->controllerServiceClosureFactory($namespace.$controller)
+            );
         }
     }
 

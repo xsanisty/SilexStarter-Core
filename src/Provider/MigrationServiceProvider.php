@@ -31,8 +31,9 @@ class MigrationServiceProvider implements ServiceProviderInterface
                 return new Migrator(
                     $app['migration.repository'],
                     $app['module'],
+                    $app['capsule']->schema(),
                     [
-                        'path' => $app['path.app'].'migrations'
+                        'path' => $app['path.app'].'database/migrations'
                     ]
                 );
             }

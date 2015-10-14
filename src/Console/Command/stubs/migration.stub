@@ -1,0 +1,27 @@
+<?php
+{{classNamespace}}
+use SilexStarter\Migration\Migration;
+
+class {{className}} extends Migration
+{
+    /**
+     * Run upgrade migration.
+     */
+    public function up()
+    {
+        $this->schema->create(
+            '{{tableName}}',
+            function ($table) {
+                //do anything with your table here
+            }
+        );
+    }
+
+    /**
+     * Run downgrade migration.
+     */
+    public function down()
+    {
+        $this->schema->drop('{{tableName}}');
+    }
+}

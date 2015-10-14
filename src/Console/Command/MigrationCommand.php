@@ -2,6 +2,7 @@
 
 namespace SilexStarter\Console\Command;
 
+use Exception;
 use SilexStarter\Console\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -12,7 +13,7 @@ class MigrationCommand extends Command
 {
     protected function configure()
     {
-        $this->setName('migrate')
+        $this->setName('migration:migrate')
             ->setDescription('Migrate the schema into database')
             ->addOption(
                 'module',
@@ -28,8 +29,45 @@ class MigrationCommand extends Command
         $migrator   = $app['migrator'];
         $module     = $input->getOption('module');
 
-        $migrator->migrate($module);
+        if ($module) {
+            $migrator->setModule($module);
+        }
+
+        $migrationFiles = $migrator->getUnmigratedFiles();
+
+        if (!$migrationFiles) {
+            $output->writeln('<info>Nothing to migrate</info>');
+            return;
+        }
 
         $output->writeln('<info>Migrating '.$module.'...</info>');
+        $migratedInstances  = [];
+
+        foreach ($migrationFiles as $migration) {
+            try {
+                $migrationClass     = $migrator->resolveClass($migration, $module);
+                $migrationInstance  = $migrator->migrationFactory($migrationClass);
+
+                $migrationInstance->up();
+
+                $migratedInstances[$migration] = $migrationInstance;
+
+                $output->writeln("<comment>$migration is migrated</comment>");
+            } catch (Exception $e) {
+                $output->writeln('<error>Error occured while running migration with message:</error>');
+                $output->writeln('<error>'.$e->getMessage().'</error>');
+                $output->writeln('<info>Rolling back previously migrated files if any...</info>');
+
+                foreach ($migratedInstances as $migrationFile => $migrationInstance) {
+
+                    $output->writeln('<comment>'.$migrationFile.' rolled back</comment>');
+                    $migrationInstance->down();
+                }
+
+                return;
+            }
+        }
+
+        $migrator->getRepository()->addMigrations($migrationFiles, ($module) ? $module : 'main');
     }
 }

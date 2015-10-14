@@ -4,6 +4,7 @@ namespace SilexStarter\Console;
 
 use Symfony\Component\Console\Application as ConsoleApplication;
 use SilexStarter\SilexStarter;
+use RecursiveCallbackFilterIterator;
 use RecursiveIteratorIterator;
 use RecursiveDirectoryIterator;
 use FilesystemIterator;
@@ -69,20 +70,30 @@ class Application extends ConsoleApplication
      */
     public function registerCommandDirectory($dir, $namespace = '')
     {
-        $commands = new RecursiveIteratorIterator(
-            new RecursiveDirectoryIterator($dir, FilesystemIterator::SKIP_DOTS)
+        $commands = new RecursiveCallbackFilterIterator(
+            new RecursiveDirectoryIterator($dir, FilesystemIterator::SKIP_DOTS),
+            function ($file, $key, $iterator) {
+                if ($iterator->hasChildren()) {
+                    return true;
+                }
+
+                if ($file->isFile() && $file->getExtension() == 'php') {
+                    return true;
+                }
+
+                return false;
+            }
         );
+
+        $commands = new RecursiveIteratorIterator($commands);
 
         $namespace = ($namespace) ? rtrim($namespace, '\\').'\\' : '';
 
         foreach ($commands as $command) {
-            if ($command->getExtension() == 'php') {
-                $command = str_replace([$dir, '.php', DIRECTORY_SEPARATOR], ['', '', '\\'], $command);
-                $command = ltrim($command, '\\');
+                $command = $command->getBaseName('.php');
                 $command = $namespace.$command;
 
                 $this->registerCommand(new $command);
-            }
         }
     }
 }

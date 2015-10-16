@@ -35,7 +35,7 @@ class MigrationRepository
     public function initialize()
     {
         $this->migrationData = [
-            'latest_batch'  => 0,
+            'batch'  => 0,
             'batch_module'  => [
                 //batch_number => module_id
             ],
@@ -61,7 +61,7 @@ class MigrationRepository
      */
     public function getLatestBatch()
     {
-        return $this->migrationData['latest_batch'];
+        return $this->migrationData['batch'];
     }
 
     /**
@@ -83,7 +83,7 @@ class MigrationRepository
      */
     public function getNextBatch()
     {
-        return $this->migrationData['latest_batch'] + 1;
+        return $this->migrationData['batch'] + 1;
     }
 
     /**
@@ -95,8 +95,9 @@ class MigrationRepository
         $module = $this->getLatestModule();
 
         unset($this->migrationData['migrations'][$module][$batch]);
+        unset($this->migrationData['batch_module'][$batch]);
 
-        $this->migrationData['latest_batch']--;
+        $this->migrationData['batch']--;
     }
 
     /**
@@ -149,15 +150,15 @@ class MigrationRepository
      */
     public function getLatestMigrated($module = 'main')
     {
-        $latest_batch = $this->migrationData['latest_batch'];
+        $batch = $this->migrationData['batch'];
 
-        if ($latest_batch == 0) {
+        if ($batch == 0) {
             return [];
         }
 
-        $latest_module = $this->migrationData['batch_module'][$latest_batch];
+        $latest_module = $this->migrationData['batch_module'][$batch];
 
-        return $this->migrationData['migrations'][$latest_module][$latest_batch];
+        return $this->migrationData['migrations'][$latest_module][$batch];
     }
 
     /**
@@ -173,7 +174,7 @@ class MigrationRepository
 
         if ($migrations) {
 
-            $this->migrationData['latest_batch'] = $batch;
+            $this->migrationData['batch'] = $batch;
             $this->migrationData['batch_module'][$batch] = $module;
 
             if (!isset($this->migrationData['migrations'][$module])) {

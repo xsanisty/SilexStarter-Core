@@ -90,10 +90,11 @@ class Application extends ConsoleApplication
         $namespace = ($namespace) ? rtrim($namespace, '\\').'\\' : '';
 
         foreach ($commands as $command) {
-                $command = $command->getBaseName('.php');
-                $command = $namespace.$command;
+            $command = str_replace([$dir, '.php', DIRECTORY_SEPARATOR], ['', '', '\\'], $command);
+            $command = ltrim($command, '\\');
+            $command = $namespace.$command;
 
-                $this->registerCommand(new $command);
+            $this->registerCommand(new $command);
         }
     }
 }

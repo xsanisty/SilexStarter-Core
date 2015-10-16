@@ -35,7 +35,9 @@ class SilexStarterInitCommand extends Command
             $dbConfig = $this->populateDatabaseInfo($input, $output);
             $database = $app['capsule'];
 
-            /** Try initiate  database connection */
+            /**
+             * Try initiate  database connection
+             */
             try {
                 $database->addConnection($dbConfig);
                 $database->connection()->getDatabaseName();
@@ -48,8 +50,6 @@ class SilexStarterInitCommand extends Command
                     $app['config']->set('database.default', $dbConfig['driver']);
                     $app['config']->set('database.connections.'.$dbConfig['driver'], $dbConfig);
                     $app['config']->save('database');
-                } else {
-                    return;
                 }
 
             } catch (Exception $e) {
@@ -62,7 +62,24 @@ class SilexStarterInitCommand extends Command
                 }
             }
 
-            /** Try to add new user */
+            /**
+             * Try to migrate database structure
+             */
+            try {
+                $output->writeln("\n<info>Since database is now connected, let's migrate the database structure</info>");
+
+                $this->migrateDatabase($output);
+            } catch (Exception $e) {
+
+                $output->writeln('<error>Error occured while trying to migrate database structure:</error>');
+                $output->writeln('<error>'.$e->getMessage().'</error>');
+
+                return ;
+            }
+
+            /**
+             * Try to add new user
+             */
             try {
                 $output->writeln("\n<info>Since database is now connected, let's add new user</info>");
 
@@ -76,7 +93,9 @@ class SilexStarterInitCommand extends Command
                 }
             }
 
-            /** Try to publish all assets */
+            /**
+             * Try to publish all assets
+             */
             try {
                 $output->writeln("\n<comment>Publishing assets...</comment>");
 
@@ -165,6 +184,11 @@ class SilexStarterInitCommand extends Command
         $command->execute($input, $output);
     }
 
+    /**
+     * Publishing default module assets
+     *
+     * @param  OutputInterface $output
+     */
     protected function publishAssets(OutputInterface $output)
     {
         $command = $this->getApplication()->find('module:publish-asset');
@@ -172,6 +196,23 @@ class SilexStarterInitCommand extends Command
             [
                 'command'   => 'module:publish-asset',
                 'module'    => ''
+            ]
+        );
+
+        $command->run($input, $output);
+    }
+
+    /**
+     * Migrating default database structure
+     *
+     * @param  OutputInterface $output
+     */
+    protected function migrateDatabase(OutputInterface $output)
+    {
+        $command = $this->getApplication()->find('migration:migrate');
+        $input   = new ArrayInput(
+            [
+                'command'   => 'migration:migrate'
             ]
         );
 

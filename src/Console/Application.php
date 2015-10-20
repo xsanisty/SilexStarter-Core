@@ -48,7 +48,8 @@ class Application extends ConsoleApplication
     }
 
     /**
-     * Register multiple commands at once
+     * Register multiple commands at once.
+     *
      * @param  array  $command list of command class or command object
      */
     public function registerCommands(array $commands)

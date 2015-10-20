@@ -288,7 +288,7 @@ class ApplicationOptimizeCommand extends Command
             $middlewareFiles[] = "require_once '$middleware';";
         }
 
-        $middlewareFile .= implode("\n", $middlewareFiles);
+        $middlewareContent .= implode("\n", $middlewareFiles);
 
         $this->app['filesystem']->dumpFile($middlewareFile, $middlewareContent . "\n");
     }

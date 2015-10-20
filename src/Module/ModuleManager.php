@@ -161,6 +161,16 @@ class ModuleManager
         $this->path[$moduleIdentifier]      = $modulePath;
         $this->namespace[$moduleIdentifier] = $moduleNamespace;
 
+        if (isset($app['optimized_app'])) {
+            $this->modules[$moduleIdentifier]   = $module;
+            $this->assets[$moduleIdentifier]    = $modulePath.'/'.$moduleResources->assets;
+            $this->config[$moduleIdentifier]    = $modulePath.'/'.$moduleResources->config;
+
+            $module->register();
+
+            return;
+        }
+
         /* if config dir exists, add namespace to the config reader */
         if ($moduleResources->config) {
             $this->app['config']->addDirectory(

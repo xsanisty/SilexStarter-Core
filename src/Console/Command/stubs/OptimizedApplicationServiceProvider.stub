@@ -1,0 +1,32 @@
+<?php
+
+use Silex\Application;
+use Silex\ServiceProviderInterface;
+
+class OptimizedApplicationServiceProvider implements ServiceProviderInterface
+{
+    public function register(Application $app)
+    {
+        $app['optimized_app'] = true;
+
+        if ($app['controller_as_service']) {
+            {{provider}}
+        }
+
+        if ($app['enable_module']) {
+            {{config}}
+
+            {{twig}}
+        }
+    }
+
+    public function boot(Application $app)
+    {
+        $app['dispatcher']->addListener(
+            'console.init',
+            function () use ($app) {
+                {{command}}
+            }
+        );
+    }
+}

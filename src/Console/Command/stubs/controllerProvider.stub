@@ -1,0 +1,8 @@
+
+            $app['{{controller}}'] = $app->share(
+                function (Application $app) {
+                    $controller = new \{{controller}}({{dependencies}});
+                    {{controllerAction}}
+                    return $controller;
+                }
+            );

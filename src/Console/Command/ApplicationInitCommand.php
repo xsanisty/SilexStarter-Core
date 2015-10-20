@@ -14,15 +14,15 @@ use Symfony\Component\Console\Question\ConfirmationQuestion;
 use Symfony\Component\Console\Question\ChoiceQuestion;
 use Symfony\Component\Console\Question\Question;
 
-class SilexStarterInitCommand extends Command
+class ApplicationInitCommand extends Command
 {
     protected $app;
 
     protected function configure()
     {
         $this
-            ->setName('silexstarter:init')
-            ->setDescription('Initialize the SilexStarter project');
+            ->setName('app:init')
+            ->setDescription('Initialize the SilexStarter Application');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
@@ -50,6 +50,8 @@ class SilexStarterInitCommand extends Command
                     $app['config']->set('database.default', $dbConfig['driver']);
                     $app['config']->set('database.connections.'.$dbConfig['driver'], $dbConfig);
                     $app['config']->save('database');
+                } else {
+                    return;
                 }
 
             } catch (Exception $e) {
@@ -59,6 +61,8 @@ class SilexStarterInitCommand extends Command
 
                 if ($helper->ask($input, $output, new ConfirmationQuestion('Do you want to retry to reconfigure the database? <comment>[Y/n]</comment>'))) {
                     $this->execute($input, $output);
+                } else {
+                    return;
                 }
             }
 
@@ -90,6 +94,8 @@ class SilexStarterInitCommand extends Command
 
                 if ($helper->ask($input, $output, new ConfirmationQuestion('Do you want to retry to add new user? <comment>[Y/n]</comment>'))) {
                     $this->addDefaultUser($input, $output);
+                } else {
+                    return;
                 }
             }
 

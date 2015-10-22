@@ -24,9 +24,9 @@ class RouteDebugCommand extends Command
         $table = new Table($output);
         $rows  = [];
 
-        if ($app['enable_module']) {
+        if ($app['enable_module'] && !$app['optimized_app']) {
             foreach ($app['module']->getRouteFiles() as $route) {
-                require $route;
+                require_once $route;
             }
         }
 

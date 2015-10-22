@@ -60,6 +60,8 @@ class ApplicationOptimizeCommand extends Command
             $classTemplate
         );
         $this->app['filesystem']->dumpFile($this->app['path.app'] . 'services/OptimizedApplicationServiceProvider.php', $classTemplate);
+
+        $this->output->writeln('<comment>OptimizedApplicationServiceProvider created at '.$this->app['path.app'] . 'services/OptimizedApplicationServiceProvider.php</comment>');
     }
 
     /**

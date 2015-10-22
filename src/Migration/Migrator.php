@@ -12,15 +12,19 @@ use Illuminate\Database\Schema\Builder as SchemaBuilder;
 class Migrator
 {
     protected $migrations = [];
-    protected $repo;
+    protected $repository;
     protected $moduleMgr;
     protected $moduleId;
     protected $config;
     protected $schemaBuilder;
 
-    public function __construct(MigrationRepository $repo, ModuleManager $moduleMgr, SchemaBuilder $schemaBuilder, array $config)
-    {
-        $this->repo         = $repo;
+    public function __construct(
+        MigrationRepository $repository,
+        ModuleManager $moduleMgr,
+        SchemaBuilder $schemaBuilder,
+        array $config
+    ) {
+        $this->repository   = $repository;
         $this->moduleMgr    = $moduleMgr;
         $this->moduleId     = 'main';
         $this->config       = $config;
@@ -41,7 +45,7 @@ class Migrator
 
         $this->runUp($migrationFiles);
 
-        $this->repo->addMigrations(array_keys($migrationFiles), $this->moduleId);
+        $this->repository->addMigrations(array_keys($migrationFiles), $this->moduleId);
 
         return $migrationFiles;
     }
@@ -61,7 +65,7 @@ class Migrator
             $migrationFiles[] = $migrationFile->getBaseName();
         }
 
-        $unmigratedFiles = $this->repo->filterUnmigrated($migrationFiles, $this->moduleId);
+        $unmigratedFiles = $this->repository->filterUnmigrated($migrationFiles, $this->moduleId);
 
         return $unmigratedFiles;
     }
@@ -185,6 +189,6 @@ class Migrator
      */
     public function getRepository()
     {
-        return $this->repo;
+        return $this->repository;
     }
 }

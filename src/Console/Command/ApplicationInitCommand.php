@@ -186,7 +186,7 @@ class ApplicationInitCommand extends Command
      */
     protected function addDefaultUser(InputInterface $input, OutputInterface $output)
     {
-        $command = $this->getApplication()->find('user:add');
+        $command = $this->getApplication()->find('user:create');
         $command->execute($input, $output);
     }
 

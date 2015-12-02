@@ -154,7 +154,7 @@ class MenuContainer
         $item = $this->items[$firstItem];
 
         foreach ($names as $itemName) {
-            $container  = $item->getChildren();
+            $container  = $item->getChildContainer();
             $item       = $container->getItem($itemName);
         }
 
@@ -205,10 +205,26 @@ class MenuContainer
             $this->activeItem->setActive(false);
         }
 
-        $item = $this->getItem($name);
+        $names      = explode('.', $name);
+        $firstItem  = array_shift($names);
 
-        $this->activeItem = $item;
-        $item->setActive();
+        if (!isset($this->items[$firstItem])) {
+            throw new Exception("Can not find menu with name: $name");
+        }
+
+        $item = $this->items[$firstItem];
+
+        if (!$names) {
+            $item->setActive();
+            $this->activeItem = $item;
+        } else {
+            foreach ($names as $itemName) {
+                $container  = $item->getChildContainer();
+                $item       = $container->getItem($itemName);
+            }
+
+            $container->setActive($item->getAttribute('name'));
+        }
     }
 
     /**
@@ -251,5 +267,15 @@ class MenuContainer
     public function setRenderer(MenuRendererInterface $renderer)
     {
         $this->renderer = $renderer;
+    }
+
+    /**
+     * Get the menu renderer
+     *
+     * @return [type] [description]
+     */
+    public function getRenderer()
+    {
+        return $this->renderer;
     }
 }

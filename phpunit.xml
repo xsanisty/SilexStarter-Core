@@ -8,10 +8,18 @@
     stopOnFailure="false"
     syntaxCheck="false"
 >
+    <filter>
+        <blacklist>
+            <directory>./vendor</directory>
+            <directory>./tests</directory>
+        </blacklist>
+    </filter>
     <testsuites>
         <testsuite name="SilexStarter core tests">
             <directory>tests</directory>
+            <exclude>vendor</exclude>
         </testsuite>
     </testsuites>
+
 
 </phpunit>

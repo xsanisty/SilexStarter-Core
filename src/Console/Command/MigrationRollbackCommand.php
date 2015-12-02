@@ -26,11 +26,12 @@ class MigrationRollbackCommand extends Command
     {
         $app        = $this->getSilexStarter();
         $migrator   = $app['migrator'];
-        $module     = $input->getOption('module');
+        $module     = $input->getOption('module') ? $input->getOption('module') : $migrator->getRepository()->getLatestModule();
 
         $output->writeln('<info>Rolling back migration '.$module.'...</info>');
+        $migrator->setModule($module);
 
-        $migrationFiles = $migrator->getRepository()->getLatestMigrated();
+        $migrationFiles = $migrator->getRepository()->getLatestMigrated($module);
 
         foreach ($migrationFiles as $migration) {
             try {

@@ -40,7 +40,7 @@ class RouteDebugCommand extends Command
             $defaults = [];
 
             foreach ($route->getRequirements() as $key => $requirement) {
-                $requirements[] = $key . "\n" . $requirement . "\n";
+                $requirements[] = $key . ":" . $requirement ;
             }
 
             foreach ($route->getDefaults() as $key => $default) {
@@ -48,7 +48,7 @@ class RouteDebugCommand extends Command
                     $default = 'Closure';
                 }
 
-                $defaults[] = $key . "\n" . $default . "\n";
+                $defaults[] = $key . ":" . $default ;
             }
 
             $rows[] = [$name, $route->getPath(), implode("\n", $requirements), implode("\n", $defaults)];

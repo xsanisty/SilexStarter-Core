@@ -85,7 +85,7 @@ class ApplicationInitCommand extends Command
              * Try to add new user
              */
             try {
-                $output->writeln("\n<info>Since database is now connected, let's add new user</info>");
+                $output->writeln("\n<info>Since database table is now created, let's add new user</info>");
 
                 $this->addDefaultUser($input, $output);
             } catch (Exception $e) {

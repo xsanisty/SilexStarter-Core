@@ -95,7 +95,7 @@ class ApplicationOptimizeCommand extends Command
         }
 
         foreach ($controllerDirectories as $module => $controller) {
-            $this->output->writeln('<comment> ---- Collecting controller from the '.$module.' module</comment>');
+            $this->output->writeln('<comment>  +-- Collecting controller from the '.$module.' module</comment>');
 
             $files = $this->scanDirectory($controller['dir']);
 
@@ -173,7 +173,7 @@ class ApplicationOptimizeCommand extends Command
             $resources  = $module->getResources();
             $identifier = $module->getModuleIdentifier();
 
-            $this->output->writeln('<comment> ---- Registering template for the '.$identifier.' module</comment>');
+            $this->output->writeln('<comment>  +-- Registering template for the '.$identifier.' module</comment>');
 
             if (!$resources->views) {
                 continue;
@@ -218,7 +218,7 @@ class ApplicationOptimizeCommand extends Command
         }
 
         foreach ($commandDirectories as $module => $command) {
-            $this->output->writeln('<comment> ---- Collecting command from the '.$module.' module</comment>');
+            $this->output->writeln('<comment>  +-- Collecting command from the '.$module.' module</comment>');
 
             $files = $this->scanDirectory($command['dir']);
 
@@ -244,7 +244,7 @@ class ApplicationOptimizeCommand extends Command
         foreach ($this->modules as $module) {
             $resources  = $module->getResources();
             $identifier = $module->getModuleIdentifier();
-            $this->output->writeln('<comment> ---- Registering configuration for the '.$identifier.' module</comment>');
+            $this->output->writeln('<comment>  +-- Registering configuration for the '.$identifier.' module</comment>');
 
             if (!$resources->config) {
                 continue;
@@ -287,7 +287,9 @@ class ApplicationOptimizeCommand extends Command
         $middlewareFiles    = [];
 
         foreach ($this->moduleMgr->getMiddlewareFiles() as $middleware) {
-            $middlewareFiles[] = "require_once '$middleware';";
+            $middlewarePath     = $this->app['filesystem']->makePathRelative(dirname($middleware), $this->app['path.app']);
+            $middlewareName     = basename($middleware);
+            $middlewareFiles[]  = "require_once __DIR__.'/{$middlewarePath}{$middlewareName}';";
         }
 
         $middlewareContent .= implode("\n", $middlewareFiles);
@@ -305,7 +307,10 @@ class ApplicationOptimizeCommand extends Command
         $routeFiles     = [];
 
         foreach ($this->moduleMgr->getRouteFiles() as $route) {
-            $routeFiles[] = "require_once '$route';";
+
+            $routePath    = $this->app['filesystem']->makePathRelative(dirname($route), $this->app['path.app']);
+            $routeName    = basename($route);
+            $routeFiles[] = "require_once __DIR__.'/{$routePath}{$routeName}';";
         }
 
         $routeContent .= implode("\n", $routeFiles);

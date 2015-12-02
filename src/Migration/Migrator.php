@@ -80,7 +80,7 @@ class Migrator
      */
     public function resolveClass($migrationFile)
     {
-        $migrationPath  = $this->getMigrationPath($this->moduleId);
+        $migrationPath  = $this->getMigrationPath();
         $migrationNs    = ($this->moduleId !== 'main') ? $this->moduleMgr->getModuleNamespace($this->moduleId) . '\\Migration\\' : '';
 
         require $migrationPath . '/' . $migrationFile;

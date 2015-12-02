@@ -5,7 +5,7 @@ namespace SilexStarter\Module;
 class ModuleResource
 {
     protected $resources;
-    protected $resourceFields = [
+    protected static $resourceFields = [
         /** Routes configuration file */
         'routes',
 
@@ -42,7 +42,7 @@ class ModuleResource
 
     public function __construct(array $resources)
     {
-        foreach ($this->resourceFields as $field) {
+        foreach (static::$resourceFields as $field) {
             $this->resources[$field] = isset($resources[$field]) ? $resources[$field] : null;
         }
     }
@@ -56,7 +56,7 @@ class ModuleResource
      */
     public function __get($resource)
     {
-        if (in_array($resource, $this->resourceFields)) {
+        if (in_array($resource, static::$resourceFields)) {
             return $this->resources[$resource];
         }
 
@@ -71,7 +71,7 @@ class ModuleResource
      */
     public function __set($resource, $value)
     {
-        if (in_array($resource, $this->resourceFields)) {
+        if (in_array($resource, static::$resourceFields)) {
             $this->resources[$resource] = $value;
         }
     }

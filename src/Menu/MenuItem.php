@@ -23,7 +23,7 @@ class MenuItem
      *
      * @var array
      */
-    protected $fields = ['url', 'label', 'icon', 'class', 'id', 'name', 'title', 'permission'];
+    protected static $fields = ['url', 'label', 'icon', 'class', 'id', 'name', 'title', 'permission'];
 
     /**
      * The children menu container.
@@ -48,7 +48,7 @@ class MenuItem
 
     public function __construct(array $attributes)
     {
-        foreach ($this->fields as $field) {
+        foreach (static::$fields as $field) {
             $this->attributes[$field] = (isset($attributes[$field])) ? $attributes[$field] : null;
         }
 
@@ -68,7 +68,7 @@ class MenuItem
      */
     public function setAttribute($name, $value)
     {
-        if (in_array($name, $this->fields)) {
+        if (in_array($name, static::$fields)) {
             $this->attributes[$name] = $value;
         }
     }
@@ -82,7 +82,7 @@ class MenuItem
      */
     public function getAttribute($name)
     {
-        if (in_array($name, $this->fields)) {
+        if (in_array($name, static::$fields)) {
             return $this->attributes[$name];
         }
     }

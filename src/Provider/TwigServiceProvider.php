@@ -65,12 +65,10 @@ class TwigServiceProvider implements ServiceProviderInterface
                     new TwigMenuExtension($app['menu_manager'])
                 );
                 $twigEnv->addExtension(
-                    new TwigUrlExtension(
-                        $app['request_stack'],
-                        $app['url_generator']
-                    )
+                    new TwigUrlExtension($app['request_stack'], $app['url_generator'])
                 );
                 $twigEnv->addGlobal('config', $app['config']);
+                $twigEnv->addGlobal('current_user', $app['sentry']->getUser());
 
                 if ($app['config']['twig.options.debug']) {
                     $twigEnv->addExtension(new Twig_Extension_Debug());

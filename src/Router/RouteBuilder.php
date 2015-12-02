@@ -2,6 +2,8 @@
 
 namespace SilexStarter\Router;
 
+use ReflectionClass;
+use ReflectionMethod;
 use Illuminate\Support\Str;
 use SilexStarter\SilexStarter;
 use Silex\Application;
@@ -380,14 +382,15 @@ class RouteBuilder
         $controller = $ns ? $ns . '\\' .$controller : $controller;
         $only       = isset($options['only']) ? $options['only'] : [];
         $except     = isset($options['except']) ? $options['except'] : [];
+        $assert     = isset($options['assert']) ? $options['assert'] : [];
         $routeMaps  = [];
         $registered = [];
         $methods    = [
-            'index'     => ['http_method' => 'get'   , 'path' => '/'           , 'assert' => ''               , 'permission' => 'read'  ],
+            'index'     => ['http_method' => 'get'   , 'path' => '/'           , 'assert' => []               , 'permission' => 'read'  ],
             'page'      => ['http_method' => 'get'   , 'path' => '/page/{page}', 'assert' => ['page' => '\d+'], 'permission' => 'read'  ],
             'show'      => ['http_method' => 'get'   , 'path' => '/{id}'       , 'assert' => ['id' => '\d+']  , 'permission' => 'read'  ],
-            'create'    => ['http_method' => 'get'   , 'path' => '/create'     , 'assert' => ''               , 'permission' => 'create'],
-            'store'     => ['http_method' => 'post'  , 'path' => '/'           , 'assert' => ''               , 'permission' => 'create'],
+            'create'    => ['http_method' => 'get'   , 'path' => '/create'     , 'assert' => []               , 'permission' => 'create'],
+            'store'     => ['http_method' => 'post'  , 'path' => '/'           , 'assert' => []               , 'permission' => 'create'],
             'edit'      => ['http_method' => 'get'   , 'path' => '/{id}/edit'  , 'assert' => ['id' => '\d+']  , 'permission' => 'edit'  ],
             'update'    => ['http_method' => 'put'   , 'path' => '/{id}'       , 'assert' => ['id' => '\d+']  , 'permission' => 'edit'  ],
             'delete'    => ['http_method' => 'delete', 'path' => '/{id}'       , 'assert' => ['id' => '\d+']  , 'permission' => 'delete']
@@ -417,8 +420,8 @@ class RouteBuilder
                 $routeOptions['permission'] = $options['permission'] . '.' .$route['permission'];
             }
 
-            if ($route['assert']) {
-                $routeOptions['assert'] = $route['assert'];
+            if ($route['assert'] || $assert) {
+                $routeOptions['assert'] = array_merge($route['assert'], $assert);
             }
 
             $routeMaps[]    = new RouteMap($route['http_method'], $route['path'], $controller . ':' .$method, $routeOptions);
@@ -467,8 +470,8 @@ class RouteBuilder
      */
     protected function createControllerRouteMap($controller, $options)
     {
-        $class              = new \ReflectionClass($controller);
-        $controllerActions  = $class->getMethods(\ReflectionMethod::IS_PUBLIC);
+        $class              = new ReflectionClass($controller);
+        $controllerActions  = $class->getMethods(ReflectionMethod::IS_PUBLIC);
 
         $uppercase          = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
         $acceptedMethod     = ['get', 'post', 'put', 'delete', 'head', 'options', 'patch'];

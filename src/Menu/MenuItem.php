@@ -94,8 +94,12 @@ class MenuItem
      *
      * @return mixed
      */
-    public function getMetaAttribute($name)
+    public function getMetaAttribute($name = null)
     {
+        if (is_null($name)) {
+            return $this->metaAttributes;
+        }
+
         if (isset($this->metaAttributes[$name])) {
             return $this->metaAttributes[$name];
         }
@@ -137,9 +141,18 @@ class MenuItem
      *
      * @return boolean
      */
-    public function hasActiveChildren()
+    public function hasActiveChildren(MenuItem $item = null)
     {
-        return $this->childContainer->hasActiveItem();
+        $hasActiveItem = $this->childContainer->hasActiveItem();
+
+        if (!$hasActiveItem) {
+            $items = $this->childContainer->getItems();
+            foreach ($items as $item) {
+                $hasActiveItem = $hasActiveItem || $item->hasActiveChildren();
+            }
+        }
+
+        return $hasActiveItem;
     }
 
     /**
@@ -220,6 +233,10 @@ class MenuItem
      */
     public function __get($name)
     {
+        if ($name === 'meta') {
+            return $this->getMetaAttribute();
+        }
+
         return $this->getAttribute($name);
     }
 

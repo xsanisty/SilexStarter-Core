@@ -5,6 +5,7 @@ namespace SilexStarter\Provider;
 use Twig_Extension_Debug;
 use Silex\Application;
 use Silex\ServiceProviderInterface;
+use SilexStarter\TwigExtension\TwigCookieExtension;
 use SilexStarter\TwigExtension\TwigAssetExtension;
 use SilexStarter\TwigExtension\TwigMenuExtension;
 use SilexStarter\TwigExtension\TwigUrlExtension;
@@ -67,6 +68,10 @@ class TwigServiceProvider implements ServiceProviderInterface
                 $twigEnv->addExtension(
                     new TwigUrlExtension($app['request_stack'], $app['url_generator'])
                 );
+                $twigEnv->addExtension(
+                    new TwigCookieExtension($app['request_stack'])
+                );
+
                 $twigEnv->addGlobal('config', $app['config']);
                 $twigEnv->addGlobal('current_user', $app['sentry']->getUser());
 

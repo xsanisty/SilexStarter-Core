@@ -35,11 +35,16 @@ class AssetManager
     /**
      * Export server variable into javascript world to be rendered later.
      *
-     * @param   mixed    $var   Variable to be exported
+     * @param   string|array    $varName   Variable name to be exported
+     * @param   mixed           $varValue  Variable value
      */
-    public function exportVariable($varName, $varValue)
+    public function exportVariable($varName, $varValue = null)
     {
-        $this->jsVar[$varName] = $varValue;
+        if (is_array($varName)) {
+            $this->jsVar = array_merge($this->jsVar, $varName);
+        } else {
+            $this->jsVar[$varName] = $varValue;
+        }
     }
 
     /**

@@ -44,13 +44,14 @@ class RequestHelper
      * Get request data.
      *
      * @param  string|null $key     The data key
+     * @param  mixed       $default The default value if key doesn't exists
      *
      * @return string               The value of request data
      */
-    public function get($key = null)
+    public function get($key = null, $default = null)
     {
         return ($key)
-                ? $this->getRequest()->request->get($key)
+                ? $this->getRequest()->request->get($key, $default)
                 : $this->getRequest()->request->all();
     }
 
@@ -74,54 +75,63 @@ class RequestHelper
         return $request;
     }
 
-    public function only($key)
+    /**
+     * Get only specified keys from the request.
+     *
+     * @param  mixed $key       The data key
+     * @param  mixed $default   Default value or array of default value
+     *
+     * @return array            Array of the requested data
+     */
+    public function only($key, $default = null)
     {
         if (is_array($key)) {
             $request = [];
 
-            foreach ($key as $k) {
-                $request[$k] = $this->get($k);
+            foreach ($key as $index => $k) {
+                $defaultVal  = is_array($default) && isset($default[$index]) ? $default[$index] : $default;
+                $request[$k] = $this->get($k, $defaultVal);
             }
 
             return $request;
 
         } else {
-            return $this->get($key);
+            return $this->get($key, $default);
         }
     }
 
-    public function query($key = null)
+    public function query($key = null, $default = null)
     {
         return ($key)
-                ? $this->getRequest()->query->get($key)
+                ? $this->getRequest()->query->get($key, $default)
                 : $this->getRequest()->query->all();
     }
 
-    public function cookie($key = null)
+    public function cookie($key = null, $default = null)
     {
         return ($key)
-                ? $this->getRequest()->cookies->get($key)
+                ? $this->getRequest()->cookies->get($key, $default)
                 : $this->getRequest()->cookies->all();
     }
 
-    public function file($key = null)
+    public function file($key = null, $default = null)
     {
         return ($key)
-                ? $this->getRequest()->files->get($key)
+                ? $this->getRequest()->files->get($key, $default)
                 : $this->getRequest()->files->all();
     }
 
-    public function server($key = null)
+    public function server($key = null, $default = null)
     {
         return ($key)
-                ? $this->getRequest()->server->get($key)
+                ? $this->getRequest()->server->get($key, $default)
                 : $this->getRequest()->server->all();
     }
 
-    public function header($key = null)
+    public function header($key = null, $default = null)
     {
         return ($key)
-                ? $this->getRequest()->headers->get($key)
+                ? $this->getRequest()->headers->get($key, $default)
                 : $this->getRequest()->headers->all();
     }
 }

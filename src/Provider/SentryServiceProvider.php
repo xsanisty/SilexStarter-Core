@@ -4,6 +4,7 @@ namespace SilexStarter\Provider;
 
 use Silex\Application;
 use Silex\ServiceProviderInterface;
+use SilexStarter\SilexStarter;
 use Cartalyst\Sentry\Cookies\NativeCookie;
 use Cartalyst\Sentry\Groups\Eloquent\Provider as GroupProvider;
 use Cartalyst\Sentry\Hashing\BcryptHasher;
@@ -42,7 +43,7 @@ class SentryServiceProvider implements ServiceProviderInterface
             }
         );
 
-        if ($app instanceof SilexStarter\SilexStarter) {
+        if ($app instanceof SilexStarter) {
             $app->bind('Cartalyst\Sentry\Sentry', 'sentry');
             $app->bind('Cartalyst\Sentry\Users\UserInterface', 'user');
         }

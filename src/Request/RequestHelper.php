@@ -56,6 +56,16 @@ class RequestHelper
     }
 
     /**
+     * Get all request data.
+     *
+     * @return array
+     */
+    public function all()
+    {
+        return $this->getRequest()->request->all();
+    }
+
+    /**
      * Get all request data except specified key
      *
      * @param  string|array $key    The excluded data.

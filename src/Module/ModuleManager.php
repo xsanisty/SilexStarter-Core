@@ -108,6 +108,15 @@ class ModuleManager
         throw new ModuleNotRegisteredException("Module $moduleIdentifier is not registered");
     }
 
+    public function getTemplatePath($moduleIdentifier)
+    {
+        if ($this->isRegistered($moduleIdentifier)) {
+            return $this->views[$moduleIdentifier];
+        }
+
+        throw new ModuleNotRegisteredException("Module $moduleIdentifier is not registered");
+    }
+
     /**
      * Register multiple module provider at once.
      *
@@ -154,7 +163,7 @@ class ModuleManager
 
         /* Get the module path via the class reflection */
         $moduleReflection = new \ReflectionClass($module);
-        $modulePath       = dirname($moduleReflection->getFileName());
+        $modulePath       = dirname($moduleReflection->getFileName()) . '/';
         $moduleResources  = $module->getResources();
         $moduleNamespace  = $moduleReflection->getNamespaceName();
 
@@ -163,8 +172,8 @@ class ModuleManager
 
         if (isset($app['optimized_app'])) {
             $this->modules[$moduleIdentifier]   = $module;
-            $this->assets[$moduleIdentifier]    = $modulePath.'/'.$moduleResources->assets;
-            $this->config[$moduleIdentifier]    = $modulePath.'/'.$moduleResources->config;
+            $this->assets[$moduleIdentifier]    = $modulePath.$moduleResources->assets;
+            $this->config[$moduleIdentifier]    = $modulePath.$moduleResources->config;
 
             $module->register();
 
@@ -174,24 +183,24 @@ class ModuleManager
         /* if config dir exists, add namespace to the config reader */
         if ($moduleResources->config) {
             $this->app['config']->addDirectory(
-                $modulePath.'/'.$moduleResources->config,
+                $modulePath.$moduleResources->config,
                 $moduleIdentifier
             );
 
-            $this->config[$moduleIdentifier] = $modulePath.'/'.$moduleResources->config;
+            $this->config[$moduleIdentifier] = $modulePath.$moduleResources->config;
         }
 
         /* If controller_as_service enabled, register the controllers as service */
         if ($this->app['controller_as_service'] && $moduleResources->controllers) {
             $this->app->registerControllerDirectory(
-                $modulePath.'/'.$moduleResources->controllers,
+                $modulePath.$moduleResources->controllers,
                 $moduleNamespace.'\\'.$moduleResources->controllers
             );
         }
 
         /* If command exists, register all command */
         if ($moduleResources->commands) {
-            $commandPath = $modulePath.'/'.$moduleResources->commands;
+            $commandPath = $modulePath.$moduleResources->commands;
             $commandNamespace = $moduleNamespace.'\\'.$moduleResources->commands;
 
             $this->commands[$commandNamespace] = $commandPath;
@@ -199,17 +208,17 @@ class ModuleManager
 
         /* if route file exists, queue for later include */
         if ($moduleResources->routes) {
-            $this->addRouteFile($modulePath.'/'.$moduleResources->routes);
+            $this->addRouteFile($modulePath.$moduleResources->routes);
         }
 
         /* if middleware file exists, queue for later include */
         if ($moduleResources->middlewares) {
-            $this->addMiddlewareFile($modulePath.'/'.$moduleResources->middlewares);
+            $this->addMiddlewareFile($modulePath.$moduleResources->middlewares);
         }
 
         /* if template file exists, register new template path under new namespace */
         if ($moduleResources->views) {
-            $this->views[$moduleIdentifier] = $modulePath.'/'.$moduleResources->views;
+            $this->views[$moduleIdentifier] = $modulePath.$moduleResources->views;
 
             $publishedDir   = $this->app['config']['twig.template_dir'] . '/module/' . $moduleIdentifier;
             $templateDir    = $this->app['filesystem']->exists($publishedDir)
@@ -223,7 +232,7 @@ class ModuleManager
 
         /* keep assets path of the module */
         if ($moduleResources->assets) {
-            $this->assets[$moduleIdentifier] = $modulePath.'/'.$moduleResources->assets;
+            $this->assets[$moduleIdentifier] = $modulePath.$moduleResources->assets;
         }
 
         $this->modules[$moduleIdentifier] = $module;

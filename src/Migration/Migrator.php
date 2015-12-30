@@ -2,6 +2,7 @@
 
 namespace SilexStarter\Migration;
 
+use Exception;
 use FilesystemIterator;
 use RecursiveIteratorIterator;
 use RecursiveDirectoryIterator;
@@ -121,7 +122,18 @@ class Migrator
 
     protected function runDown(array $migrations)
     {
+        $ran = [];
 
+        try {
+            foreach ($migrations as $migration) {
+                $migration->down();
+                $ran[] = $migration;
+            }
+        } catch (Exception $e) {
+            foreach ($ran as $migration) {
+                $run->up();
+            }
+        }
     }
 
     /**
@@ -167,6 +179,11 @@ class Migrator
             $modulePath     = $this->moduleMgr->getModulePath($this->moduleId);
             $moduleResources= $this->moduleMgr->getModule($this->moduleId)->getResources();
             $migrationPath  = $modulePath . '/' . $moduleResources->migrations;
+
+            if (!$moduleResources->migrations) {
+                throw new Exception("No migration directory specified for '{$this->moduleId}'");
+
+            }
 
             return $migrationPath;
         }

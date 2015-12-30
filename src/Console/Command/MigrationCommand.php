@@ -33,7 +33,12 @@ class MigrationCommand extends Command
             $migrator->setModule($module);
         }
 
-        $migrationFiles = $migrator->getUnmigratedFiles();
+        try {
+            $migrationFiles = $migrator->getUnmigratedFiles();
+        } catch (Exception $e) {
+            $output->writeln('<error>'.$e->getMessage().'</error>');
+            return;
+        }
 
         if (!$migrationFiles) {
             $output->writeln('<info>Nothing to migrate</info>');

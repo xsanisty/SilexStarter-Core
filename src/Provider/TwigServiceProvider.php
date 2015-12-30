@@ -2,6 +2,7 @@
 
 namespace SilexStarter\Provider;
 
+use Exception;
 use Twig_Extension_Debug;
 use Silex\Application;
 use Silex\ServiceProviderInterface;
@@ -73,7 +74,12 @@ class TwigServiceProvider implements ServiceProviderInterface
                 );
 
                 $twigEnv->addGlobal('config', $app['config']);
-                $twigEnv->addGlobal('current_user', $app['sentry']->getUser());
+
+                try {
+                    $twigEnv->addGlobal('current_user', $app['sentry']->getUser());
+                } catch (Exception $e) {
+                    $twigEnv->addGlobal('current_user', null);
+                }
 
                 if ($app['config']['twig.options.debug']) {
                     $twigEnv->addExtension(new Twig_Extension_Debug());

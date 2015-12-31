@@ -312,6 +312,10 @@ class ModuleManager
      */
     public function publishAsset($module)
     {
+        if (!$this->modules[$module]->getResources()->assets) {
+            throw new Exception("Module $module has no defined assets");
+        }
+
         $moduleAsset = $this->assets[$module];
         $publicAsset = $this->app['path.public'].'assets/'.$module;
 

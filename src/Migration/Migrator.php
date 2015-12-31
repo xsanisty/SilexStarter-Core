@@ -32,6 +32,11 @@ class Migrator
         $this->schemaBuilder= $schemaBuilder;
     }
 
+    /**
+     * Set the migrator to work on specific module, default is main module.
+     *
+     * @param string    $moduleId   The module identifier
+     */
     public function setModule($moduleId)
     {
         $this->moduleId = $moduleId;
@@ -42,11 +47,23 @@ class Migrator
      */
     public function migrate()
     {
-        $migrationFiles = $this->getUnmigratedFiles($this->moduleId);
+        $migrationFiles = $this->getUnmigratedFiles();
+        $migrated       = $this->run($migrationFiles);
 
-        $this->runUp($migrationFiles);
+        $this->repository->addMigrations(array_keys($migrated), $this->moduleId);
 
-        $this->repository->addMigrations(array_keys($migrationFiles), $this->moduleId);
+        return $migrationFiles;
+    }
+
+    /**
+     * Rollback all registered migration.
+     */
+    public function rollback()
+    {
+        $migrationFiles = $this->repository->getLatestMigrated($module);
+        $migrated       = $this->run($migrationFiles);
+
+        $migrator->repository->removeLatestBatch();
 
         return $migrationFiles;
     }
@@ -93,54 +110,33 @@ class Migrator
         return $migrationFqcn;
     }
 
-    /**
-     * Rollback all registered migration.
-     */
-    public function rollback()
+    protected function run(array $migrations, $direction = 'up')
     {
-
-    }
-
-    protected function runUp(array $migrations)
-    {
-        $ran = [];
+        $ran    = [];
+        $back   = $direction == 'up' ? 'down' : 'up';
 
         /**
          * rollback gracefully on error, leave no migration migrated
          */
         try {
             foreach ($migrations as $migration) {
-                $migration->up();
-                $ran[] = $migration;
+                $migrationClass     = $this->resolveClass($migration);
+                $migrationInstance  = $this->migrationFactory($migrationClass);
+
+                $migrationInstance->$direction();
+                $ran[$migration] = $migrationInstance;
             }
         } catch (Exception $e) {
             foreach ($ran as $migration) {
-                $run->down();
+                $migration->$back();
             }
         }
-    }
 
-    protected function runDown(array $migrations)
-    {
-        $ran = [];
-
-        try {
-            foreach ($migrations as $migration) {
-                $migration->down();
-                $ran[] = $migration;
-            }
-        } catch (Exception $e) {
-            foreach ($ran as $migration) {
-                $run->up();
-            }
-        }
+        return $ran;
     }
 
     /**
      * Get all migrations files.
-     *
-     * @param  [type] $dir [description]
-     * @return [type]      [description]
      */
     public function getMigrationFiles()
     {

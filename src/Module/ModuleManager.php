@@ -329,6 +329,10 @@ class ModuleManager
      */
     public function publishConfig($module)
     {
+        if (!$this->modules[$module]->getResources()->assets) {
+            throw new Exception("Module $module has no defined config");
+        }
+
         $moduleConfig = $this->config[$module];
         $publicConfig = $this->app['path.app'].'config/'.$module;
 

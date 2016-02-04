@@ -48,7 +48,7 @@ class ApplicationOptimizeCommand extends Command
     {
         $this->output->writeln('<info>Creating OptimizedApplicationServiceProvider...</info>');
 
-        $classTemplate      = file_get_contents(__DIR__.'/stubs/OptimizedApplicationServiceProvider.stub');
+        $classTemplate      = file_get_contents(__DIR__ . '/stubs/optimizedApplicationServiceProvider.stub');
         $controllerProvider = $this->collectController();
         $twigPath           = $this->collectTwigPath();
         $configPath         = $this->collectConfigPath();
@@ -123,9 +123,8 @@ class ApplicationOptimizeCommand extends Command
         $controllerReflection   = new ReflectionClass($controller);
         $controllerConstructor  = $controllerReflection->getConstructor();
         $controllerAction       = '';
-        $providerTemplate       = file_get_contents(__DIR__.'/stubs/controllerProvider.stub');
+        $providerTemplate       = file_get_contents(__DIR__ . '/stubs/controllerProvider.stub');
         $dependencies           = [];
-
 
         if ($controllerConstructor) {
             $constructorParameters  = $controllerConstructor->getParameters();
@@ -179,19 +178,25 @@ class ApplicationOptimizeCommand extends Command
                 continue;
             }
 
-            $templateDir  = $this->moduleMgr->getModulePath($identifier) . '/' . $resources->views;
+            $templateDir  = $this->moduleMgr->getModulePath($identifier) . $resources->views;
+            $templateDir  = $this->app['filesystem']->makePathRelative($templateDir, $this->app['path.app'] . 'services/');
+
             $publishedDir = $this->app['config']['twig.template_dir'] . '/module/' . $identifier;
 
             if ($this->app['filesystem']->exists($publishedDir)) {
-                $twigPath .= "\$app['twig.loader.filesystem']->addPath('$publishedDir', '$identifier');\n$indentation";
+                $publishedDir = $this->app['filesystem']->makePathRelative($publishedDir, $this->app['path.app'] . 'services/');
+                $twigPath .= "\$app['twig.loader.filesystem']->addPath(__DIR__ . '/$publishedDir', '$identifier');\n$indentation";
             }
 
-            $twigPath .= "\$app['twig.loader.filesystem']->addPath('$templateDir', '$identifier');\n$indentation";
+            $twigPath .= "\$app['twig.loader.filesystem']->addPath(__DIR__ . '/$templateDir', '$identifier');\n$indentation";
         }
 
         return $twigPath;
     }
 
+    /**
+     * Collecting all available command and register it to the console
+     */
     protected function collectCommand()
     {
         $this->output->writeln('<info> -- Collecting available command</info>');
@@ -234,6 +239,9 @@ class ApplicationOptimizeCommand extends Command
         return $commandProviderCode;
     }
 
+    /**
+     * Collecting unpublished and published config path
+     */
     protected function collectConfigPath()
     {
         $this->output->writeln('<info> -- Collecting available configuration</info>');
@@ -250,9 +258,10 @@ class ApplicationOptimizeCommand extends Command
                 continue;
             }
 
-            $configDir  = $this->moduleMgr->getModulePath($identifier) . '/' . $resources->config;
+            $configDir  = $this->moduleMgr->getModulePath($identifier) . $resources->config;
+            $configDir  = $this->app['filesystem']->makePathRelative($configDir, $this->app['path.app'] . 'services/');
 
-            $configPath .= "\$app['config']->addDirectory('$configDir', '$identifier');\n$indentation";
+            $configPath .= "\$app['config']->addDirectory(__DIR__ . '/$configDir', '$identifier');\n$indentation";
         }
 
         return $configPath;
@@ -276,6 +285,9 @@ class ApplicationOptimizeCommand extends Command
         $this->app['config']->save('services');
     }
 
+    /**
+     * Append module's middleware into main middleware file
+     */
     protected function appendMiddleware()
     {
 
@@ -289,7 +301,7 @@ class ApplicationOptimizeCommand extends Command
         foreach ($this->moduleMgr->getMiddlewareFiles() as $middleware) {
             $middlewarePath     = $this->app['filesystem']->makePathRelative(dirname($middleware), $this->app['path.app']);
             $middlewareName     = basename($middleware);
-            $middlewareFiles[]  = "require_once __DIR__.'/{$middlewarePath}{$middlewareName}';";
+            $middlewareFiles[]  = "require_once __DIR__ . '/{$middlewarePath}{$middlewareName}';";
         }
 
         $middlewareContent .= implode("\n", $middlewareFiles);
@@ -310,7 +322,7 @@ class ApplicationOptimizeCommand extends Command
 
             $routePath    = $this->app['filesystem']->makePathRelative(dirname($route), $this->app['path.app']);
             $routeName    = basename($route);
-            $routeFiles[] = "require_once __DIR__.'/{$routePath}{$routeName}';";
+            $routeFiles[] = "require_once __DIR__ . '/{$routePath}{$routeName}';";
         }
 
         $routeContent .= implode("\n", $routeFiles);

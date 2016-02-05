@@ -170,6 +170,7 @@ class ModuleManager
         $this->path[$moduleIdentifier]      = $modulePath;
         $this->namespace[$moduleIdentifier] = $moduleNamespace;
 
+        /** only register path when optimized_app is registered */
         if (isset($app['optimized_app'])) {
             $this->modules[$moduleIdentifier]   = $module;
             $this->assets[$moduleIdentifier]    = $modulePath.$moduleResources->assets;

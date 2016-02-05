@@ -10,35 +10,38 @@ use SilexStarter\Contracts\ModuleProviderInterface;
 abstract class ModuleProvider implements ModuleProviderInterface
 {
     protected $app;
+    protected $info;
+    protected $resources;
 
     public function __construct(Application $app)
     {
-        $this->app = $app;
+        $this->app  = $app;
+        $this->info = new ModuleInfo([]);
+        $this->resources = new ModuleResource([]);
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function getRequiredModules()
     {
         return [];
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function getInfo()
     {
-        return new ModuleInfo([]);
+        return $this->info;
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function getResources()
     {
-        return new ModuleResource(
-            [
-                'routes'        => 'Resources/routes.php',
-                'views'         => 'Resources/views',
-                'controllers'   => 'Controller',
-                'assets'        => 'Resources/assets',
-                'migrations'    => 'Resources/migrations',
-                'translations'  => 'Resources/translations',
-                'config'        => 'Resources/config'
-            ]
-        );
+        return $this->resources;
     }
 
     /**

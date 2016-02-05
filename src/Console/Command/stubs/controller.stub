@@ -1,0 +1,127 @@
+<?php
+{{namespace}}
+{{repositoryInterfaceFqcn}}
+
+class {{controller}}
+{
+    protected $repository;
+
+    /**
+     * Constructing the controller.
+     *
+     * @param {{repositoryInterface}} $repository  The repository object
+     */
+    public function __construct({{repositoryInterface}} $repository)
+    {
+        $this->repository = $repository;
+    }
+
+    /**
+     * Show all available resources.
+     */
+    public function index()
+    {
+        $datum = $this->repository->findAll();
+
+        return View::make(
+            '{{templatePath}}/index.twig',
+            [
+                'datum'     => $datum,
+                'status'    => Session::getFlash('status'),
+                'message'   => Session::getFlash('message'),
+            ]
+        );
+    }
+
+    /**
+     * Show single resource with specific id.
+     */
+    public function show($id)
+    {
+        $data = $this->repository->findById($id);
+
+        return View::make('{{templatePath}}/show.twig', ['data' => $data]);
+    }
+
+    /**
+     * Display new resource form.
+     */
+    public function create()
+    {
+        $data = Session::getFlash('data', []);
+
+        return View::make('{{templatePath}}/create.twig', ['action' => Url::to('{{urlName}}.store'), 'data' => $data]);
+    }
+
+    /**
+     * Create new resource in database.
+     */
+    public function store()
+    {
+        $data   = Request::get('data');
+
+        try {
+            $entity = $this->repository->create($data);
+
+            Session::flash('status', 'success');
+            Session::flash('messsage', 'New record has been created!');
+
+            return Response::redirect(Url::to('{{urlName}}.edit', ['id' => $entity->id]));
+
+        } catch (Exception $e) {
+            Session::flash('status', 'error');
+            Session::flash('message', $e->getMessage());
+            Session::flash('data', $data);
+
+            return Response::redirect(Url::to('{{urlName}}.create'));
+        }
+    }
+
+    /**
+     * Display edit resource form.
+     */
+    public function edit($id)
+    {
+        return Response::view('{{templatePath}}/edit.twig', ['action' => Url::to('{{urlName}}.update', ['id' => $id])]);
+    }
+
+    /**
+     * Update existing resource in the database.
+     */
+    public function update($id)
+    {
+        $data   = Request::get('data');
+
+        try {
+            $entity = $this->repository->update($id, $data);
+
+            Session::flash('status', 'success');
+            Session::flash('messsage', 'Record has been updated!');
+
+        } catch (Exception $e) {
+            Session::flash('status', 'error');
+            Session::flash('message', $e->getMessage());
+        }
+
+        return Response::redirect(Url::to('{{urlName}}.edit', ['id' => $entity->id]));
+    }
+
+    /**
+     * Remove specified resource in database.
+     */
+    public function delete($id)
+    {
+        try {
+            $this->repository->delete($id);
+
+            Session::flash('status', 'success');
+            Session::flash('messsage', 'Record has been deleted!');
+
+        } catch (Exception $e) {
+            Session::flash('status', 'error');
+            Session::flash('message', $e->getMessage());
+        }
+
+        return Response::redirect(Url::to('{{urlName}}.index'));
+    }
+}

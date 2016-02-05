@@ -1,0 +1,25 @@
+<?php
+
+{{namespace}}
+
+use Silex\Application;
+use Silex\ServiceProviderInterface;
+{{useModelFqcn}}
+{{useRepoFqcn}}
+
+class {{repoClass}}ServiceProvider implements ServiceProviderInterface
+{
+    public function register(Application $app)
+    {
+        $app['{{repoFqcn}}'] = $app->share(
+            function (Application $app) {
+                return new {{repoClass}}(new {{model}});
+            }
+        );
+        $app->bind('{{ifaceFqcn}}', '{{repoFqcn}}');
+    }
+
+    public function boot(Application $app)
+    {
+    }
+}

@@ -1,0 +1,40 @@
+{% set template = config.get('@silexstarter-dashboard.config.template') %}
+{% extends '@silexstarter-dashboard/'~ template ~'/index.twig' %}
+
+{% block content %}
+    <div class="box">
+        <div class="box-header with-border">
+            <h3 class="box-title">Records</h3>
+        </div>
+        <div class="box-body">
+            {# add more field based on your entity model #}
+            <table class="table table-condensed table-striped" id="record_table" style="width: 100%;">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th class="text-center" style="width:10%">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if datum %}
+                        {% for data in datum %}
+                            <tr>
+                                <td>{{ data.id }}</td>
+                                <td>{{ data.name }}</td>
+                                <td class=" text-center">
+                                    <a style="margin-right: 5px" class="btn btn-xs btn-primary btn-edit" href="{{ url_for('{{module}}.{{entity}}.edit', ['id' => data.id]) }}">edit</button>
+                                    <a style="margin-right: 5px" class="btn btn-xs btn-danger btn-delete" href="{{ url_for('{{module}}.{{entity}}.delete', ['id' => data.id]) }}">delete</button>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    {% else %}
+                    <tr>
+                        <td class="text-center" colspan="2">Data not loaded!</td>
+                    </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+{% endblock %}

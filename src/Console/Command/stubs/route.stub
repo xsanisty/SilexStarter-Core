@@ -1,0 +1,9 @@
+
+Route::resource(
+    '{{entity}}',
+    '{{controller}}',
+    [
+        'as'        => '{{routeName}}',
+        'namespace' => '{{namespace}}'
+    ]
+);

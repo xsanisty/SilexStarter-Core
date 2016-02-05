@@ -61,11 +61,11 @@ class MigrationCreateCommand extends Command
         );
 
         $targetDir  = ($moduleId)
-                    ? $moduleMgr->getModulePath($moduleId) . '/' . $module->getResources()->migrations
+                    ? $moduleMgr->getModulePath($moduleId) . $module->getResources()->migrations
                     : $migrator->getMigrationPath();
 
         $app['filesystem']->dumpFile($targetDir . '/' . $fileName, $classCode);
 
-        $output->writeln('<info>Migration created at ' . $targetDir . '/' . $fileName . '</info>');
+        $output->writeln('<info> - Migration created at ' . $targetDir . '/' . $fileName . '</info>');
     }
 }

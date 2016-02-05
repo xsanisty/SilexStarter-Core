@@ -60,10 +60,10 @@ class Migrator
      */
     public function rollback()
     {
-        $migrationFiles = $this->repository->getLatestMigrated($module);
+        $migrationFiles = $this->repository->getLatestMigrated();
         $migrated       = $this->run($migrationFiles);
 
-        $migrator->repository->removeLatestBatch();
+        $this->repository->removeLatestBatch();
 
         return $migrationFiles;
     }
@@ -130,6 +130,7 @@ class Migrator
             foreach ($ran as $migration) {
                 $migration->$back();
             }
+            throw $e;
         }
 
         return $ran;

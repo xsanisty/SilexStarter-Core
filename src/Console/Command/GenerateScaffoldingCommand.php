@@ -18,6 +18,7 @@ class GenerateScaffoldingCommand extends Command
 {
     protected $output;
     protected $app;
+    protected $mode;
     protected $module;
     protected $filesystem;
     protected $entity;
@@ -46,9 +47,10 @@ class GenerateScaffoldingCommand extends Command
             )
             ->addOption(
                 'mode',
-                's',
+                'd',
                 InputOption::VALUE_OPTIONAL,
-                'Mode can be "standard" [generate standard web form], "ajax" [generate ajax based form], or "api" [generate api endpoint]'
+                'Mode can be "standard" [generate standard web form], "ajax" [generate ajax based form], or "api" [generate api endpoint]',
+                'standard'
             );
     }
 
@@ -58,21 +60,40 @@ class GenerateScaffoldingCommand extends Command
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $this->output       = $output;
-        $this->app          = $app = $this->getSilexStarter();
-        $this->module       = $module = $input->getOption('module');
-        $this->filesystem   = $app['filesystem'];
-        $this->entity       = $entity = $input->getArgument('entity-name');
-        $this->moduleManager= $moduleManager = $app['module'];
+        $this->app          = $this->getSilexStarter();
+        $this->filesystem   = $this->app['filesystem'];
+        $this->moduleManager= $this->moduleManager = $this->app['module'];
+        $this->module       = $input->getOption('module');
+        $this->entity       = $input->getArgument('entity-name');
+        $this->mode         = $input->getOption('mode');
 
-        $baseClassName      = Str::studly($entity);
-        $baseNamespace      = $module ? $moduleManager->getModuleNamespace($module) : '';
-        $mode               = $input->getOption('mode') ? $input->getOption('mode') : 'standard';
+        if ($this->module) {
+            $this->basePath = $this->moduleManager->getModulePath($this->module);
+            $this->resources= $this->moduleManager->getModule($this->module)->getResources();
+        } else {
+            $this->basePath = $this->app['path.app'];
+        }
 
-        $this->basePath     = $basePath = $module ? $moduleManager->getModulePath($module) : $app['path.app'];
-        $this->resources    = $resources = $module ? $moduleManager->getModule($module)->getResources() : null;
+        $this->generateStubList();
+        $this->generateMigration();
+        $this->generateModel();
+        $this->generateRepositoryInterface();
+        $this->generateRepository();
+        $this->generateRepositoryServiceProvider();
+        $this->registerServiceProvider();
+        $this->generateController();
+        $this->generateTemplate();
+        $this->appendRoute();
+    }
 
-        if ($module) {
-            $this->generated    = [
+    protected function generateStubList()
+    {
+        $basePath       = $this->basePath;
+        $baseClassName  = Str::studly($this->entity);
+        $baseNamespace  = $this->module ? $this->moduleManager->getModuleNamespace($this->module) : '';
+
+        if ($this->module) {
+            $this->generated = [
                 'model'  => [
                     'class'     => $baseClassName,
                     'file_path' => $basePath . 'Model/' . $baseClassName . '.php',
@@ -82,9 +103,9 @@ class GenerateScaffoldingCommand extends Command
                 ],
                 'controller' => [
                     'class'     => $baseClassName . 'Controller',
-                    'file_path' => $basePath . $resources->controllers . '/' . $baseClassName . 'Controller.php',
-                    'namespace' => $baseNamespace . '\\' . $resources->controllers,
-                    'fqcn'      => $baseNamespace . '\\' . $resources->controllers .'\\' . $baseClassName . 'Controller',
+                    'file_path' => $basePath . $this->resources->controllers . '/' . $baseClassName . 'Controller.php',
+                    'namespace' => $baseNamespace . '\\' . $this->resources->controllers,
+                    'fqcn'      => $baseNamespace . '\\' . $this->resources->controllers .'\\' . $baseClassName . 'Controller',
                     'template'  =>  __DIR__ . '/stubs/controller.stub',
                 ],
                 'repository_interface' => [
@@ -96,7 +117,7 @@ class GenerateScaffoldingCommand extends Command
                 ],
                 'repository'  => [
                     'class'     => $baseClassName . 'Repository',
-                    'file_path' => $basePath . ($module ? 'Repository' : 'repositories') . '/' . $baseClassName . 'Repository.php',
+                    'file_path' => $basePath . 'Repository' . '/' . $baseClassName . 'Repository.php',
                     'namespace' => $baseNamespace . '\\Repository',
                     'fqcn'      => $baseNamespace . '\\Repository\\' . $baseClassName . 'Repository',
                     'template'  => __DIR__ . '/stubs/repository.stub',
@@ -109,12 +130,12 @@ class GenerateScaffoldingCommand extends Command
                     'template'  => __DIR__ . '/stubs/repositoryServiceProvider.stub',
                 ],
                 'template' => [
-                    'dir_path'      => $moduleManager->getTemplatePath($module) . '/' . $entity,
-                    'relative_path' => '@' . $module . '/' . $entity
+                    'dir_path'      => $this->moduleManager->getTemplatePath($this->module) . '/' . $this->entity,
+                    'relative_path' => '@' . $this->module . '/' . $this->entity
                 ]
             ];
         } else {
-            $this->generated    = [
+            $this->generated = [
                 'model'  => [
                     'class'     => $baseClassName,
                     'file_path' => $basePath . 'models' . '/' . $baseClassName . '.php',
@@ -151,22 +172,11 @@ class GenerateScaffoldingCommand extends Command
                     'template'  => __DIR__ . '/stubs/repositoryServiceProvider.stub',
                 ],
                 'template' => [
-                    'dir_path'      => $app['config']['twig.template_dir'] . '/' . $entity,
-                    'relative_path' => $entity
+                    'dir_path'      => $this->app['config']['twig.template_dir'] . '/' . $this->entity,
+                    'relative_path' => $this->entity
                 ]
             ];
         }
-
-
-        $this->generateMigration();
-        $this->generateModel();
-        $this->generateRepositoryInterface();
-        $this->generateRepository();
-        $this->generateRepositoryServiceProvider();
-        $this->registerServiceProvider();
-        $this->generateController();
-        $this->generateTemplate();
-        $this->appendRoute();
     }
 
     /**

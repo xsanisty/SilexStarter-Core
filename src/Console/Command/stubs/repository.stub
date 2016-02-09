@@ -25,7 +25,7 @@ class {{model}}Repository implements {{model}}RepositoryInterface
      */
     public function findById($id)
     {
-        return $this->{{entity}}->newQuery()->find($id);
+        return $this->{{entity}}->find($id);
     }
 
     /**

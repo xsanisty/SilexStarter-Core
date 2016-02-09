@@ -43,6 +43,12 @@ class GenerateScaffoldingCommand extends Command
                 'm',
                 InputOption::VALUE_REQUIRED,
                 'If set, the command will create scaffolding for specific module'
+            )
+            ->addOption(
+                'mode',
+                's',
+                InputOption::VALUE_OPTIONAL,
+                'Mode can be "standard" [generate standard web form], "ajax" [generate ajax based form], or "api" [generate api endpoint]'
             );
     }
 
@@ -60,50 +66,97 @@ class GenerateScaffoldingCommand extends Command
 
         $baseClassName      = Str::studly($entity);
         $baseNamespace      = $module ? $moduleManager->getModuleNamespace($module) : '';
+        $mode               = $input->getOption('mode') ? $input->getOption('mode') : 'standard';
 
         $this->basePath     = $basePath = $module ? $moduleManager->getModulePath($module) : $app['path.app'];
         $this->resources    = $resources = $module ? $moduleManager->getModule($module)->getResources() : null;
-        $this->generated    = [
-            'model'  => [
-                'class'     => $baseClassName,
-                'file_path' => $basePath . ($module ? 'Model' : 'models') . '/' . $baseClassName . '.php',
-                'namespace' => $module ? $baseNamespace . '\\Model' : '',
-                'fqcn'      => ($module ? $baseNamespace . '\\Model\\' : '') . $baseClassName . '',
-                'template'  => __DIR__ . '/stubs/model.stub',
-            ],
-            'controller' => [
-                'class'     => $baseClassName . 'Controller',
-                'file_path' => $basePath . ($module ? $resources->controllers : 'controllers') . '/' . $baseClassName . 'Controller.php',
-                'namespace' => $module ? $baseNamespace . '\\' . $resources->controllers : '',
-                'fqcn'      => ($module ? $baseNamespace . '\\' . $resources->controllers .'\\' : '') . $baseClassName . 'Controller',
-                'template'  =>  __DIR__ . '/stubs/controller.stub',
-            ],
-            'repository_interface' => [
-                'class'     => $baseClassName . 'RepositoryInterface',
-                'file_path' => $basePath . ($module ? 'Contract' : 'repositories') . '/' . $baseClassName . 'RepositoryInterface.php',
-                'namespace' => $module ? $baseNamespace . '\\Contract' : '',
-                'fqcn'      => ($module ? $baseNamespace . '\\Contract\\' : '') . $baseClassName . 'RepositoryInterface',
-                'template'  => __DIR__ . '/stubs/repositoryInterface.stub',
-            ],
-            'repository'  => [
-                'class'     => $baseClassName . 'Repository',
-                'file_path' => $basePath . ($module ? 'Repository' : 'repositories') . '/' . $baseClassName . 'Repository.php',
-                'namespace' => $module ? $baseNamespace . '\\Repository' : '',
-                'fqcn'      => ($module ? $baseNamespace . '\\Repository\\' : '') . $baseClassName . 'Repository',
-                'template'  => __DIR__ . '/stubs/repository.stub',
-            ],
-            'repository_service_provider' => [
-                'class'     => $baseClassName . 'RepositoryServiceProvider',
-                'file_path' => $basePath . ($module ? 'Provider' : 'services') . '/' . $baseClassName . 'RepositoryServiceProvider.php',
-                'namespace' => $module ? $baseNamespace . '\\Provider' : '',
-                'fqcn'      => ($module ? $baseNamespace . '\\Provider\\' : '') . $baseClassName . 'RepositoryServiceProvider',
-                'template'  => __DIR__ . '/stubs/repositoryServiceProvider.stub',
-            ],
-            'template' => [
-                'dir_path'      => ($module ? $moduleManager->getTemplatePath($module) : $app['config']['twig.template_dir']) . '/' . $entity,
-                'relative_path' => $module ? '@' . $module . '/' . $entity : $entity
-            ]
-        ];
+
+        if ($module) {
+            $this->generated    = [
+                'model'  => [
+                    'class'     => $baseClassName,
+                    'file_path' => $basePath . 'Model/' . $baseClassName . '.php',
+                    'namespace' => $baseNamespace . '\\Model' ,
+                    'fqcn'      => $baseNamespace . '\\Model\\' . $baseClassName ,
+                    'template'  => __DIR__ . '/stubs/model.stub',
+                ],
+                'controller' => [
+                    'class'     => $baseClassName . 'Controller',
+                    'file_path' => $basePath . $resources->controllers . '/' . $baseClassName . 'Controller.php',
+                    'namespace' => $baseNamespace . '\\' . $resources->controllers,
+                    'fqcn'      => $baseNamespace . '\\' . $resources->controllers .'\\' . $baseClassName . 'Controller',
+                    'template'  =>  __DIR__ . '/stubs/controller.stub',
+                ],
+                'repository_interface' => [
+                    'class'     => $baseClassName . 'RepositoryInterface',
+                    'file_path' => $basePath . 'Contract/' . $baseClassName . 'RepositoryInterface.php',
+                    'namespace' => $baseNamespace . '\\Contract',
+                    'fqcn'      => $baseNamespace . '\\Contract\\' . $baseClassName . 'RepositoryInterface',
+                    'template'  => __DIR__ . '/stubs/repositoryInterface.stub',
+                ],
+                'repository'  => [
+                    'class'     => $baseClassName . 'Repository',
+                    'file_path' => $basePath . ($module ? 'Repository' : 'repositories') . '/' . $baseClassName . 'Repository.php',
+                    'namespace' => $baseNamespace . '\\Repository',
+                    'fqcn'      => $baseNamespace . '\\Repository\\' . $baseClassName . 'Repository',
+                    'template'  => __DIR__ . '/stubs/repository.stub',
+                ],
+                'repository_service_provider' => [
+                    'class'     => $baseClassName . 'RepositoryServiceProvider',
+                    'file_path' => $basePath . 'Provider' . '/' . $baseClassName . 'RepositoryServiceProvider.php',
+                    'namespace' => $baseNamespace . '\\Provider',
+                    'fqcn'      => $baseNamespace . '\\Provider\\' . $baseClassName . 'RepositoryServiceProvider',
+                    'template'  => __DIR__ . '/stubs/repositoryServiceProvider.stub',
+                ],
+                'template' => [
+                    'dir_path'      => $moduleManager->getTemplatePath($module) . '/' . $entity,
+                    'relative_path' => '@' . $module . '/' . $entity
+                ]
+            ];
+        } else {
+            $this->generated    = [
+                'model'  => [
+                    'class'     => $baseClassName,
+                    'file_path' => $basePath . 'models' . '/' . $baseClassName . '.php',
+                    'namespace' => '',
+                    'fqcn'      => $baseClassName,
+                    'template'  => __DIR__ . '/stubs/model.stub',
+                ],
+                'controller' => [
+                    'class'     => $baseClassName . 'Controller',
+                    'file_path' => $basePath . 'controllers' . '/' . $baseClassName . 'Controller.php',
+                    'namespace' => '',
+                    'fqcn'      => $baseClassName . 'Controller',
+                    'template'  =>  __DIR__ . '/stubs/controller.stub',
+                ],
+                'repository_interface' => [
+                    'class'     => $baseClassName . 'RepositoryInterface',
+                    'file_path' => $basePath . 'repositories' . '/' . $baseClassName . 'RepositoryInterface.php',
+                    'namespace' => '',
+                    'fqcn'      => $baseClassName . 'RepositoryInterface',
+                    'template'  => __DIR__ . '/stubs/repositoryInterface.stub',
+                ],
+                'repository'  => [
+                    'class'     => $baseClassName . 'Repository',
+                    'file_path' => $basePath . 'repositories' . '/' . $baseClassName . 'Repository.php',
+                    'namespace' => '',
+                    'fqcn'      => $baseClassName . 'Repository',
+                    'template'  => __DIR__ . '/stubs/repository.stub',
+                ],
+                'repository_service_provider' => [
+                    'class'     => $baseClassName . 'RepositoryServiceProvider',
+                    'file_path' => $basePath . 'services' . '/' . $baseClassName . 'RepositoryServiceProvider.php',
+                    'namespace' => '',
+                    'fqcn'      => $baseClassName . 'RepositoryServiceProvider',
+                    'template'  => __DIR__ . '/stubs/repositoryServiceProvider.stub',
+                ],
+                'template' => [
+                    'dir_path'      => $app['config']['twig.template_dir'] . '/' . $entity,
+                    'relative_path' => $entity
+                ]
+            ];
+        }
+
 
         $this->generateMigration();
         $this->generateModel();

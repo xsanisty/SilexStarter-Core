@@ -23,17 +23,17 @@
             <h3 class="box-title">{{entity}} list</h3>
 
             <div class="box-tools pull-right">
-                <a href="{{ url_for('{{module}}.{{entity}}.create') }}" class="btn btn-sm btn-primary">Create Record</a>
+                <a href="{{ url_for('{{module}}.{{entity}}.create') }}" class="btn btn-sm btn-primary">Create {{entity}}</a>
             </div>
         </div>
         <div class="box-body">
             {# add more field based on your entity model #}
-            <table class="table table-condensed table-striped" id="record_table" style="width: 100%;">
+            <table class="table table-condensed table-striped" id="{{entity}}_table" style="width: 100%;">
                 <thead>
                     <tr>
                         <th>ID</th>
                         <th>Name</th>
-                        <th class="text-center" style="width:10%">Action</th>
+                        <th class="text-center" style="width:15%">Action</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -43,6 +43,7 @@
                                 <td>{{ data.id }}</td>
                                 <td>{{ data.name }}</td>
                                 <td class=" text-center">
+                                    <a style="margin-right: 5px" class="btn btn-xs btn-info btn-show" href="{{ url_for('{{module}}.{{entity}}.show', {'id' : data.id}) }}">show</button>
                                     <a style="margin-right: 5px" class="btn btn-xs btn-primary btn-edit" href="{{ url_for('{{module}}.{{entity}}.edit', {'id' : data.id}) }}">edit</button>
                                     <a style="margin-right: 5px" class="btn btn-xs btn-danger btn-delete" href="{{ url_for('{{module}}.{{entity}}.delete', {'id' : data.id}) }}">delete</button>
                                 </td>
@@ -63,7 +64,7 @@
     {{ parent() }}
 
     <script>
-        $('#record_table').on('click', '.btn-delete', function(e){
+        $('#{{entity}}_table').on('click', '.btn-delete', function(e){
             e.preventDefault();
             var $btn = $(this);
 

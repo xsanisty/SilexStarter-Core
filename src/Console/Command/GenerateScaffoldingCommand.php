@@ -163,6 +163,7 @@ class GenerateScaffoldingCommand extends Command
             '{{urlName}}'                   => $this->module ? $this->module . '.' . $this->entity : $this->entity,
             '{{repositoryInterfaceFqcn}}'   => $namespace ? 'use ' . $this->generated['repository_interface']['fqcn'] . ';' : '',
             '{{namespace}}'                 => $namespace ? "\nnamespace $namespace;\n\nuse Exception;\n" : '',
+            '{{entity}}'                    => $this->entity,
         ];
 
         $compiledCode  = str_replace(array_keys($replacement), array_values($replacement), $template);

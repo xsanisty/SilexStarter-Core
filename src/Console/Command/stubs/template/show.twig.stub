@@ -4,17 +4,17 @@
 {% block content %}
     <div class="box">
         <div class="box-header with-border">
-            <h3 class="box-title">Edit Records</h3>
+            <h3 class="box-title">{{entity}} Detail</h3>
         </div>
         <div class="box-body">
             <div class="row">
-                <div class="col-md-4">ID :</div>
-                <div class="col-md-8">{{data.id}}</div>
+                <div class="col-md-3">ID :</div>
+                <div class="col-md-9">{{data.id}}</div>
             </div>
 
             <div class="row">
-                <div class="col-md-4">Name :</div>
-                <div class="col-md-8">{{data.name}}</div>
+                <div class="col-md-3">Name :</div>
+                <div class="col-md-9">{{data.name}}</div>
             </div>
 
             {# add more field based on your entity model #}

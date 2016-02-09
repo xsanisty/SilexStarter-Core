@@ -4,13 +4,28 @@
 {% block content %}
     <div class="box">
         <div class="box-header with-border">
-            <h3 class="box-title">Edit Records</h3>
+            <h3 class="box-title">Create {{entity}}</h3>
         </div>
         <div class="box-body">
-            <form action="{{action}}" class="form-hosizontal" method="post">
+            {% if status == 'success' %}
+                <div class="alert alert-success alert-dismissable">
+                    <button aria-hidden="true" data-dismiss="alert" class="close" type="button">×</button>
+                    <h4><i class="fa fa-fw fa-check-circle"></i> Success!</h4>
+                    <p>{{ message }}</p>
+                </div>
+            {% endif %}
+
+            {% if status == 'error' %}
+                <div class="alert alert-danger alert-dismissable">
+                    <h4><i class="fa fa-fw fa-exclamation-circle"></i> Error!</h4>
+                    <p>{{ message }}</p>
+                </div>
+            {% endif %}
+
+            <form action="{{action}}" class="form-horizontal" method="post">
                 <div class="form-group">
-                    <label for="name" class="col-md-4">Name</label>
-                    <div class="col-md-8">
+                    <label for="name" class="col-md-3">Name</label>
+                    <div class="col-md-9">
                         <input type="text" id="name" class="form-control inut-sm" name="data[name]">
                     </div>
                 </div>

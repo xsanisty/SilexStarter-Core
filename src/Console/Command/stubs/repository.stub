@@ -33,7 +33,7 @@ class {{model}}Repository implements {{model}}RepositoryInterface
      */
     public function create(array $data)
     {
-        return $this->{{entity}}->newQuery()->create($data);
+        return $this->{{entity}}->create($data);
     }
 
     /**

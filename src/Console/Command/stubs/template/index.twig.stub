@@ -2,9 +2,29 @@
 {% extends '@silexstarter-dashboard/'~ template ~'/index.twig' %}
 
 {% block content %}
-    <div class="box">
+
+    {% if status == 'success' %}
+        <div class="alert alert-success alert-dismissable">
+            <button aria-hidden="true" data-dismiss="alert" class="close" type="button">×</button>
+            <h4><i class="fa fa-fw fa-check-circle"></i> Success!</h4>
+            <p>{{ message }}</p>
+        </div>
+    {% endif %}
+
+    {% if status == 'error' %}
+        <div class="alert alert-danger alert-dismissable">
+            <h4><i class="fa fa-fw fa-exclamation-circle"></i> Error!</h4>
+            <p>{{ message }}</p>
+        </div>
+    {% endif %}
+
+    <div class="box box-primary">
         <div class="box-header with-border">
-            <h3 class="box-title">Records</h3>
+            <h3 class="box-title">{{entity}} list</h3>
+
+            <div class="box-tools pull-right">
+                <a href="{{ url_for('{{module}}.{{entity}}.create') }}" class="btn btn-sm btn-primary">Create Record</a>
+            </div>
         </div>
         <div class="box-body">
             {# add more field based on your entity model #}
@@ -23,8 +43,8 @@
                                 <td>{{ data.id }}</td>
                                 <td>{{ data.name }}</td>
                                 <td class=" text-center">
-                                    <a style="margin-right: 5px" class="btn btn-xs btn-primary btn-edit" href="{{ url_for('{{module}}.{{entity}}.edit', ['id' => data.id]) }}">edit</button>
-                                    <a style="margin-right: 5px" class="btn btn-xs btn-danger btn-delete" href="{{ url_for('{{module}}.{{entity}}.delete', ['id' => data.id]) }}">delete</button>
+                                    <a style="margin-right: 5px" class="btn btn-xs btn-primary btn-edit" href="{{ url_for('{{module}}.{{entity}}.edit', {'id' : data.id}) }}">edit</button>
+                                    <a style="margin-right: 5px" class="btn btn-xs btn-danger btn-delete" href="{{ url_for('{{module}}.{{entity}}.delete', {'id' : data.id}) }}">delete</button>
                                 </td>
                             </tr>
                         {% endfor %}
@@ -37,4 +57,28 @@
             </table>
         </div>
     </div>
+{% endblock %}
+
+{% block javascript %}
+    {{ parent() }}
+
+    <script>
+        $('#record_table').on('click', '.btn-delete', function(e){
+            e.preventDefault();
+            var $btn = $(this);
+
+            if(confirm('Are you sure to delete this {{entity}}')){
+                $.ajax({
+                    'method' : 'DELETE',
+                    'url' : $btn.attr('href'),
+                    'success' : function(){
+                        $btn.parents('tr').remove();
+                    },
+                    'error' : function(){
+                        alert('Error occured while deleting {{entity}}')
+                    }
+                });
+            }
+        });
+    </script>
 {% endblock %}

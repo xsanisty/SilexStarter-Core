@@ -2,6 +2,8 @@
 {{namespace}}
 {{repositoryInterfaceFqcn}}
 
+use Xsanisty\Admin\DashboardModule;
+
 class {{controller}}
 {
     protected $repository;
@@ -14,6 +16,19 @@ class {{controller}}
     public function __construct({{repositoryInterface}} $repository)
     {
         $this->repository = $repository;
+
+        Event::listen(
+            DashboardModule::INIT,
+            function () {
+                Menu::get('admin_breadcrumb')->createItem(
+                    'manage-{{entity}}',
+                    [
+                        'label' => ucfirst('{{entity}}') . ' list',
+                        'url'   => Url::to('{{urlName}}.index')
+                    ]
+                );
+            }
+        );
     }
 
     /**
@@ -21,14 +36,17 @@ class {{controller}}
      */
     public function index()
     {
+        Event::fire(DashboardModule::INIT);
         $datum = $this->repository->findAll();
 
         return View::make(
-            '{{templatePath}}/index.twig',
+            '{{templatePath}}/index',
             [
                 'datum'     => $datum,
                 'status'    => Session::getFlash('status'),
                 'message'   => Session::getFlash('message'),
+                'title'     => ucfirst('{{entity}}') . ' list',
+                'page_title'=> ucfirst('{{entity}}') . ' list',
             ]
         );
     }
@@ -38,9 +56,18 @@ class {{controller}}
      */
     public function show($id)
     {
+        Event::fire(DashboardModule::INIT);
+        Menu::get('admin_breadcrumb')->createItem(
+            'show-{{entity}}',
+            [
+                'label' => ucfirst('{{entity}}') . ' details',
+                'url'   => Url::to('{{urlName}}.show', ['id' => $id])
+            ]
+        );
+
         $data = $this->repository->findById($id);
 
-        return View::make('{{templatePath}}/show.twig', ['data' => $data]);
+        return View::make('{{templatePath}}/show', ['data' => $data]);
     }
 
     /**
@@ -48,9 +75,28 @@ class {{controller}}
      */
     public function create()
     {
+        Event::fire(DashboardModule::INIT);
+        Menu::get('admin_breadcrumb')->createItem(
+            'create-{{entity}}',
+            [
+                'label' => 'Create {{entity}}',
+                'url'   => Url::to('{{urlName}}.create')
+            ]
+        );
+
         $data = Session::getFlash('data', []);
 
-        return View::make('{{templatePath}}/create.twig', ['action' => Url::to('{{urlName}}.store'), 'data' => $data]);
+        return View::make(
+            '{{templatePath}}/create',
+            [
+                'action'    => Url::to('{{urlName}}.store'),
+                'data'      => $data,
+                'status'    => Session::getFlash('status'),
+                'message'   => Session::getFlash('message'),
+                'title'     => 'Create {{entity}}',
+                'page_title'=> 'Create {{entity}}',
+            ]
+        );
     }
 
     /**
@@ -64,7 +110,7 @@ class {{controller}}
             $entity = $this->repository->create($data);
 
             Session::flash('status', 'success');
-            Session::flash('messsage', 'New record has been created!');
+            Session::flash('message', 'New ' . ucfirst('{{entity}}') . ' has been created!');
 
             return Response::redirect(Url::to('{{urlName}}.edit', ['id' => $entity->id]));
 
@@ -82,7 +128,28 @@ class {{controller}}
      */
     public function edit($id)
     {
-        return Response::view('{{templatePath}}/edit.twig', ['action' => Url::to('{{urlName}}.update', ['id' => $id])]);
+        Event::fire(DashboardModule::INIT);
+        Menu::get('admin_breadcrumb')->createItem(
+            'edit-{{entity}}',
+            [
+                'label' => 'Edit {{entity}}',
+                'url'   => Url::to('{{urlName}}.edit', ['id' => $id])
+            ]
+        );
+
+        $data = $this->repository->findById($id);
+
+        return Response::view(
+            '{{templatePath}}/edit',
+            [
+                'action'    => Url::to('{{urlName}}.update', ['id' => $id]),
+                'data'      => $data,
+                'status'    => Session::getFlash('status'),
+                'message'   => Session::getFlash('message'),
+                'title'     => 'Edit {{entity}}',
+                'page_title'=> 'Edit {{entity}}',
+            ]
+        );
     }
 
     /**
@@ -90,13 +157,13 @@ class {{controller}}
      */
     public function update($id)
     {
-        $data   = Request::get('data');
+        $data = Request::get('data');
 
         try {
             $entity = $this->repository->update($id, $data);
 
             Session::flash('status', 'success');
-            Session::flash('messsage', 'Record has been updated!');
+            Session::flash('message', ucfirst('{{entity}}') . ' has been updated!');
 
         } catch (Exception $e) {
             Session::flash('status', 'error');
@@ -115,11 +182,23 @@ class {{controller}}
             $this->repository->delete($id);
 
             Session::flash('status', 'success');
-            Session::flash('messsage', 'Record has been deleted!');
+            Session::flash('message', ucfirst('{{entity}}') . ' has been deleted!');
+            $status = 200;
 
         } catch (Exception $e) {
             Session::flash('status', 'error');
             Session::flash('message', $e->getMessage());
+            $status = 500;
+        }
+
+        if (Request::ajax()) {
+            return Response::json(
+                [
+                    'status'    => Session::getFlash('status'),
+                    'message'   => Session::getFlash('message'),
+                ],
+                $status
+            );
         }
 
         return Response::redirect(Url::to('{{urlName}}.index'));

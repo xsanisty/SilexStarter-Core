@@ -1,0 +1,161 @@
+<?php
+{{namespace}}
+{{repositoryInterfaceFqcn}}
+use Xsanisty\Admin\DashboardModule;
+
+class {{controller}}
+{
+    protected $repository;
+
+    /**
+     * Constructing the controller.
+     *
+     * @param {{repositoryInterface}} $repository  The repository object
+     */
+    public function __construct({{repositoryInterface}} $repository)
+    {
+        $this->repository = $repository;
+    }
+
+    /**
+     * Show all available resources.
+     */
+    public function index()
+    {
+        Event::fire(DashboardModule::INIT);
+        Menu::get('admin_breadcrumb')->createItem(
+            'manage-{{entity}}',
+            [
+                'label' => ucfirst('{{entity}}') . ' list',
+                'url'   => Url::to('{{urlName}}.index')
+            ]
+        );
+
+        return View::make(
+            '{{templatePath}}/index',
+            [
+                'title'     => ucfirst('{{entity}}') . ' list',
+                'page_title'=> ucfirst('{{entity}}') . ' list',
+            ]
+        );
+    }
+
+    /**
+     * Show single resource with specific id.
+     */
+    public function show($id)
+    {
+        $data = $this->repository->findById($id);
+
+        if ($data) {
+            return Response::json($data);
+        }
+
+        return Response::ajax(
+            ucfirst('{{entity}}') . ' not found!',
+            404,
+            [[
+                'message'   => $e->getMessage(),
+                'code'      => $e->getCode()
+            ]]
+        );
+    }
+
+    /**
+     * Create new resource in database.
+     */
+    public function store()
+    {
+        $data   = Request::get('data');
+
+        try {
+            $entity = $this->repository->create($data);
+
+            return Response::ajax('New ' . ucfirst('{{entity}}') . ' has been created!', 201);
+
+        } catch (Exception $e) {
+            return Response::ajax(
+                'Error occured while creating new {{entity}}!',
+                500,
+                [[
+                    'message'   => $e->getMessage(),
+                    'code'      => $e->getCode()
+                ]]
+            );
+        }
+    }
+
+    /**
+     * Update existing resource in the database.
+     */
+    public function update($id)
+    {
+        $data = Request::get('data');
+
+        try {
+            $entity = $this->repository->update($id, $data);
+
+            return Response::ajax(ucfirst('{{entity}}') . ' has been updated!');
+
+        } catch (Exception $e) {
+            return Response::ajax(
+                'Error occured while updating {{entity}}!',
+                500,
+                [[
+                    'message'   => $e->getMessage(),
+                    'code'      => $e->getCode()
+                ]]
+            );
+        }
+    }
+
+    /**
+     * Remove specified resource in database.
+     */
+    public function delete($id)
+    {
+        try {
+            $this->repository->delete($id);
+
+            return Response::ajax(ucfirst('{{entity}}') . ' has been deleted!');
+
+        } catch (Exception $e) {
+            return Response::ajax(
+                'Error occured while deleting {{entity}}!',
+                500,
+                [[
+                    'message'   => $e->getMessage(),
+                    'code'      => $e->getCode()
+                ]]
+            );
+        }
+    }
+
+    /**
+     * Build a datatable response.
+     */
+    public function datatable()
+    {
+        $datatable = Datatable::of($this->repository->createDatatableQuery())
+        /** add more fields based on your table */
+        ->setColumn([{% for field in fields %}'{{field.name}}', {% endfor %}])
+        ->setFormatter(
+            function ($row) {
+                $showButton   = '<button href="' . Url::to('{{urlName}}.show', ['id' => $row->id]) . '" class="btn btn-xs btn-info btn-{{entity}}-show" style="margin-right: 5px">show</button>';
+                $editButton   = '<button href="' . Url::to('{{urlName}}.show', ['id' => $row->id]) . '" class="btn btn-xs btn-primary btn-{{entity}}-edit" style="margin-right: 5px">edit</button>';
+                $deleteButton = '<button href="' . Url::to('{{urlName}}.delete', ['id' => $row->id]) . '" class="btn btn-xs btn-danger btn-{{entity}}-delete" style="margin-right: 5px">delete</button>';
+
+                /** format your fields as you need */
+                return [
+                    {% for field in fields %}$row->{{field.name}},
+                    {% endfor %}
+
+                    $showButton . $editButton . $deleteButton
+                ];
+            }
+        )
+        ->make();
+
+        return Response::json($datatable);
+    }
+}

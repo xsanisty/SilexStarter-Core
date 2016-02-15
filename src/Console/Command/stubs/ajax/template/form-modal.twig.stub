@@ -1,0 +1,37 @@
+{% raw %}<div class="modal fade" id="{{entity}}_form_modal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                Edit {{entity}}
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-12">
+                        <form action="" class="form-horizontal" id="{{entity}}_form" method="post">
+                            <input type="hidden" id="_method_field" name="_method" value="POST">{% endraw %}
+                            {% for field in fields %}{% if field.name == 'id' %}<input type="hidden" id="id_field" name="data[id]">{% else %}
+
+                            <div class="form-group">
+                                <label for="{{field.name ~ '_field'}}" class="col-md-4">{{field.name}}</label>
+                                <div class="col-md-8">
+                                    <input id="{{field.name ~ '_field'}}" name="data[{{field.name}}]" type="text" class="form-control input-sm">
+                                </div>
+                            </div>{% endif %}
+                            {% endfor %}
+                            {% raw %}
+                            <div class="form-group">
+                                <div class="col-md-12">
+                                    <button id="btn-{{entity}}-save" class="btn btn-sm btn-primary pull-right" style="margin-right: 5px">Save</button>
+                                    <button id="btn-{{entity}}-cancel" class="btn btn-sm btn-danger pull-right" style="margin-right: 5px" data-dismiss="modal">Cancel</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>{% endraw %}

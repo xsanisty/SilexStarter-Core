@@ -1,0 +1,10 @@
+
+Route::resource(
+    '{{entity}}',
+    '{{controller}}',
+    [
+        'as'        => '{{routeName}}',
+        'namespace' => '{{namespace}}',
+        'only'      => ['index', 'store', 'update', 'delete']
+    ]
+);

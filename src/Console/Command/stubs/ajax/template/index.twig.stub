@@ -1,0 +1,57 @@
+{% raw %}{% set template = config.get('@silexstarter-dashboard.config.template') %}
+{% extends '@silexstarter-dashboard/'~ template ~'/index.twig' %}
+
+{# Stylesheet Block #}
+{% block stylesheet %}
+    {{parent()}}
+
+    {{ stylesheet([
+        '@silexstarter-datatable/css/dataTables.bootstrap.css',
+        '@silexstarter-datatable/css/responsive.bootstrap.min.css',
+    ]) }}
+{% endblock %}
+
+{# Content Block #}
+{% block content %}
+    <a href="{{ url_for('{{module}}.{{entity}}.create') }}" class="btn btn-sm btn-primary btn-block-sm" id="btn-{{entity}}-create">
+        <i class="fa fa-fw fa-plus"></i>
+        Create {{entity}}
+    </a>
+    <table class="table table-condensed table-striped" id="{{entity}}_table" style="width: 100%">
+        <thead>
+            <tr>{% endraw %}
+                {% for field in fields %}<th class="all">{{field.name}}</th>
+                {% endfor %}{% raw %}
+                <th class="desktop text-center" style="width: 15%">Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td class="text-center" colspan="{{colspan}}">Data not loaded!</td>
+            </tr>
+        </tbody>
+    </table>
+{% endblock %}
+
+{# Modal Block #}
+{% block modal %}
+    {{parent()}}
+    {% include '@{{module}}/{{entity}}/form-modal.twig' %}
+    {% include '@{{module}}/{{entity}}/show-modal.twig' %}
+{% endblock %}
+
+{# Javascript Block #}
+{% block javascript %}
+    <script>
+        var datatableUrl = '{{ url_for('{{datatableUrl}}') }}';
+        var actionUrl = '{{ url_for('{{actionUrl}}') }}'
+    </script>
+    {{parent()}}
+
+    {{ javascript([
+        '@silexstarter-datatable/js/jquery.dataTables.min.js',
+        '@silexstarter-datatable/js/dataTables.bootstrap.min.js',
+        '@silexstarter-datatable/js/dataTables.responsive.min.js',
+        '@{{module}}/js/{{entity}}_datatable.js'
+    ]) }}
+{% endblock %}{% endraw %}

@@ -1,0 +1,131 @@
+<?php
+{{namespace}}
+{{repositoryInterfaceFqcn}}
+
+class {{controller}}
+{
+    protected $repository;
+
+    /**
+     * Constructing the controller.
+     *
+     * @param {{repositoryInterface}} $repository  The repository object
+     */
+    public function __construct({{repositoryInterface}} $repository)
+    {
+        $this->repository = $repository;
+    }
+
+    /**
+     * Show all available resources.
+     */
+    public function index()
+    {
+        $datum = $this->repository->findAll();
+
+        return View::make(
+            '{{templatePath}}/index',
+            [
+                'datum'     => $datum,
+                'status'    => Session::getFlash('status'),
+                'message'   => Session::getFlash('message'),
+                'title'     => ucfirst('{{entity}}') . ' list',
+                'page_title'=> ucfirst('{{entity}}') . ' list',
+            ]
+        );
+    }
+
+    /**
+     * Show single resource with specific id.
+     */
+    public function show($id)
+    {
+        Menu::get('admin_breadcrumb')->createItem(
+            'show-{{entity}}',
+            [
+                'label' => ucfirst('{{entity}}') . ' details',
+                'url'   => Url::to('{{urlName}}.show', ['id' => $id])
+            ]
+        );
+
+        $data = $this->repository->findById($id);
+
+        return View::make('{{templatePath}}/show', ['data' => $data]);
+    }
+
+    /**
+     * Create new resource in database.
+     */
+    public function store()
+    {
+        $data   = Request::get('data');
+
+        try {
+            $entity = $this->repository->create($data);
+
+            Session::flash('status', 'success');
+            Session::flash('message', 'New ' . ucfirst('{{entity}}') . ' has been created!');
+
+            return Response::redirect(Url::to('{{urlName}}.edit', ['id' => $entity->id]));
+
+        } catch (Exception $e) {
+            Session::flash('status', 'error');
+            Session::flash('message', $e->getMessage());
+            Session::flash('data', $data);
+
+            return Response::redirect(Url::to('{{urlName}}.create'));
+        }
+    }
+
+    /**
+     * Update existing resource in the database.
+     */
+    public function update($id)
+    {
+        $data = Request::get('data');
+
+        try {
+            $entity = $this->repository->update($id, $data);
+
+            Session::flash('status', 'success');
+            Session::flash('message', ucfirst('{{entity}}') . ' has been updated!');
+
+        } catch (Exception $e) {
+            Session::flash('status', 'error');
+            Session::flash('message', $e->getMessage());
+        }
+
+        return Response::redirect(Url::to('{{urlName}}.edit', ['id' => $entity->id]));
+    }
+
+    /**
+     * Remove specified resource in database.
+     */
+    public function delete($id)
+    {
+        try {
+            $this->repository->delete($id);
+
+            Session::flash('status', 'success');
+            Session::flash('message', ucfirst('{{entity}}') . ' has been deleted!');
+            $status = 200;
+
+        } catch (Exception $e) {
+            Session::flash('status', 'error');
+            Session::flash('message', $e->getMessage());
+            $status = 500;
+        }
+
+        if (Request::ajax()) {
+            return Response::json(
+                [
+                    'status'    => Session::getFlash('status'),
+                    'message'   => Session::getFlash('message'),
+                ],
+                $status
+            );
+        }
+
+        return Response::redirect(Url::to('{{urlName}}.index'));
+    }
+}

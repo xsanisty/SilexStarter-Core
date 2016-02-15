@@ -37,8 +37,8 @@ class MigrationCreateCommand extends Command
                 'fields',
                 'f',
                 InputOption::VALUE_REQUIRED,
-                'Define fields for the table [field_one:increments|field_two:integer|field_three:enum:val1,val2|field_for:float:8,2]',
-                'id:increments,name:string'
+                'Define fields for the table [field_one:increments+field_two:integer+field_three:enum:val1,val2+field_for:float:8,2]',
+                'id:increments+name:string'
             );
     }
 

@@ -1,0 +1,19 @@
+
+Route::resource(
+    '{{entity}}',
+    '{{controller}}',
+    [
+        'as'        => '{{routeName}}',
+        'namespace' => '{{namespace}}',
+        'except'    => ['create', 'edit']
+    ]
+);
+
+Route::post(
+    '{{entity}}/datatable',
+    '{{controller}}:datatable',
+    [
+        'as'        => '{{routeName}}.datatable',
+        'namespace' => '{{namespace}}'
+    ]
+);

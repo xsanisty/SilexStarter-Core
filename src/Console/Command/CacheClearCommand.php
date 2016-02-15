@@ -24,7 +24,7 @@ class CacheClearCommand extends Command
     {
         $app = $this->getSilexStarter();
 
-        foreach (['cache', 'profiler', 'view'] as $dir) {
+        foreach (['cache', 'profiler', 'view', 'console'] as $dir) {
             $cache = new RecursiveIteratorIterator(
                 new RecursiveDirectoryIterator($app['path.app'].'storage/'.$dir, FilesystemIterator::SKIP_DOTS),
                 RecursiveIteratorIterator::CHILD_FIRST

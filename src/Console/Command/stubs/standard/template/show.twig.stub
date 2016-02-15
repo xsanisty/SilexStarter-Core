@@ -1,0 +1,20 @@
+{% raw %}{% set template = config.get('@silexstarter-dashboard.config.template') %}
+{% extends '@silexstarter-dashboard/'~ template ~'/index.twig' %}
+
+{% block content %}
+    <div class="box">
+        <div class="box-header with-border">
+            <h3 class="box-title">{{entity}} Detail</h3>
+        </div>
+        <div class="box-body">
+            {% endraw %}
+            {% for field in fields %}<div class="row">
+                <label for="{{field.name ~ '_field'}}" class="col-md-4">{{field.name}}</label>
+                <div class="col-md-8" id="{{field.name ~ '_field'}}">{{ '{{data.' ~ field.name ~ '}}' }}</div>
+            </div>{% endfor %}
+            {% raw %}
+
+            {# add more field based on your entity model #}
+        </div>
+    </div>
+{% endblock %}{% endraw %}

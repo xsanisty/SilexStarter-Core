@@ -12,7 +12,10 @@ class {{className}} extends Migration
         $this->schema->create(
             '{{tableName}}',
             function ($table) {
-                //do anything with your table here
+                {{tableDefinition}}
+                $table->timestamps();
+
+                //add more fields to your table here
             }
         );
     }

@@ -1,0 +1,19 @@
+{% raw %}<div class="modal fade" id="{{entity}}_show_modal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                {{entity}} detail
+            </div>
+            <div class="modal-body">{% endraw %}
+                {% for field in fields %}<div class="row">
+                    <label for="{{field.name ~ '_show_field'}}" class="col-md-4">{{field.name}}</label>
+                    <div class="col-md-8" id="{{field.name ~ '_show_field'}}"></div>
+                </div>
+                {% endfor %}
+            {% raw %}</div>
+        </div>
+    </div>
+</div>{% endraw %}

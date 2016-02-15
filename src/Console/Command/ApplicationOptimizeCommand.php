@@ -140,7 +140,7 @@ class ApplicationOptimizeCommand extends Command
             }
         }
 
-        $indentation    = "\n                    ";
+        $indentation    = "\n" . str_repeat(' ', 20);
         $dependencies   = ($dependencies)
                         ? "$indentation    " .
                           implode(", $indentation    ", $dependencies) .
@@ -166,7 +166,7 @@ class ApplicationOptimizeCommand extends Command
     {
         $this->output->writeln('<info> -- Collecting available template</info>');
         $twigPath   = '';
-        $indentation= '            ';
+        $indentation= str_repeat(' ', 12);
 
         foreach ($this->modules as $module) {
             $resources  = $module->getResources();
@@ -247,7 +247,7 @@ class ApplicationOptimizeCommand extends Command
         $this->output->writeln('<info> -- Collecting available configuration</info>');
 
         $configPath = '';
-        $indentation= '            ';
+        $indentation= str_repeat(' ', 12);
 
         foreach ($this->modules as $module) {
             $resources  = $module->getResources();

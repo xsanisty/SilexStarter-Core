@@ -13,12 +13,12 @@ class MigrationRollbackCommand extends Command
     protected function configure()
     {
         $this->setName('migration:rollback')
-            ->setDescription('Migrate the schema into database')
+            ->setDescription('Rollback latest migration')
             ->addOption(
                 'module',
                 'm',
                 InputOption::VALUE_REQUIRED,
-                'If set, the command will rolling back specific module'
+                'Roll back migration for specific module'
             );
     }
 

@@ -1,7 +1,5 @@
 <?php
-
 {{namespace}}
-
 use Silex\Application;
 use Silex\ServiceProviderInterface;
 {{useModelFqcn}}

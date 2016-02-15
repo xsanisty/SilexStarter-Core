@@ -1,0 +1,58 @@
+<?php
+{{namespace}}
+{{modelFqcn}}
+{{ifaceFqcn}}
+
+class {{model}}Repository implements {{model}}RepositoryInterface
+{
+    protected ${{entity}};
+
+    public function __construct({{model}} ${{entity}})
+    {
+        $this->{{entity}} = ${{entity}};
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function findAll()
+    {
+        return $this->{{entity}}->all();
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function findById($id)
+    {
+        return $this->{{entity}}->find($id);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function create(array $data)
+    {
+        return $this->{{entity}}->create($data);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function update($id, array $data)
+    {
+        $this->{{entity}}->newQuery()
+            ->where('id', '=', $id)
+            ->update($data);
+
+        return $this->{{entity}}->newQuery()->find($id);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function delete($id)
+    {
+        return $this->{{entity}}->newQuery()->where('id', '=', $id)->delete();
+    }
+}

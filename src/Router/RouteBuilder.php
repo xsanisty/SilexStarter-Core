@@ -225,10 +225,10 @@ class RouteBuilder
         $namespace = implode('\\', $this->namespaceStack);
 
         if ($lastNs) {
-            return implode('\\', [$namespace, trim($lastNs, '\\')]);
+            $namespace .= '\\' . $lastNs;
         }
 
-        return $namespace;
+        return trim($namespace, '\\');
     }
 
     /**

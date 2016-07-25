@@ -1,6 +1,6 @@
 <?php
 
-namespace SilexStarter\Provider;
+namespace SilexStarter\Session;
 
 use Cartalyst\Sentry\Sessions\SessionInterface;
 use Symfony\Component\HttpFoundation\Session\SessionInterface as SymfonySessionInterface;

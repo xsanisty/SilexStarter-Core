@@ -115,7 +115,7 @@ class MigrationCreateCommand extends Command
                 switch ($field['type']) {
                     case 'char':
                     case 'string':
-                        $param  = ', ' . $field['option'] ? $field['option'] : '255';
+                        $param  = ', ' . ($field['option'] ? $field['option'] : '255');
                         break;
                     case 'enum':
                         $enum   = explode(',', $field['option']);

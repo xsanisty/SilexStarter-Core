@@ -23,7 +23,7 @@
             <h3 class="box-title">{{entity}} list</h3>
 
             <div class="box-tools pull-right">
-                <a href="{{ url_for('{{module}}.{{entity}}.create') }}" class="btn btn-sm btn-primary">Create {{entity}}</a>
+                <a href="{{ url_for('{% if module %}{{module}}.{% endif %}{{entity}}.create') }}" class="btn btn-sm btn-primary">Create {{entity}}</a>
             </div>
         </div>
         <div class="box-body">

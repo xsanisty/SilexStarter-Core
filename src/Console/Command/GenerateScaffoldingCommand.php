@@ -35,7 +35,7 @@ class GenerateScaffoldingCommand extends Command
     protected function configure()
     {
         $this
-            ->setName('generate:scaffolding')
+            ->setName('scaffold')
             ->setDescription('Generate basic crud scaffolding')
             ->addArgument(
                 'entity-name',
@@ -47,6 +47,12 @@ class GenerateScaffoldingCommand extends Command
                 'm',
                 InputOption::VALUE_REQUIRED,
                 'Create scaffolding for specific module'
+            )
+            ->addOption(
+                'migrate',
+                'g',
+                InputOption::VALUE_NONE,
+                'Run the migration after all file is generated'
             )
             ->addOption(
                 'mode',
@@ -83,7 +89,7 @@ class GenerateScaffoldingCommand extends Command
             $this->basePath = $this->moduleManager->getModulePath($this->module);
             $this->resources= $this->moduleManager->getModule($this->module)->getResources();
         } else {
-            $this->basePath = $this->app['path.app'];
+            $this->basePath = $this->app['path.root'];
         }
 
         $this->app['twig.loader.filesystem']->addPath(__DIR__ . '/stubs', 'stubs');
@@ -97,6 +103,11 @@ class GenerateScaffoldingCommand extends Command
         $this->generateController();
         $this->generateTemplate();
         $this->appendRoute();
+
+        if ($input->getOption('migrate')) {
+            $this->runMigration();
+        }
+
     }
 
     protected function getFields()
@@ -123,10 +134,17 @@ class GenerateScaffoldingCommand extends Command
         $mode           = $this->mode;
         $basePath       = $this->basePath;
         $baseClassName  = Str::studly($this->entity);
-        $baseNamespace  = $this->module ? $this->moduleManager->getModuleNamespace($this->module) : '';
+        $baseNamespace  = $this->module ? $this->moduleManager->getModuleNamespace($this->module) : 'App';
 
         if ($this->module) {
             $this->generated = [
+                'entity' => [
+                    'class'     => $baseClassName,
+                    'file_path' => $basePath . 'Entity/' . $baseClassName . '.php',
+                    'namespace' => $baseNamespace . '\\Entity' ,
+                    'fqcn'      => $baseNamespace . '\\Entity\\' . $baseClassName ,
+                    'template'  => '@stubs/entity.stub',
+                ],
                 'model'  => [
                     'class'     => $baseClassName,
                     'file_path' => $basePath . 'Model/' . $baseClassName . '.php',
@@ -174,40 +192,47 @@ class GenerateScaffoldingCommand extends Command
             ];
         } else {
             $this->generated = [
+                'entity' => [
+                    'class'     => $baseClassName,
+                    'file_path' => $basePath . 'src/App/Entity/' . $baseClassName . '.php',
+                    'namespace' => $baseNamespace . '\\Entity',
+                    'fqcn'      => $baseNamespace . '\\Entity\\' . $baseClassName,
+                    'template'  => '@stubs/entity.stub',
+                ],
                 'model'  => [
                     'class'     => $baseClassName,
-                    'file_path' => $basePath . 'models' . '/' . $baseClassName . '.php',
-                    'namespace' => '',
-                    'fqcn'      => $baseClassName,
-                    'template'  => __DIR__ . '/stubs/model.stub',
+                    'file_path' => $basePath . 'src/App/Model/' . $baseClassName . '.php',
+                    'namespace' => $baseNamespace . '\\Model',
+                    'fqcn'      => $baseNamespace . '\\Model\\' . $baseClassName,
+                    'template'  => '@stubs/model.stub',
                 ],
                 'controller' => [
                     'class'     => $baseClassName . 'Controller',
-                    'file_path' => $basePath . 'controllers' . '/' . $baseClassName . 'Controller.php',
-                    'namespace' => '',
-                    'fqcn'      => $baseClassName . 'Controller',
-                    'template'  =>  __DIR__ . '/stubs/' . $mode . '/controller.stub',
+                    'file_path' => $basePath . 'src/App/Controller/' . $baseClassName . 'Controller.php',
+                    'namespace' => $baseNamespace . '\\Controller',
+                    'fqcn'      => $baseNamespace . '\\Controller\\' . $baseClassName . 'Controller',
+                    'template'  =>  '@stubs/' . $mode . '/controller.stub',
                 ],
                 'repository_interface' => [
                     'class'     => $baseClassName . 'RepositoryInterface',
-                    'file_path' => $basePath . 'repositories' . '/' . $baseClassName . 'RepositoryInterface.php',
-                    'namespace' => '',
-                    'fqcn'      => $baseClassName . 'RepositoryInterface',
-                    'template'  => __DIR__ . '/stubs/' . $mode . '/repositoryInterface.stub',
+                    'file_path' => $basePath . 'src/App/Contract/' . $baseClassName . 'RepositoryInterface.php',
+                    'namespace' => $baseNamespace . '\\Contract',
+                    'fqcn'      => $baseNamespace . '\\Contract\\' . $baseClassName . 'RepositoryInterface',
+                    'template'  => '@stubs/' . $mode . '/repositoryInterface.stub',
                 ],
                 'repository'  => [
                     'class'     => $baseClassName . 'Repository',
-                    'file_path' => $basePath . 'repositories' . '/' . $baseClassName . 'Repository.php',
-                    'namespace' => '',
-                    'fqcn'      => $baseClassName . 'Repository',
-                    'template'  => __DIR__ . '/stubs/' . $mode . '/repository.stub',
+                    'file_path' => $basePath . 'src/App/Repository/' . $baseClassName . 'Repository.php',
+                    'namespace' => $baseNamespace . '\\Repository',
+                    'fqcn'      => $baseNamespace . '\\Repository\\' . $baseClassName . 'Repository',
+                    'template'  => '@stubs/' . $mode . '/repository.stub',
                 ],
                 'repository_service_provider' => [
                     'class'     => $baseClassName . 'RepositoryServiceProvider',
-                    'file_path' => $basePath . 'services' . '/' . $baseClassName . 'RepositoryServiceProvider.php',
-                    'namespace' => '',
-                    'fqcn'      => $baseClassName . 'RepositoryServiceProvider',
-                    'template'  => __DIR__ . '/stubs/repositoryServiceProvider.stub',
+                    'file_path' => $basePath . 'src/App/Provider/' . $baseClassName . 'RepositoryServiceProvider.php',
+                    'namespace' => $baseNamespace . '\\Provider',
+                    'fqcn'      => $baseNamespace . '\\Provider\\' . $baseClassName . 'RepositoryServiceProvider',
+                    'template'  => '@stubs/repositoryServiceProvider.stub',
                 ],
                 'template' => [
                     'dir_path'      => $this->app['config']['twig.template_dir'] . '/' . $this->entity,
@@ -239,6 +264,26 @@ class GenerateScaffoldingCommand extends Command
             'class-name'=> 'Create' . Str::studly(Str::plural($this->entity)) . 'Table',
             '--table'   => Str::plural($this->entity),
             '--fields'  => $this->input->getOption('fields'),
+        ];
+
+        if ($this->module) {
+            $input['--module'] =  $this->module;
+        }
+
+        $command->run(new ArrayInput($input), $this->output);
+    }
+
+    protected function runMigration()
+    {
+        /** return if module is specified but migration isn't */
+        if ($this->resources && !$this->resources->migrations) {
+            return;
+        }
+
+        $this->output->writeln("<comment>Running migration</comment>");
+        $command    = $this->getApplication()->find('migration:migrate');
+        $input      = [
+            'command'   => 'migration:migrate'
         ];
 
         if ($this->module) {

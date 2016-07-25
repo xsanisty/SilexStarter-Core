@@ -19,18 +19,14 @@ class {{controller}}
     /**
      * Show all available resources.
      */
-    public function index()
+    public function index($page = 1)
     {
         $datum = $this->repository->findAll();
 
-        return View::make(
-            '{{templatePath}}/index',
+        return Response::json(
             [
-                'datum'     => $datum,
-                'status'    => Session::getFlash('status'),
-                'message'   => Session::getFlash('message'),
-                'title'     => ucfirst('{{entity}}') . ' list',
-                'page_title'=> ucfirst('{{entity}}') . ' list',
+                'datum' => $datum,
+                'page'  => $page,
             ]
         );
     }
@@ -40,17 +36,9 @@ class {{controller}}
      */
     public function show($id)
     {
-        Menu::get('admin_breadcrumb')->createItem(
-            'show-{{entity}}',
-            [
-                'label' => ucfirst('{{entity}}') . ' details',
-                'url'   => Url::to('{{urlName}}.show', ['id' => $id])
-            ]
-        );
+        $entity = $this->repository->findById($id);
 
-        $data = $this->repository->findById($id);
-
-        return View::make('{{templatePath}}/show', ['data' => $data]);
+        return Response::json($entity);
     }
 
     /**
@@ -63,17 +51,25 @@ class {{controller}}
         try {
             $entity = $this->repository->create($data);
 
-            Session::flash('status', 'success');
-            Session::flash('message', 'New ' . ucfirst('{{entity}}') . ' has been created!');
-
-            return Response::redirect(Url::to('{{urlName}}.edit', ['id' => $entity->id]));
-
+            return Response::json(
+                [
+                    'message'   => 'New {{entity}} has been created!',
+                    'data'      => $entity
+                ],
+                201
+            );
         } catch (Exception $e) {
-            Session::flash('status', 'error');
-            Session::flash('message', $e->getMessage());
-            Session::flash('data', $data);
-
-            return Response::redirect(Url::to('{{urlName}}.create'));
+            return Response::json(
+                [
+                    'message'   => 'Error occured while creating {{entity}}!',
+                    'data'      => $entity,
+                    'error'     => [
+                        'message'   => $e->getMessage(),
+                        'code'      => $e->getCode()
+                    ]
+                ],
+                500
+            );
         }
     }
 
@@ -87,15 +83,26 @@ class {{controller}}
         try {
             $entity = $this->repository->update($id, $data);
 
-            Session::flash('status', 'success');
-            Session::flash('message', ucfirst('{{entity}}') . ' has been updated!');
-
+            return Response::json(
+                [
+                    'message'   => '{{entity}} has been updated!',
+                    'data'      => $entity
+                ],
+                200
+            );
         } catch (Exception $e) {
-            Session::flash('status', 'error');
-            Session::flash('message', $e->getMessage());
+            return Response::json(
+                [
+                    'message'   => 'Error occured while updating {{entity}}!',
+                    'data'      => $entity,
+                    'error'     => [
+                        'message'   => $e->getMessage(),
+                        'code'      => $e->getCode()
+                    ]
+                ],
+                500
+            );
         }
-
-        return Response::redirect(Url::to('{{urlName}}.edit', ['id' => $entity->id]));
     }
 
     /**
@@ -106,26 +113,20 @@ class {{controller}}
         try {
             $this->repository->delete($id);
 
-            Session::flash('status', 'success');
-            Session::flash('message', ucfirst('{{entity}}') . ' has been deleted!');
-            $status = 200;
+            return Response::json(['message' => '{{entity}} has been deleted!'], 200);
 
         } catch (Exception $e) {
-            Session::flash('status', 'error');
-            Session::flash('message', $e->getMessage());
-            $status = 500;
-        }
-
-        if (Request::ajax()) {
             return Response::json(
                 [
-                    'status'    => Session::getFlash('status'),
-                    'message'   => Session::getFlash('message'),
+                    'message'   => 'Error occured while deleting {{entity}}!',
+                    'data'      => $entity,
+                    'error'     => [
+                        'message'   => $e->getMessage(),
+                        'code'      => $e->getCode()
+                    ]
                 ],
-                $status
+                500
             );
         }
-
-        return Response::redirect(Url::to('{{urlName}}.index'));
     }
 }

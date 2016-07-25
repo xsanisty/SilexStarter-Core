@@ -75,8 +75,8 @@ class ApplicationOptimizeCommand extends Command
         $controllerProviderCode = '';
         $controllerDirectories  = [
             'main'  => [
-                'dir'   => $this->app['path.app'] . 'controllers',
-                'ns'    => ''
+                'dir'   => $this->app['path.root'] . 'App/Controller',
+                'ns'    => 'App\\Controller'
             ]
         ];
 
@@ -143,7 +143,7 @@ class ApplicationOptimizeCommand extends Command
         $indentation    = "\n" . str_repeat(' ', 20);
         $dependencies   = ($dependencies)
                         ? "$indentation    " .
-                          implode(", $indentation    ", $dependencies) .
+                          implode(",$indentation    ", $dependencies) .
                           "$indentation"
                         : '';
 
@@ -309,6 +309,9 @@ class ApplicationOptimizeCommand extends Command
         $this->app['filesystem']->dumpFile($middlewareFile, $middlewareContent . "\n");
     }
 
+    /**
+     * Append module's route file into main route file
+     */
     protected function appendRoute()
     {
         $this->output->writeln('<info>Appending module route file into main route file...</info>');
@@ -330,9 +333,14 @@ class ApplicationOptimizeCommand extends Command
         $this->app['filesystem']->dumpFile($routeFile, $routeContent . "\n");
     }
 
+    /**
+     * Scan directory for any php files
+     * @param  string $dir The directory need to be scanned
+     * @return RecursiveIteratorIterator
+     */
     protected function scanDirectory($dir)
     {
-        $fileIterator   = new RecursiveCallbackFilterIterator(
+        $fileIterator = new RecursiveCallbackFilterIterator(
             new RecursiveDirectoryIterator($dir, FilesystemIterator::SKIP_DOTS),
             function ($file, $key, $iterator) {
                 if ($iterator->hasChildren()) {

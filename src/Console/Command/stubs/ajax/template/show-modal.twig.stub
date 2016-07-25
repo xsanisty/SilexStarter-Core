@@ -11,9 +11,8 @@
                 {% for field in fields %}<div class="row">
                     <label for="{{field.name ~ '_show_field'}}" class="col-md-4">{{field.name}}</label>
                     <div class="col-md-8" id="{{field.name ~ '_show_field'}}"></div>
-                </div>
-                {% endfor %}
-            {% raw %}</div>
+                </div>{% endfor %}
+            </div>
         </div>
     </div>
-</div>{% endraw %}
+</div>

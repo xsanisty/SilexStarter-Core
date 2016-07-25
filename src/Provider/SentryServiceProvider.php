@@ -5,6 +5,7 @@ namespace SilexStarter\Provider;
 use Silex\Application;
 use Silex\ServiceProviderInterface;
 use SilexStarter\SilexStarter;
+use SilexStarter\Session\SentrySymfonySession;
 use Cartalyst\Sentry\Cookies\NativeCookie;
 use Cartalyst\Sentry\Groups\Eloquent\Provider as GroupProvider;
 use Cartalyst\Sentry\Hashing\BcryptHasher;
@@ -56,7 +57,7 @@ class SentryServiceProvider implements ServiceProviderInterface
     {
         $this->app['sentry.hasher'] = $this->app->share(
             function (Application $app) {
-                $hasher = $app['config']['sentry.hasher'];
+                $hasher = $app['config']['@silexstarter-usermanager.sentry.hasher'];
 
                 switch ($hasher) {
                     case 'native':
@@ -81,7 +82,7 @@ class SentryServiceProvider implements ServiceProviderInterface
     {
         $this->app['sentry.user'] = $this->app->share(
             function (Application $app) {
-                $model = $app['config']['sentry.users.model'];
+                $model = $app['config']['@silexstarter-usermanager.sentry.users.model'];
 
                 // We will never be accessing a user in Sentry without accessing
                 // the user provider first. So, we can lazily set up our user
@@ -89,7 +90,7 @@ class SentryServiceProvider implements ServiceProviderInterface
                 // attribute outside of Sentry, you will need to ensure you are
                 // overriding at runtime.
                 if (method_exists($model, 'setLoginAttributeName')) {
-                    $loginAttribute = $app['config']['sentry.users.login_attribute'];
+                    $loginAttribute = $app['config']['@silexstarter-usermanager.sentry.users.login_attribute'];
 
                     forward_static_call_array(
                         [$model, 'setLoginAttributeName'],
@@ -99,7 +100,7 @@ class SentryServiceProvider implements ServiceProviderInterface
 
                 // Define the Group model to use for relationships.
                 if (method_exists($model, 'setGroupModel')) {
-                    $groupModel = $app['config']['sentry.groups.model'];
+                    $groupModel = $app['config']['@silexstarter-usermanager.sentry.groups.model'];
 
                     forward_static_call_array(
                         [$model, 'setGroupModel'],
@@ -109,7 +110,7 @@ class SentryServiceProvider implements ServiceProviderInterface
 
                 // Define the user group pivot table name to use for relationships.
                 if (method_exists($model, 'setUserGroupsPivot')) {
-                    $pivotTable = $app['config']['sentry.user_groups_pivot_table'];
+                    $pivotTable = $app['config']['@silexstarter-usermanager.sentry.user_groups_pivot_table'];
 
                     forward_static_call_array(
                         [$model, 'setUserGroupsPivot'],
@@ -129,11 +130,11 @@ class SentryServiceProvider implements ServiceProviderInterface
     {
         $this->app['sentry.group'] = $this->app->share(
             function (Application $app) {
-                $model = $app['config']['sentry.groups.model'];
+                $model = $app['config']['@silexstarter-usermanager.sentry.groups.model'];
 
                 // Define the User model to use for relationships.
                 if (method_exists($model, 'setUserModel')) {
-                    $userModel = $app['config']['sentry.users.model'];
+                    $userModel = $app['config']['@silexstarter-usermanager.sentry.users.model'];
 
                     forward_static_call_array(
                         [$model, 'setUserModel'],
@@ -143,7 +144,7 @@ class SentryServiceProvider implements ServiceProviderInterface
 
                 // Define the user group pivot table name to use for relationships.
                 if (method_exists($model, 'setUserGroupsPivot')) {
-                    $pivotTable = $app['config']['sentry.user_groups_pivot_table'];
+                    $pivotTable = $app['config']['@silexstarter-usermanager.sentry.user_groups_pivot_table'];
 
                     forward_static_call_array(
                         [$model, 'setUserGroupsPivot'],
@@ -163,16 +164,16 @@ class SentryServiceProvider implements ServiceProviderInterface
     {
         $this->app['sentry.throttle'] = $this->app->share(
             function (Application $app) {
-                $model = $app['config']['sentry.throttling.model'];
+                $model = $app['config']['@silexstarter-usermanager.sentry.throttling.model'];
 
                 $throttleProvider = new ThrottleProvider($app['sentry.user'], $model);
 
-                if ($app['config']['sentry.throttling.enabled'] === false) {
+                if ($app['config']['@silexstarter-usermanager.sentry.throttling.enabled'] === false) {
                     $throttleProvider->disable();
                 }
 
                 if (method_exists($model, 'setAttemptLimit')) {
-                    $attemptLimit = $app['config']['sentry.throttling.attempt_limit'];
+                    $attemptLimit = $app['config']['@silexstarter-usermanager.sentry.throttling.attempt_limit'];
 
                     forward_static_call_array(
                         [$model, 'setAttemptLimit'],
@@ -180,7 +181,7 @@ class SentryServiceProvider implements ServiceProviderInterface
                     );
                 }
                 if (method_exists($model, 'setSuspensionTime')) {
-                    $suspensionTime = $app['config']['sentry.throttling.suspension_time'];
+                    $suspensionTime = $app['config']['@silexstarter-usermanager.sentry.throttling.suspension_time'];
 
                     forward_static_call_array(
                         [$model, 'setSuspensionTime'],
@@ -190,7 +191,7 @@ class SentryServiceProvider implements ServiceProviderInterface
 
                 // Define the User model to use for relationships.
                 if (method_exists($model, 'setUserModel')) {
-                    $userModel = $app['config']['sentry.users.model'];
+                    $userModel = $app['config']['@silexstarter-usermanager.sentry.users.model'];
 
                     forward_static_call_array(
                         [$model, 'setUserModel'],
@@ -210,7 +211,7 @@ class SentryServiceProvider implements ServiceProviderInterface
     {
         $this->app['sentry.session'] = $this->app->share(
             function (Application $app) {
-                $key = $app['config']['sentry.cookie.key'];
+                $key = $app['config']['@silexstarter-usermanager.sentry.cookie.key'];
 
                 return new SentrySymfonySession($this->app['session'], $key);
             }
@@ -224,7 +225,7 @@ class SentryServiceProvider implements ServiceProviderInterface
     {
         $this->app['sentry.cookie'] = $this->app->share(
             function (Application $app) {
-                $key = $app['config']['sentry.cookie.key'];
+                $key = $app['config']['@silexstarter-usermanager.sentry.cookie.key'];
 
                 return new NativeCookie(['http_only' => true], $key);
             }

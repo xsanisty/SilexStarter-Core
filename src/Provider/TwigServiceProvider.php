@@ -60,53 +60,55 @@ class TwigServiceProvider implements ServiceProviderInterface
                     $app['config']['twig.options']
                 );
 
-                $twigEnv->addExtension(
-                    new TwigAssetExtension($app['asset_manager'])
-                );
-                $twigEnv->addExtension(
-                    new TwigMenuExtension($app['menu_manager'])
-                );
-                $twigEnv->addExtension(
-                    new TwigUrlExtension($app['request_stack'], $app['url_generator'])
-                );
-                $twigEnv->addExtension(
-                    new TwigCookieExtension($app['request_stack'])
-                );
+                if (!isset($app['console'])) {
+                    $twigEnv->addExtension(
+                        new TwigAssetExtension($app['asset_manager'])
+                    );
+                    $twigEnv->addExtension(
+                        new TwigMenuExtension($app['menu_manager'])
+                    );
+                    $twigEnv->addExtension(
+                        new TwigUrlExtension($app['request_stack'], $app['url_generator'])
+                    );
+                    $twigEnv->addExtension(
+                        new TwigCookieExtension($app['request_stack'])
+                    );
 
-                $twigEnv->addGlobal('config', $app['config']);
+                    $twigEnv->addGlobal('config', $app['config']);
 
-                try {
-                    $twigEnv->addGlobal('current_user', $app['sentry']->getUser());
-                } catch (Exception $e) {
-                    $twigEnv->addGlobal('current_user', null);
-                }
-
-                if ($app['config']['twig.options.debug']) {
-                    $twigEnv->addExtension(new Twig_Extension_Debug());
-                }
-
-                if ($app['enable_profiler']) {
-                    $twigEnv->addGlobal('app', $app);
-                    $app->registerServices(['Silex\Provider\HttpFragmentServiceProvider']);
-                }
-
-                if (class_exists('Symfony\Bridge\Twig\Extension\RoutingExtension')) {
-                    if (isset($app['url_generator'])) {
-                        $twigEnv->addExtension(new RoutingExtension($app['url_generator']));
+                    try {
+                        $twigEnv->addGlobal('current_user', $app['sentry']->getUser());
+                    } catch (Exception $e) {
+                        $twigEnv->addGlobal('current_user', null);
                     }
 
-                    if (isset($app['translator'])) {
-                        $twigEnv->addExtension(new TranslationExtension($app['translator']));
+                    if ($app['config']['twig.options.debug']) {
+                        $twigEnv->addExtension(new Twig_Extension_Debug());
                     }
 
-                    if (isset($app['security'])) {
-                        $twigEnv->addExtension(new SecurityExtension($app['security']));
+                    if ($app['enable_profiler']) {
+                        $twigEnv->addGlobal('app', $app);
+                        $app->registerServices(['Silex\Provider\HttpFragmentServiceProvider']);
                     }
 
-                    if (isset($app['fragment.handler'])) {
-                        $app['fragment.renderer.hinclude']->setTemplating($twigEnv);
+                    if (class_exists('Symfony\Bridge\Twig\Extension\RoutingExtension')) {
+                        if (isset($app['url_generator'])) {
+                            $twigEnv->addExtension(new RoutingExtension($app['url_generator']));
+                        }
 
-                        $twigEnv->addExtension(new HttpKernelExtension($app['fragment.handler']));
+                        if (isset($app['translator'])) {
+                            $twigEnv->addExtension(new TranslationExtension($app['translator']));
+                        }
+
+                        if (isset($app['security'])) {
+                            $twigEnv->addExtension(new SecurityExtension($app['security']));
+                        }
+
+                        if (isset($app['fragment.handler'])) {
+                            $app['fragment.renderer.hinclude']->setTemplating($twigEnv);
+
+                            $twigEnv->addExtension(new HttpKernelExtension($app['fragment.handler']));
+                        }
                     }
                 }
 

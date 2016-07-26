@@ -45,7 +45,7 @@ class RoutePermissionChecker
         try {
             $message = 'Insufficient permission to acces this page';
 
-            if (!$this->user->hasAnyAccess((array) $permission)) {
+            if (!$this->user->hasAnyAccess(array_merge(['admin'], (array) $permission))) {
                 return  ($request->isXmlHttpRequest())
                         ? $this->response->ajax($message, 401, [['code' => 401, 'message' => $message]])
                         : $this->response->make($message, 401);

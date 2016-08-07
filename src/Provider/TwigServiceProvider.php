@@ -55,6 +55,11 @@ class TwigServiceProvider implements ServiceProviderInterface
                     $app['config']['twig.options']
                 );
 
+                /* set twig template cache to app/storage/console for console environment */
+                if (isset($app['console'])) {
+                    $app['config']['twig.options']['cache'] = $app['path.app'] . '/storage/console';
+                }
+
                 $twigEnv = new \Twig_Environment(
                     $app['twig.loader'],
                     $app['config']['twig.options']

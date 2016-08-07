@@ -46,7 +46,7 @@ class TwigServiceProvider implements ServiceProviderInterface
     {
         $this->app['twig'] = $this->app->share(
             function (Application $app) {
-                $app['config']['twig.options'] = array_replace(
+                $twigOptions = array_replace(
                     [
                         'charset'          => $app['charset'],
                         'debug'            => $app['debug'],
@@ -57,12 +57,12 @@ class TwigServiceProvider implements ServiceProviderInterface
 
                 /* set twig template cache to app/storage/console for console environment */
                 if (isset($app['console'])) {
-                    $app['config']['twig.options']['cache'] = $app['path.app'] . '/storage/console';
+                    $twigOptions['cache'] = $app['path.app'] . '/storage/console';
                 }
 
                 $twigEnv = new \Twig_Environment(
                     $app['twig.loader'],
-                    $app['config']['twig.options']
+                    $twigOptions
                 );
 
                 if (!isset($app['console'])) {

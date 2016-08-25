@@ -144,4 +144,9 @@ class RequestHelper
                 ? $this->getRequest()->headers->get($key, $default)
                 : $this->getRequest()->headers->all();
     }
+
+    public function content()
+    {
+        return $this->getRequest()->getContent();
+    }
 }

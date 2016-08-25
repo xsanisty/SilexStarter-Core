@@ -295,6 +295,11 @@ class RouteBuilder
         return $this->forwardRouteMethod('delete', $pattern, $to, $options);
     }
 
+    public function options($pattern, $to = null, array $options = [])
+    {
+        return $this->forwardRouteMethod('options', $pattern, $to, $options);
+    }
+
     public function patch($pattern, $to = null, array $options = [])
     {
         return $this->forwardRouteMethod('patch', $pattern, $to, $options);

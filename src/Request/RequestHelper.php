@@ -2,6 +2,7 @@
 
 namespace SilexStarter\Request;
 
+use Exception;
 use RuntimeException;
 use Symfony\Component\HttpFoundation\RequestStack;
 
@@ -148,5 +149,17 @@ class RequestHelper
     public function content()
     {
         return $this->getRequest()->getContent();
+    }
+
+    public function json()
+    {
+        $requestContent = json_decode($this->contet(), true);
+
+        if (!$requestContent) {
+            throw new Exception("Error Processing Json Request (". json_last_error_msg() .")", 1);
+        }
+
+        return $requestContent;
+
     }
 }

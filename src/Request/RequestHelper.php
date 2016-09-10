@@ -153,7 +153,7 @@ class RequestHelper
 
     public function json()
     {
-        $requestContent = json_decode($this->contet(), true);
+        $requestContent = json_decode($this->content(), true);
 
         if (!$requestContent) {
             throw new Exception("Error Processing Json Request (". json_last_error_msg() .")", 1);

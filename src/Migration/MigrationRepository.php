@@ -158,7 +158,7 @@ class MigrationRepository
 
         $latest_module = $this->migrationData['batch_module'][$batch];
 
-        return $this->migrationData['migrations'][$latest_module][$batch];
+        return array_reverse($this->migrationData['migrations'][$latest_module][$batch]);
     }
 
     /**

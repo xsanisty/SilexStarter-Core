@@ -8,7 +8,7 @@ use Silex\Application;
 use Silex\ServiceProviderInterface;
 use SilexStarter\TwigExtension\TwigCookieExtension;
 use SilexStarter\TwigExtension\TwigAssetExtension;
-use SilexStarter\TwigExtension\TwigMenuExtension;
+use SilexStarter\TwigExtension\TwigEventExtension;
 use SilexStarter\TwigExtension\TwigUrlExtension;
 use Symfony\Bridge\Twig\Extension\RoutingExtension;
 use Symfony\Bridge\Twig\Extension\TranslationExtension;
@@ -66,18 +66,10 @@ class TwigServiceProvider implements ServiceProviderInterface
                 );
 
                 if (!isset($app['console'])) {
-                    $twigEnv->addExtension(
-                        new TwigAssetExtension($app['asset_manager'])
-                    );
-                    $twigEnv->addExtension(
-                        new TwigMenuExtension($app['menu_manager'])
-                    );
-                    $twigEnv->addExtension(
-                        new TwigUrlExtension($app['request_stack'], $app['url_generator'])
-                    );
-                    $twigEnv->addExtension(
-                        new TwigCookieExtension($app['request_stack'])
-                    );
+                    $twigEnv->addExtension(new TwigAssetExtension($app['asset_manager']));
+                    $twigEnv->addExtension(new TwigEventExtension($app['dispatcher']));
+                    $twigEnv->addExtension(new TwigUrlExtension($app['request_stack'], $app['url_generator']));
+                    $twigEnv->addExtension(new TwigCookieExtension($app['request_stack']));
 
                     $twigEnv->addGlobal('config', $app['config']);
 

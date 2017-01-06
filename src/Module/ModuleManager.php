@@ -16,6 +16,7 @@ class ModuleManager
     protected $assets       = [];
     protected $config       = [];
     protected $commands     = [];
+    protected $services     = [];
     protected $views        = [];
     protected $path         = [];
     protected $namespace    = [];
@@ -60,7 +61,7 @@ class ModuleManager
             return $this->modules[$moduleIdentifier];
         }
 
-        throw new ModuleNotRegisteredException("Module $moduleIdentifier is not registered");
+        throw new ModuleNotRegisteredException("Module \"$moduleIdentifier\" is not registered");
     }
 
     /**
@@ -74,7 +75,7 @@ class ModuleManager
             return $this->path[$moduleIdentifier];
         }
 
-        throw new ModuleNotRegisteredException("Module $moduleIdentifier is not registered");
+        throw new ModuleNotRegisteredException("Module \"$moduleIdentifier\" is not registered");
     }
 
     /**
@@ -90,7 +91,7 @@ class ModuleManager
             return $this->namespace[$moduleIdentifier];
         }
 
-        throw new ModuleNotRegisteredException("Module $moduleIdentifier is not registered");
+        throw new ModuleNotRegisteredException("Module \"$moduleIdentifier\" is not registered");
     }
 
     /**
@@ -105,16 +106,21 @@ class ModuleManager
             return $this->app['path.public'].'assets/'.$moduleIdentifier;
         }
 
-        throw new ModuleNotRegisteredException("Module $moduleIdentifier is not registered");
+        throw new ModuleNotRegisteredException("Module \"$moduleIdentifier\" is not registered");
     }
 
+    /**
+     * Get template path of specified module
+     * @param  string $moduleIdentifier The module identifier
+     * @return string                   Path to twig template
+     */
     public function getTemplatePath($moduleIdentifier)
     {
         if ($this->isRegistered($moduleIdentifier)) {
             return $this->views[$moduleIdentifier];
         }
 
-        throw new ModuleNotRegisteredException("Module $moduleIdentifier is not registered");
+        throw new ModuleNotRegisteredException("Module \"$moduleIdentifier\" is not registered");
     }
 
     /**
@@ -205,6 +211,12 @@ class ModuleManager
             $commandNamespace = $moduleNamespace.'\\'.$moduleResources->commands;
 
             $this->commands[$commandNamespace] = $commandPath;
+        }
+
+        /* If services exists, register all services */
+        if ($moduleResources->services) {
+            $servicesList = require $modulePath.$moduleResources->services;
+            $this->app->registerServices($servicesList);
         }
 
         /* if route file exists, queue for later include */

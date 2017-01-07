@@ -155,7 +155,7 @@ class ModuleManager
     /**
      * Register ModuleProvider into application.
      *
-     * @param ModuleProviderInterface $module the module provider
+     * @param SilexStarter\Contracts\ModuleProviderInterface $module the module provider
      */
     public function register(ModuleProviderInterface $module)
     {
@@ -177,7 +177,7 @@ class ModuleManager
         $this->namespace[$moduleIdentifier] = $moduleNamespace;
 
         /** only register path when optimized_app is registered */
-        if (isset($app['optimized_app'])) {
+        if (isset($this->app['optimized_app'])) {
             $this->modules[$moduleIdentifier]   = $module;
             $this->assets[$moduleIdentifier]    = $modulePath.$moduleResources->assets;
             $this->config[$moduleIdentifier]    = $modulePath.$moduleResources->config;
@@ -187,51 +187,72 @@ class ModuleManager
             return;
         }
 
-        /* if config dir exists, add namespace to the config reader */
-        if ($moduleResources->config) {
-            $this->app['config']->addDirectory(
-                $modulePath.$moduleResources->config,
-                $moduleIdentifier
-            );
-
-            $this->config[$moduleIdentifier] = $modulePath.$moduleResources->config;
-        }
-
-        /* If controller_as_service enabled, register the controllers as service */
-        if ($this->app['controller_as_service'] && $moduleResources->controllers) {
-            $this->app->registerControllerDirectory(
-                $modulePath.$moduleResources->controllers,
-                $moduleNamespace.'\\'.$moduleResources->controllers
-            );
-        }
-
-        /* If command exists, register all command */
-        if ($moduleResources->commands) {
-            $commandPath = $modulePath.$moduleResources->commands;
-            $commandNamespace = $moduleNamespace.'\\'.$moduleResources->commands;
-
-            $this->commands[$commandNamespace] = $commandPath;
-        }
-
-        /* If services exists, register all services */
-        if ($moduleResources->services) {
-            $servicesList = require $modulePath.$moduleResources->services;
-            $this->app->registerServices($servicesList);
+        /* if middleware file exists, queue for later include */
+        if ($moduleResources->middlewares) {
+            $this->addMiddlewareFile($modulePath . $moduleResources->middlewares);
         }
 
         /* if route file exists, queue for later include */
         if ($moduleResources->routes) {
-            $this->addRouteFile($modulePath.$moduleResources->routes);
+            $this->addRouteFile($modulePath . $moduleResources->routes);
         }
 
-        /* if middleware file exists, queue for later include */
-        if ($moduleResources->middlewares) {
-            $this->addMiddlewareFile($modulePath.$moduleResources->middlewares);
+        /* keep assets path of the module */
+        if ($moduleResources->assets) {
+            $this->assets[$moduleIdentifier] = $modulePath . $moduleResources->assets;
         }
 
-        /* if template file exists, register new template path under new namespace */
-        if ($moduleResources->views) {
-            $this->views[$moduleIdentifier] = $modulePath.$moduleResources->views;
+        $this->registerModuleConfig($module);
+        $this->registerModuleController($module);
+        $this->registerModuleCommand($module);
+        $this->registerModuleServices($module);
+        $this->registerModuleTemplate($module);
+        $this->modules[$moduleIdentifier] = $module;
+
+        $module->register();
+    }
+
+    /**
+     * Register module controller as services
+     *
+     * @param  SilexStarter\Contracts\ModuleProviderInterface $module Module provider class
+     */
+    protected function registerModuleController(ModuleProviderInterface $module)
+    {
+        if ($this->app['controller_as_service'] && $module->getResources()->controllers) {
+            $this->app->registerControllerDirectory(
+                $this->path[$module->getModuleIdentifier()] . $module->getResources()->controllers,
+                $this->namespace[$module->getModuleIdentifier()] . '\\' . $module->getResources()->controllers
+            );
+        }
+    }
+
+    /**
+     * Queue module command to be registered to console application
+     *
+     * @param  SilexStarter\Contracts\ModuleProviderInterface $module Module provider class
+     */
+    protected function registerModuleCommand(ModuleProviderInterface $module)
+    {
+        if ($module->getResources()->commands) {
+            $commandPath        = $this->path[$module->getModuleIdentifier()] . $module->getResources()->commands;
+            $commandNamespace   = $this->namespace[$module->getModuleIdentifier()] . '\\' . $module->getResources()->commands;
+
+            $this->commands[$commandNamespace] = $commandPath;
+        }
+    }
+
+    /**
+     * Register module template path so it can be accessed by controller
+     *
+     * @param  SilexStarter\Contracts\ModuleProviderInterface $module Module provider class
+     */
+    protected function registerModuleTemplate(ModuleProviderInterface $module)
+    {
+        if ($module->getResources()->views) {
+            $moduleIdentifier = $module->getModuleIdentifier();
+
+            $this->views[$moduleIdentifier] = $this->path[$module->getModuleIdentifier()] . $module->getResources()->views;
 
             $publishedDir   = $this->app['config']['twig.template_dir'] . '/module/' . $moduleIdentifier;
             $templateDir    = $this->app['filesystem']->exists($publishedDir)
@@ -242,14 +263,38 @@ class ModuleManager
             $this->app['twig.loader.filesystem']->addPath($templateDir, $moduleIdentifier);
             $this->app['twig.loader.filesystem']->addPath($this->views[$moduleIdentifier], $moduleIdentifier);
         }
+    }
 
-        /* keep assets path of the module */
-        if ($moduleResources->assets) {
-            $this->assets[$moduleIdentifier] = $modulePath.$moduleResources->assets;
+    /**
+     * Register module services into application container
+     *
+     * @param  SilexStarter\Contracts\ModuleProviderInterface $module Module provider class
+     */
+    protected function registerModuleServices(ModuleProviderInterface $module)
+    {
+        if ($module->getResources()->services) {
+            $servicesList = require $this->path[$module->getModuleIdentifier()] . $module->getResources()->services;
+            $this->app->registerServices($servicesList);
         }
+    }
 
-        $this->modules[$moduleIdentifier] = $module;
-        $module->register();
+    /**
+     * Register module configuration to configuration container
+     *
+     * @param  SilexStarter\Contracts\ModuleProviderInterface $module Module provider class
+     */
+    protected function registerModuleConfig(ModuleProviderInterface $module)
+    {
+        if ($module->getResources()->config) {
+            $configDir = $this->path[$module->getModuleIdentifier()] . $module->getResources()->config;
+
+            $this->app['config']->addDirectory(
+                $configDir,
+                $module->getModuleIdentifier()
+            );
+
+            $this->config[$module->getModuleIdentifier()] = $configDir;
+        }
     }
 
     /**

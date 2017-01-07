@@ -83,6 +83,10 @@ class RouteBuilder
      */
     protected function pushBeforeHandler($beforeHandler)
     {
+        if (!$beforeHandler) {
+            return;
+        }
+
         $beforeHandler = is_string($beforeHandler) ? $this->app->middleware($beforeHandler) : $beforeHandler;
         $this->beforeHandlerStack[] = $beforeHandler;
     }
@@ -114,6 +118,10 @@ class RouteBuilder
      */
     protected function pushAfterHandler($afterHandler)
     {
+        if (!$afterHandler) {
+            return;
+        }
+
         $afterHandler = is_string($afterHandler) ? $this->app->middleware($afterHandler) : $afterHandler;
         array_unshift($this->afterHandlerStack, $afterHandler);
     }
@@ -211,6 +219,10 @@ class RouteBuilder
 
     public function pushNamespace($namespace)
     {
+        if (!$namespace) {
+            return;
+        }
+
         $namespace = trim($namespace, '\\');
         $this->namespaceStack[] = $namespace;
     }
@@ -316,31 +328,18 @@ class RouteBuilder
      */
     public function group($prefix, \Closure $callable, array $options = [])
     {
-        $permissionEnabled      = isset($options['permission']) && $options['permission'];
-        $beforeHandlerEnabled   = isset($options['before']) && $options['before'];
-        $afterHandlerEnabled    = isset($options['after']) && $options['after'];
-        $namespaceEnabled       = isset($options['namespace']) && $options['namespace'];
+        $options = array_merge(['permission' => null, 'before' => null, 'after' =>  null, 'namespace' => null], $options);
 
-        if ($beforeHandlerEnabled) {
-            $this->pushBeforeHandler($options['before']);
-        }
+        $this->pushBeforeHandler($options['before']);
+        $this->pushAfterHandler($options['after']);
+        $this->pushNamespace($options['namespace']);
 
-        if ($permissionEnabled) {
-            $permission = $options['permission'];
-
+        if ($options['permission']) {
             $this->pushBeforeHandler(
-                function (Request $request, Application $app) use ($permission) {
-                    return $app['route_permission_checker']->check($request, $permission);
+                function (Request $request, Application $app) use ($options) {
+                    return $app['route_permission_checker']->check($request, $options['permission']);
                 }
             );
-        }
-
-        if ($afterHandlerEnabled) {
-            $this->pushAfterHandler($options['after']);
-        }
-
-        if ($namespaceEnabled) {
-            $this->pushNamespace($options['namespace']);
         }
 
         /* push the context to be accessed to callable route */
@@ -350,19 +349,19 @@ class RouteBuilder
 
         $routeCollection = $this->popContext();
 
-        if ($permissionEnabled) {
+        if ($options['permission']) {
             $this->popBeforeHandler();
         }
 
-        if ($beforeHandlerEnabled) {
+        if ($options['before']) {
             $this->popBeforeHandler();
         }
 
-        if ($afterHandlerEnabled) {
+        if ($options['after']) {
             $this->popAfterHandler();
         }
 
-        if ($namespaceEnabled) {
+        if ($options['namespace']) {
             $this->popNamespace();
         }
 

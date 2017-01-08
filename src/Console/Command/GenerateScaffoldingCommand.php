@@ -40,7 +40,7 @@ class GenerateScaffoldingCommand extends Command
             ->addArgument(
                 'entity-name',
                 InputArgument::REQUIRED,
-                'The entity name as the base of the scaffolding'
+                'The table or entity name as the base of the scaffolding'
             )
             ->addOption(
                 'module',
@@ -65,8 +65,9 @@ class GenerateScaffoldingCommand extends Command
                 'fields',
                 'f',
                 InputOption::VALUE_REQUIRED,
-                'Define fields for the table [field_one:increments+field_two:integer+field_three:enum:val1,val2+field_for:float:8,2]',
-                'id:increments+name:string'
+                'Define fields for the table using the following format "field_name:field_type[:options][|anothe_field:field_type[:options]].
+                Example: field_one:increments|field_two:integer|field_three:enum:val1,val2|field_four:float:8,2',
+                'id:increments|name:string'
             );
     }
 
@@ -93,15 +94,17 @@ class GenerateScaffoldingCommand extends Command
         }
 
         $this->app['twig.loader.filesystem']->addPath(__DIR__ . '/stubs', 'stubs');
+
         $this->generateStubList();
         $this->generateMigration();
         $this->generateModel();
+        $this->generateEntity();
         $this->generateRepositoryInterface();
         $this->generateRepository();
         $this->generateRepositoryServiceProvider();
-        $this->registerServiceProvider();
         $this->generateController();
         $this->generateTemplate();
+        $this->registerServiceProvider();
         $this->appendRoute();
 
         if ($input->getOption('migrate')) {
@@ -112,16 +115,19 @@ class GenerateScaffoldingCommand extends Command
 
     protected function getFields()
     {
-        $fields = explode('+', $this->input->getOption('fields'));
+        $fields = explode('|', $this->input->getOption('fields'));
 
         foreach ($fields as $key => $field) {
             $fieldStruct = explode(':', $field);
+            $fieldName   = trim($fieldStruct[0]);
 
-            if (trim($fieldStruct[0])) {
+            if ($fieldName) {
                 $fields[$key] = [
-                    'name'  => trim($fieldStruct[0]),
-                    'type'  => isset($fieldStruct[1]) ? $fieldStruct[1] : 'text',
-                    'option'=> isset($fieldStruct[2]) ? $fieldStruct[2] : '',
+                    'name'          => $fieldName,
+                    'type'          => isset($fieldStruct[1]) ? $fieldStruct[1] : 'text',
+                    'option'        => isset($fieldStruct[2]) ? $fieldStruct[2] : '',
+                    'name_camel'    => Str::camel($fieldName),
+                    'name_studly'   => Str::studly($fieldName),
                 ];
             }
         }
@@ -273,6 +279,9 @@ class GenerateScaffoldingCommand extends Command
         $command->run(new ArrayInput($input), $this->output);
     }
 
+    /**
+     * Run generated migration
+     */
     protected function runMigration()
     {
         /** return if module is specified but migration isn't */
@@ -322,6 +331,24 @@ class GenerateScaffoldingCommand extends Command
 
         $this->filesystem->dumpFile($controllerFile, $compiledCode);
         $this->output->writeln('<info> - Controller created at '. $controllerFile .'</info>');
+    }
+
+    /**
+     * Generate entity class
+     */
+    protected function generateEntity()
+    {
+        $entityFile     = $this->generated['entity']['file_path'];
+        $replacement    = [
+            'namespace' => "\nnamespace " . $this->generated['entity']['namespace'] . ";\n",
+            'entity'    => $this->generated['entity']['class'],
+            'fields'    => $this->getFields()
+        ];
+
+        $compiledCode   = $this->app['twig']->render($this->generated['entity']['template'], $replacement);
+
+        $this->filesystem->dumpFile($entityFile, $compiledCode);
+        $this->output->writeln('<info> - Controller created at '. $entityFile .'</info>');
     }
 
     /**

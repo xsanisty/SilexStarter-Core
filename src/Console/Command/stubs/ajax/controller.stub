@@ -141,9 +141,12 @@ class {{controller}}
         ->setColumn([{% for field in fields %}'{{field.name}}', {% endfor %}])
         ->setFormatter(
             function ($row) {
-                $showButton   = '<button href="' . Url::to('{{urlName}}.show', ['id' => $row->id]) . '" class="btn btn-xs btn-info btn-{{entity}}-show" style="margin-right: 5px">show</button>';
-                $editButton   = '<button href="' . Url::to('{{urlName}}.show', ['id' => $row->id]) . '" class="btn btn-xs btn-primary btn-{{entity}}-edit" style="margin-right: 5px">edit</button>';
-                $deleteButton = '<button href="' . Url::to('{{urlName}}.delete', ['id' => $row->id]) . '" class="btn btn-xs btn-danger btn-{{entity}}-delete" style="margin-right: 5px">delete</button>';
+                $showUrl        = Url::to('{{urlName}}.show', ['id' => $row->id]);
+                $deleteUrl      = Url::to('{{urlName}}.delete', ['id' => $row->id]);
+
+                $showButton     = '<button href="' . $showUrl . '" class="btn btn-xs btn-info btn-{{entity}}-show" style="margin-right: 5px">show</button>';
+                $editButton     = '<button href="' . $showUrl . '" class="btn btn-xs btn-primary btn-{{entity}}-edit" style="margin-right: 5px">edit</button>';
+                $deleteButton   = '<button href="' . $deleteUrl . '" class="btn btn-xs btn-danger btn-{{entity}}-delete" style="margin-right: 5px">delete</button>';
 
                 /** format your fields as you need */
                 return [

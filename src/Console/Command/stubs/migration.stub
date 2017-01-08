@@ -13,7 +13,7 @@ class {{className}} extends Migration
             '{{tableName}}',
             function ($table) {
                 {{tableDefinition}}
-                $table->timestamps();
+                $table->nullableTimestamps();
 
                 //add more fields to your table here
             }

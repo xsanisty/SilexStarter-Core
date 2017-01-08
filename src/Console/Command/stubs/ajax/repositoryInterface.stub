@@ -1,21 +1,30 @@
 <?php
 {{namespace}}
 {{modelFqcn}}
+{{entityFqcn}}
 
 interface {{model}}RepositoryInterface
 {
+    /**
+     * Create entity object from array of data
+
+     * @param  array  $data         Array of entity data
+
+     * @return {{entityFqcn}}       Entity object
+     */
+    public function entityFactory(array $data) //:{{entityClass}};
 
     /**
      * Find records by id.
      *
      * @param  integer  $id     The record id
      *
-     * @return {{model}}          Model of the specified record
+     * @return {{entityFqcn}}   Entity object of the specified record
      */
-    public function findById($id);
+    public function findById($id) //:{{entityClass}};
 
     /**
-     * Create new record based on given data.
+     * Create new record based on given entity.
      *
      * @param  array    $data   The data need to be created
      *
@@ -30,17 +39,17 @@ interface {{model}}RepositoryInterface
      * @param  integer  $id     The id of the model
      * @param  array    $data   The model object need to be updated.
      *
-     * @return {{model}}          The updated model
+     * @return {{entityClass}}  The updated model
      * @throws Exception        Exception thrown if operation failed
      */
-    public function update($id, array $data);
+    public function update({{entityClass}} $entity);
 
     /**
      * Delete records by id.
      *
      * @param  integer  $id     The record id
      *
-     * @return {{model}}          Model of the specified record
+     * @return bool             Return true on success
      * @throws Exception        Exception thrown if operation failed
      */
     public function delete($id);

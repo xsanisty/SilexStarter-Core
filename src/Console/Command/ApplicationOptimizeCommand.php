@@ -16,24 +16,25 @@ class ApplicationOptimizeCommand extends Command
 {
     protected $app;
     protected $output;
+    protected $moduleManager;
+    protected $modules;
 
     protected function configure()
     {
         $this
             ->setName('app:optimize')
-            ->setDescription('Create an optimized OptimizedModuleServiceProvider');
-
+            ->setDescription('Optimizing app by reducing complex app bootstrap and create single OptimizedApplicationServiceProvider');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $this->app      = $this->getSilexStarter();
-        $this->output   = $output;
-        $this->moduleMgr= $this->app['module'];
+        $this->app          = $this->getSilexStarter();
+        $this->output       = $output;
+        $this->moduleManager= $this->app['module'];
 
-        $this->moduleMgr->registerModules($this->app['config']->get('modules'));
+        $this->moduleManager->registerModules($this->app['config']->get('modules'));
 
-        $this->modules  = $this->app['module']->getRegisteredModules();
+        $this->modules      = $this->moduleManager->getRegisteredModules();
 
         $this->createOptimizedProvider();
         $this->registerOptimizedProvider();
@@ -59,9 +60,9 @@ class ApplicationOptimizeCommand extends Command
             [$controllerProvider, $twigPath, $configPath, $commandProvider],
             $classTemplate
         );
-        $this->app['filesystem']->dumpFile($this->app['path.app'] . 'services/OptimizedApplicationServiceProvider.php', $classTemplate);
+        $this->app['filesystem']->dumpFile($this->app['path.src'] . 'App/Provider/OptimizedApplicationServiceProvider.php', $classTemplate);
 
-        $this->output->writeln('<comment>OptimizedApplicationServiceProvider created at '.$this->app['path.app'] . 'services/OptimizedApplicationServiceProvider.php</comment>');
+        $this->output->writeln('<comment>OptimizedApplicationServiceProvider created at '.$this->app['path.src'] . 'App/Provider/OptimizedApplicationServiceProvider.php</comment>');
     }
 
     /**
@@ -75,7 +76,7 @@ class ApplicationOptimizeCommand extends Command
         $controllerProviderCode = '';
         $controllerDirectories  = [
             'main'  => [
-                'dir'   => $this->app['path.root'] . 'App/Controller',
+                'dir'   => $this->app['path.src'] . 'App/Controller',
                 'ns'    => 'App\\Controller'
             ]
         ];
@@ -88,8 +89,8 @@ class ApplicationOptimizeCommand extends Command
                 continue;
             }
 
-            $controllerDir  = $this->moduleMgr->getModulePath($identifier) . '/' . $resources->controllers;
-            $controllerNs   = $this->moduleMgr->getModuleNamespace($identifier) . '\\' . $resources->controllers;
+            $controllerDir  = $this->moduleManager->getModulePath($identifier) . '/' . $resources->controllers;
+            $controllerNs   = $this->moduleManager->getModuleNamespace($identifier) . '\\' . $resources->controllers;
 
             $controllerDirectories[$identifier] = ['dir' => $controllerDir, 'ns' => $controllerNs];
         }
@@ -178,7 +179,7 @@ class ApplicationOptimizeCommand extends Command
                 continue;
             }
 
-            $templateDir  = $this->moduleMgr->getModulePath($identifier) . $resources->views;
+            $templateDir  = $this->moduleManager->getModulePath($identifier) . $resources->views;
             $templateDir  = $this->app['filesystem']->makePathRelative($templateDir, $this->app['path.app'] . 'services/');
 
             $publishedDir = $this->app['config']['twig.template_dir'] . '/module/' . $identifier;
@@ -216,8 +217,8 @@ class ApplicationOptimizeCommand extends Command
                 continue;
             }
 
-            $commandDir  = $this->moduleMgr->getModulePath($identifier) . '/' . $resources->commands;
-            $commandNs   = $this->moduleMgr->getModuleNamespace($identifier) . '\\' . $resources->commands;
+            $commandDir  = $this->moduleManager->getModulePath($identifier) . '/' . $resources->commands;
+            $commandNs   = $this->moduleManager->getModuleNamespace($identifier) . '\\' . $resources->commands;
 
             $commandDirectories[$identifier] = ['dir' => $commandDir, 'ns' => $commandNs];
         }
@@ -258,7 +259,7 @@ class ApplicationOptimizeCommand extends Command
                 continue;
             }
 
-            $configDir  = $this->moduleMgr->getModulePath($identifier) . $resources->config;
+            $configDir  = $this->moduleManager->getModulePath($identifier) . $resources->config;
             $configDir  = $this->app['filesystem']->makePathRelative($configDir, $this->app['path.app'] . 'services/');
 
             $configPath .= "\$app['config']->addDirectory(__DIR__ . '/$configDir', '$identifier');\n$indentation";
@@ -298,7 +299,7 @@ class ApplicationOptimizeCommand extends Command
         $middlewareContent  = preg_replace('/require_once(.*?;\n)/', '', $middlewareContent);
         $middlewareFiles    = [];
 
-        foreach ($this->moduleMgr->getMiddlewareFiles() as $middleware) {
+        foreach ($this->moduleManager->getMiddlewareFiles() as $middleware) {
             $middlewarePath     = $this->app['filesystem']->makePathRelative(dirname($middleware), $this->app['path.app']);
             $middlewareName     = basename($middleware);
             $middlewareFiles[]  = "require_once __DIR__ . '/{$middlewarePath}{$middlewareName}';";
@@ -321,7 +322,7 @@ class ApplicationOptimizeCommand extends Command
         $routeContent   = preg_replace('/require_once(.*?;\n)/', '', $routeContent);
         $routeFiles     = [];
 
-        foreach ($this->moduleMgr->getRouteFiles() as $route) {
+        foreach ($this->moduleManager->getRouteFiles() as $route) {
 
             $routePath    = $this->app['filesystem']->makePathRelative(dirname($route), $this->app['path.app']);
             $routeName    = basename($route);

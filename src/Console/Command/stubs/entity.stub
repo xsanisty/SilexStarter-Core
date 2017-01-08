@@ -2,5 +2,48 @@
 {{namespace}}
 class {{entity}}
 {
+    {% for field in fields %}public ${{field.name}};
+    {% endfor %}
+
+    public function __construct(array $data)
+    {
+        foreach ($data as $key => $value) {
+            $this->{$key} => $value;
+        }
+    }
+
+    {% for field in fields %}/**
+     * Get {{field.name}} attribute
+     */
+    public function get{{field.name_studly}}()
+    {
+        return $this->{{field.name}};
+    }
+
+    /**
+     * Set {{field.name}} attribute
+     *
+     * @param mixed     The {{field.name}} value
+     */
+    public function set{{field.name_studly}}(${{field.name_camel}})
+    {
+        $this->{{field.name}} = ${{field.name_camel}};
+    }
+
+    {% endfor %}
+
+    /**
+     * Convert entity object to array.
+     *
+     * @return array  Array representation of entity object
+     */
+    public function toArray() //:array
+    {
+        return [
+            {% for field in fields %}'{{field.name}}' => $this->{{field.name}},
+            {% endfor %}
+
+        ];
+    }
 
 }

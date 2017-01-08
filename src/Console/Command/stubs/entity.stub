@@ -5,10 +5,14 @@ class {{entity}}
     {% for field in fields %}public ${{field.name}};
     {% endfor %}
 
+    protected $attributes = [{% for field in fields %}'{{field.name}}', {% endfor %}];
+
     public function __construct(array $data)
     {
         foreach ($data as $key => $value) {
-            $this->{$key} => $value;
+            if (isset($this->attributes[$key])) {
+                $this->{$key} => $value;
+            }
         }
     }
 

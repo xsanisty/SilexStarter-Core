@@ -167,9 +167,9 @@ class GenerateScaffoldingCommand extends Command
                 ],
                 'repository_interface' => [
                     'class'     => $baseClassName . 'RepositoryInterface',
-                    'file_path' => $basePath . 'Contract/' . $baseClassName . 'RepositoryInterface.php',
-                    'namespace' => $baseNamespace . '\\Contract',
-                    'fqcn'      => $baseNamespace . '\\Contract\\' . $baseClassName . 'RepositoryInterface',
+                    'file_path' => $basePath . 'Contracts/' . $baseClassName . 'RepositoryInterface.php',
+                    'namespace' => $baseNamespace . '\\Contracts',
+                    'fqcn'      => $baseNamespace . '\\Contracts\\' . $baseClassName . 'RepositoryInterface',
                     'template'  => '@stubs/' . $mode . '/repositoryInterface.stub',
                 ],
                 'repository'  => [
@@ -221,9 +221,9 @@ class GenerateScaffoldingCommand extends Command
                 ],
                 'repository_interface' => [
                     'class'     => $baseClassName . 'RepositoryInterface',
-                    'file_path' => $basePath . 'src/App/Contract/' . $baseClassName . 'RepositoryInterface.php',
-                    'namespace' => $baseNamespace . '\\Contract',
-                    'fqcn'      => $baseNamespace . '\\Contract\\' . $baseClassName . 'RepositoryInterface',
+                    'file_path' => $basePath . 'src/App/Contracts/' . $baseClassName . 'RepositoryInterface.php',
+                    'namespace' => $baseNamespace . '\\Contracts',
+                    'fqcn'      => $baseNamespace . '\\Contracts\\' . $baseClassName . 'RepositoryInterface',
                     'template'  => '@stubs/' . $mode . '/repositoryInterface.stub',
                 ],
                 'repository'  => [

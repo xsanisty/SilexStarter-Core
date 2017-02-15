@@ -392,9 +392,9 @@ class RouteBuilder
         $methods    = [
             'index'     => ['http_method' => 'get'   , 'path' => '/'           , 'assert' => []               , 'permission' => 'read'  ],
             'page'      => ['http_method' => 'get'   , 'path' => '/page/{page}', 'assert' => ['page' => '\d+'], 'permission' => 'read'  ],
-            'show'      => ['http_method' => 'get'   , 'path' => '/{id}'       , 'assert' => []               , 'permission' => 'read'  ],
             'create'    => ['http_method' => 'get'   , 'path' => '/create'     , 'assert' => []               , 'permission' => 'create'],
             'store'     => ['http_method' => 'post'  , 'path' => '/'           , 'assert' => []               , 'permission' => 'create'],
+            'show'      => ['http_method' => 'get'   , 'path' => '/{id}'       , 'assert' => []               , 'permission' => 'read'  ],
             'edit'      => ['http_method' => 'get'   , 'path' => '/{id}/edit'  , 'assert' => []               , 'permission' => 'edit'  ],
             'update'    => ['http_method' => 'put'   , 'path' => '/{id}'       , 'assert' => []               , 'permission' => 'edit'  ],
             'delete'    => ['http_method' => 'delete', 'path' => '/{id}'       , 'assert' => []               , 'permission' => 'delete']

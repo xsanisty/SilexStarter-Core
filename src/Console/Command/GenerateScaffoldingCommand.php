@@ -156,6 +156,9 @@ class GenerateScaffoldingCommand extends Command
         }
 
         if ($this->module) {
+            $controllerDirs         = (array) $this->resources->controllers;
+            $defaultControllerDir   = $controllerDirs[0];
+
             $this->generated = [
                 'entity' => [
                     'class'     => $baseClassName,
@@ -173,9 +176,9 @@ class GenerateScaffoldingCommand extends Command
                 ],
                 'controller' => [
                     'class'     => $baseClassName . 'Controller',
-                    'file_path' => $basePath . $this->resources->controllers . '/' . $baseClassName . 'Controller.php',
-                    'namespace' => $baseNamespace . '\\' . $this->resources->controllers,
-                    'fqcn'      => $baseNamespace . '\\' . $this->resources->controllers .'\\' . $baseClassName . 'Controller',
+                    'file_path' => $basePath . $defaultControllerDir . '/' . $baseClassName . 'Controller.php',
+                    'namespace' => $baseNamespace . '\\' . $defaultControllerDir,
+                    'fqcn'      => $baseNamespace . '\\' . $defaultControllerDir .'\\' . $baseClassName . 'Controller',
                     'template'  => '@stubs/' . $mode . '/controller.stub',
                 ],
                 'repository_interface' => [

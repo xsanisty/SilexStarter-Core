@@ -390,14 +390,14 @@ class RouteBuilder
         $routeMaps  = [];
         $registered = [];
         $methods    = [
-            'index'     => ['http_method' => 'get'   , 'path' => '/'           , 'assert' => []               , 'permission' => 'read'  ],
-            'page'      => ['http_method' => 'get'   , 'path' => '/page/{page}', 'assert' => ['page' => '\d+'], 'permission' => 'read'  ],
-            'create'    => ['http_method' => 'get'   , 'path' => '/create'     , 'assert' => []               , 'permission' => 'create'],
-            'store'     => ['http_method' => 'post'  , 'path' => '/'           , 'assert' => []               , 'permission' => 'create'],
-            'show'      => ['http_method' => 'get'   , 'path' => '/{id}'       , 'assert' => []               , 'permission' => 'read'  ],
-            'edit'      => ['http_method' => 'get'   , 'path' => '/{id}/edit'  , 'assert' => []               , 'permission' => 'edit'  ],
-            'update'    => ['http_method' => 'put'   , 'path' => '/{id}'       , 'assert' => []               , 'permission' => 'edit'  ],
-            'delete'    => ['http_method' => 'delete', 'path' => '/{id}'       , 'assert' => []               , 'permission' => 'delete']
+            'index'         => ['method' => 'index' , 'http_method' => 'get'   , 'path' => '/'           , 'assert' => []               , 'permission' => 'read'  ],
+            'paged_index'   => ['method' => 'index' , 'http_method' => 'get'   , 'path' => '/page/{page}', 'assert' => ['page' => '\d+'], 'permission' => 'read'  ],
+            'create'        => ['method' => 'create', 'http_method' => 'get'   , 'path' => '/create'     , 'assert' => []               , 'permission' => 'create'],
+            'store'         => ['method' => 'store' , 'http_method' => 'post'  , 'path' => '/'           , 'assert' => []               , 'permission' => 'create'],
+            'show'          => ['method' => 'show'  , 'http_method' => 'get'   , 'path' => '/{id}'       , 'assert' => []               , 'permission' => 'read'  ],
+            'edit'          => ['method' => 'edit'  , 'http_method' => 'get'   , 'path' => '/{id}/edit'  , 'assert' => []               , 'permission' => 'edit'  ],
+            'update'        => ['method' => 'update', 'http_method' => 'put'   , 'path' => '/{id}'       , 'assert' => []               , 'permission' => 'edit'  ],
+            'delete'        => ['method' => 'delete', 'http_method' => 'delete', 'path' => '/{id}'       , 'assert' => []               , 'permission' => 'delete']
         ];
 
         if ($only) {
@@ -414,7 +414,7 @@ class RouteBuilder
                 continue;
             }
 
-            $routeOptions    = [];
+            $routeOptions = [];
 
             if (isset($options['as']) && $options['as']) {
                 $routeOptions['as'] = $options['as'] . '.' .$method;
@@ -428,7 +428,7 @@ class RouteBuilder
                 $routeOptions['assert'] = array_merge($route['assert'], $assert);
             }
 
-            $routeMaps[]    = new RouteMap($route['http_method'], $route['path'], $controller . ':' .$method, $routeOptions);
+            $routeMaps[]    = new RouteMap($route['http_method'], $route['path'], $controller . ':' . $route['method'], $routeOptions);
         }
 
         $routeCollection = $this->buildControllerRoute($this->app['controllers_factory'], $routeMaps);

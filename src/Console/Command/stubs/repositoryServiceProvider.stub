@@ -1,20 +1,21 @@
 <?php
-{{namespace}}
+namespace {{namespace}};
+
 use Silex\Application;
 use Silex\ServiceProviderInterface;
-{{useModelFqcn}}
-{{useRepoFqcn}}
+use {{model_fqcn}};
+use {{repo_fqcn}};
 
-class {{repoClass}}ServiceProvider implements ServiceProviderInterface
+class {{repo_class}}ServiceProvider implements ServiceProviderInterface
 {
     public function register(Application $app)
     {
-        $app['{{repoFqcn}}'] = $app->share(
+        $app['{{repo_fqcn}}'] = $app->share(
             function (Application $app) {
-                return new {{repoClass}}(new {{model}});
+                return new {{repo_class}}(new {{model_class}});
             }
         );
-        $app->bind('{{ifaceFqcn}}', '{{repoFqcn}}');
+        $app->bind('{{repo_interface_fqcn}}', '{{repo_fqcn}}');
     }
 
     public function boot(Application $app)

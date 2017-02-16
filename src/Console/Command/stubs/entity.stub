@@ -1,22 +1,28 @@
 <?php
-{{namespace}}
+namespace {{namespace}};
+
 class {{entity}}
 {
-    {% for field in fields %}public ${{field.name}};
+    {% for field in fields %}private ${{field.name}};
     {% endfor %}
 
-    protected $attributes = [{% for field in fields %}'{{field.name}}', {% endfor %}];
+    protected $attributes = [
+        {% for field in fields %}'{{field.name}}',
+        {% endfor %}'created_at',
+        'updated_at',
+    ];
 
     public function __construct(array $data)
     {
         foreach ($data as $key => $value) {
-            if (isset($this->attributes[$key])) {
-                $this->{$key} => $value;
+            if (in_array($key, $this->attributes)) {
+                $this->{$key} = $value;
             }
         }
     }
+    {% for field in fields %}
 
-    {% for field in fields %}/**
+    /**
      * Get {{field.name}} attribute
      */
     public function get{{field.name_studly}}()
@@ -33,7 +39,6 @@ class {{entity}}
     {
         $this->{{field.name}} = ${{field.name_camel}};
     }
-
     {% endfor %}
 
     /**
@@ -41,7 +46,7 @@ class {{entity}}
      *
      * @return array  Array representation of entity object
      */
-    public function toArray() //:array
+    public function toArray() #:array
     {
         return [
             {% for field in fields %}'{{field.name}}' => $this->{{field.name}},
@@ -49,5 +54,4 @@ class {{entity}}
 
         ];
     }
-
 }

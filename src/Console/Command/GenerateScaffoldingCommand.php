@@ -110,7 +110,6 @@ class GenerateScaffoldingCommand extends Command
         if ($input->getOption('migrate')) {
             $this->runMigration();
         }
-
     }
 
     protected function getFields()
@@ -189,9 +188,8 @@ class GenerateScaffoldingCommand extends Command
                 'template' => [
                     'dir_path'      => $this->moduleManager->getTemplatePath($this->module) . '/' . $this->entity,
                     'relative_path' => '@' . $this->module . '/' . $this->entity,
-                    'stub_dir'      => __DIR__ . '/stubs/' . $mode . '/template/'
                 ],
-                'asset' => [
+                'assets' => [
                     'public_path'   => $this->moduleManager->getPublicAssetPath($this->module),
                     'module_path'   => $this->moduleManager->getModulePath($this->module) . $this->resources->assets,
                 ]
@@ -243,9 +241,8 @@ class GenerateScaffoldingCommand extends Command
                 'template' => [
                     'dir_path'      => $this->app['config']['twig.template_dir'] . '/' . $this->entity,
                     'relative_path' => $this->entity,
-                    'stub_dir'      => __DIR__ . '/stubs/' . $mode . '/template/'
                 ],
-                'asset' => [
+                'assets' => [
                     'public_path'   => $this->app['path.public'] . 'assets',
                     'module_path'   => '',
                 ]
@@ -314,20 +311,22 @@ class GenerateScaffoldingCommand extends Command
 
         $this->output->writeln("<comment>Generating controller '" . $this->generated['controller']['class'] . "'</comment>");
 
-        $namespace      = $this->generated['controller']['namespace'];
         $controllerFile = $this->generated['controller']['file_path'];
-        $replacement    = [
-            'repositoryInterface'       => $this->generated['repository_interface']['class'],
-            'controller'                => $this->generated['controller']['class'],
-            'templatePath'              => $this->generated['template']['relative_path'],
-            'urlName'                   => $this->module ? $this->module . '.' . $this->entity : $this->entity,
-            'repositoryInterfaceFqcn'   => $namespace ? 'use ' . $this->generated['repository_interface']['fqcn'] . ';' : '',
-            'namespace'                 => $namespace ? "\nnamespace $namespace;\n\nuse Exception;" : '',
+        $variables      = [
+            'repository_interface'      => $this->generated['repository_interface']['class'],
+            'controller_class'          => $this->generated['controller']['class'],
+            'template_path'             => $this->generated['template']['relative_path'],
+            'url_name'                  => $this->module ? $this->module . '.' . $this->entity : $this->entity,
+            'repo_interface_fqcn'       => $this->generated['repository_interface']['fqcn'],
+            'namespace'                 => $this->generated['controller']['namespace'],
+            'repo_prop'                 => Str::camel($this->entity) . 'Repository',
             'entity'                    => $this->entity,
+            'entity_plural'             => Str::plural($this->entity),
             'fields'                    => $this->fields,
+            'route_name'                => $this->module ? $this->module . '.' . $this->entity : $this->entity,
         ];
 
-        $compiledCode  = $this->app['twig']->render($this->generated['controller']['template'], $replacement);
+        $compiledCode  = $this->app['twig']->render($this->generated['controller']['template'], $variables);
 
         $this->filesystem->dumpFile($controllerFile, $compiledCode);
         $this->output->writeln('<info> - Controller created at '. $controllerFile .'</info>');
@@ -339,16 +338,16 @@ class GenerateScaffoldingCommand extends Command
     protected function generateEntity()
     {
         $entityFile     = $this->generated['entity']['file_path'];
-        $replacement    = [
-            'namespace' => "\nnamespace " . $this->generated['entity']['namespace'] . ";\n",
+        $variables      = [
+            'namespace' => $this->generated['entity']['namespace'],
             'entity'    => $this->generated['entity']['class'],
             'fields'    => $this->getFields()
         ];
 
-        $compiledCode   = $this->app['twig']->render($this->generated['entity']['template'], $replacement);
+        $compiledCode   = $this->app['twig']->render($this->generated['entity']['template'], $variables);
 
         $this->filesystem->dumpFile($entityFile, $compiledCode);
-        $this->output->writeln('<info> - Controller created at '. $entityFile .'</info>');
+        $this->output->writeln('<info> - Entity created at '. $entityFile .'</info>');
     }
 
     /**
@@ -358,14 +357,15 @@ class GenerateScaffoldingCommand extends Command
     {
         $this->output->writeln("<comment>Generating model '" . $this->generated['model']['class'] . "'</comment>");
 
-        $namespace      = $this->generated['model']['namespace'];
         $modelFile      = $this->generated['model']['file_path'];
-        $replacement    = [
-            'namespace' => $namespace ? "\nnamespace $namespace;\n\nuse Exception;\n" : '',
-            'model'     => $this->generated['model']['class']
+        $variables      = [
+            'namespace'         => $this->generated['model']['namespace'],
+            'model_class'       => $this->generated['model']['class'],
+            'entity_class_alias'=> $this->generated['entity']['class'] . 'Entity',
+            'entity_fqcn'       => $this->generated['entity']['fqcn'],
         ];
 
-        $compiledCode   = $this->app['twig']->render($this->generated['model']['template'], $replacement);
+        $compiledCode   = $this->app['twig']->render($this->generated['model']['template'], $variables);
 
         $this->filesystem->dumpFile($modelFile, $compiledCode);
         $this->output->writeln('<info> - Model created at '. $modelFile .'</info>');
@@ -378,19 +378,17 @@ class GenerateScaffoldingCommand extends Command
     {
         $this->output->writeln("<comment>Generating repository interface '" . $this->generated['repository_interface']['class'] . "'</comment>");
 
-        $namespace      = $this->generated['repository_interface']['namespace'];
         $interfaceFile  = $this->generated['repository_interface']['file_path'];
-        $replacement    = [
-            'namespace' => $namespace ? "\nnamespace $namespace;\n\nuse Exception;\n" : '',
-            'modelFqcn' => $namespace ? 'use ' . $this->generated['model']['fqcn'] . ';' : '',
-            'model'     => $this->generated['model']['class'],
+        $variables      = [
+            'namespace'         => $this->generated['repository_interface']['namespace'],
+            'entity_class'      => $this->generated['entity']['class'],
+            'entity_fqcn'       => $this->generated['entity']['fqcn'],
         ];
 
-        $compiledCode   = $this->app['twig']->render($this->generated['repository_interface']['template'], $replacement);
+        $compiledCode   = $this->app['twig']->render($this->generated['repository_interface']['template'], $variables);
 
         $this->filesystem->dumpFile($interfaceFile, $compiledCode);
         $this->output->writeln('<info> - Interface created at '. $interfaceFile . '<info>');
-
     }
 
     /**
@@ -400,17 +398,19 @@ class GenerateScaffoldingCommand extends Command
     {
         $this->output->writeln("<comment>Generating repository '" . $this->generated['repository']['class'] . "'</comment>");
 
-        $namespace      = $this->generated['repository']['namespace'];
-        $repoFile       = $this->generated['repository']['file_path'];
-        $replacement    = [
-            'namespace'     => $namespace ? "\nnamespace $namespace;\n\nuse Exception;\n" : '',
-            'modelFqcn'     => $namespace ? 'use ' . $this->generated['model']['fqcn'] . ';' : '',
-            'ifaceFqcn'     => $namespace ? 'use ' . $this->generated['repository_interface']['fqcn'] . ';' : '',
-            'model'         => $this->generated['model']['class'],
-            'entity'        => $this->entity,
+        $repoFile   = $this->generated['repository']['file_path'];
+        $variables  = [
+            'namespace'         => $this->generated['repository']['namespace'],
+            'model_fqcn'        => $this->generated['model']['fqcn'],
+            'entity_fqcn'       => $this->generated['entity']['fqcn'],
+            'interface_fqcn'    => $this->generated['repository_interface']['fqcn'],
+            'model_class_alias' => $this->generated['model']['class'] . 'Model',
+            'model_prop'        => Str::camel($this->entity),
+            'entity_class'      => $this->generated['entity']['class'],
+            'entity'            => $this->entity,
         ];
 
-        $compiledCode   = $this->app['twig']->render($this->generated['repository']['template'], $replacement);
+        $compiledCode   = $this->app['twig']->render($this->generated['repository']['template'], $variables);
 
         $this->filesystem->dumpFile($repoFile, $compiledCode);
         $this->output->writeln('<info> - Repository created at '. $repoFile .'</info>');
@@ -423,20 +423,18 @@ class GenerateScaffoldingCommand extends Command
     {
         $this->output->writeln("<comment>Generating service provider '" . $this->generated['repository_service_provider']['class'] . "'</comment>");
 
-        $namespace      = $this->generated['repository_service_provider']['namespace'];
         $serviceFile    = $this->generated['repository_service_provider']['file_path'];
 
-        $replacement    = [
-            'namespace'     => $namespace ? "\nnamespace $namespace;\n" : '',
-            'useModelFqcn'  => $namespace ? 'use ' . $this->generated['model']['fqcn'] . ';' : '',
-            'useRepoFqcn'   => $namespace ? 'use ' . $this->generated['repository']['fqcn'] . ';' : '',
-            'repoFqcn'      => $this->generated['repository']['fqcn'],
-            'repoClass'     => $this->generated['repository']['class'],
-            'model'         => $this->generated['model']['class'],
-            'ifaceFqcn'     => $this->generated['repository_interface']['fqcn'],
+        $variables      = [
+            'namespace'             => $this->generated['repository_service_provider']['namespace'],
+            'repo_fqcn'             => $this->generated['repository']['fqcn'],
+            'model_fqcn'            => $this->generated['model']['fqcn'],
+            'repo_class'            => $this->generated['repository']['class'],
+            'model_class'           => $this->generated['model']['class'],
+            'repo_interface_fqcn'   => $this->generated['repository_interface']['fqcn'],
         ];
 
-        $compiledCode   = $this->app['twig']->render($this->generated['repository_service_provider']['template'], $replacement);
+        $compiledCode   = $this->app['twig']->render($this->generated['repository_service_provider']['template'], $variables);
 
         $this->filesystem->dumpFile($serviceFile, $compiledCode);
         $this->output->writeln('<info> - Service provider created at '. $serviceFile .'</info>');
@@ -466,7 +464,6 @@ class GenerateScaffoldingCommand extends Command
             } else {
                 throw new Exception("No module found, write to main services config");
             }
-
         } catch (Exception $e) {
             if ($this->module) {
                 $this->output->writeln('<error> - Unable register service to module service list</error>');
@@ -496,41 +493,42 @@ class GenerateScaffoldingCommand extends Command
 
         $this->output->writeln("<comment>Creating template for the resource</comment>");
 
-        if ($this->mode == 'ajax') {
-            $stubs = ['index', 'form-modal', 'show-modal'];
-
-            /** write the js into public and module path */
-            $template   = file_get_contents($this->generated['template']['stub_dir'] . 'datatable.js.stub');
-            $compiled   = str_replace(['{{module}}', '{{entity}}'], [$this->module, $this->entity], $template);
-            $jsFile     = '/js/' . $this->entity . '_datatable.js';
-
-            $publicJsPath = $this->generated['asset']['public_path'] . $jsFile;
-            $this->filesystem->dumpFile($publicJsPath, $compiled);
-            $this->output->writeln('<info> - Javascript template generated at '. $publicJsPath. '</info>');
-
-            if ($this->module && $this->resources->assets) {
-                $moduleJsPath = $this->generated['asset']['module_path'] . $jsFile;
-                $this->filesystem->dumpFile($moduleJsPath, $compiled);
-                $this->output->writeln('<info> - Javascript template generated at ' . $moduleJsPath . '</info>');
-            }
-        } else {
-            $stubs = ['index', 'edit', 'create', 'show'];
-        }
-
-        $replacement = [
-            '{{module}}'        => $this->module,
-            '{{entity}}'        => $this->entity,
-            '{{colspan}}'       => count($this->fields)+1,
-            '{{datatableUrl}}'  => ($this->module ? $this->module . '.' . $this->entity : $this->entity) . '.datatable',
-            '{{actionUrl}}'     => ($this->module ? $this->module . '.' . $this->entity : $this->entity) . '.store',
+        $variables = [
+            'module'        => $this->module,
+            'entity'        => $this->entity,
+            'colspan'       => count($this->fields)+1,
+            'datatable_url' => ($this->module ? $this->module . '.' . $this->entity : $this->entity) . '.datatable',
+            'action_url'    => ($this->module ? $this->module . '.' . $this->entity : $this->entity) . '.store',
+            'fields'        => $this->fields
         ];
 
-        foreach ($stubs as $stub) {
-            $template   = $this->app['twig']->render('@stubs/' . $this->mode . '/template/' . $stub . '.twig.stub', ['fields' => $this->fields]);
+        $stubs  = $this->mode == 'ajax'
+                ? ['index.twig', 'form-modal.twig', 'show-modal.twig', 'script.js']
+                : ['index.twig', 'edit.twig', 'create.twig', 'show.twig'];
 
-            //$template   = file_get_contents($this->generated['template']['stub_dir'] . $stub . '.twig.stub');
-            $compiled   = str_replace(array_keys($replacement), array_values($replacement), $template);
-            $targetFile = $this->generated['template']['dir_path'] . '/' . $stub . '.twig';
+        foreach ($stubs as $stub) {
+            $compiled = $this->app['twig']->render(
+                '@stubs/' . $this->mode . '/template/' . $stub . '.stub',
+                $variables
+            );
+
+            if ($stub == 'script.js') {
+                $targetFile = '/js/' . $this->entity . '.js';
+                $publicDir  = $this->generated['assets']['public_path'];
+                $moduleDir  = $this->generated['assets']['module_path'];
+
+                $this->filesystem->dumpFile($publicDir . $targetFile, $compiled);
+                $this->output->writeln('<info> - Javascript template generated at ' . $publicDir . $targetFile . '</info>');
+
+                if ($this->module && $this->resources->assets) {
+                    $this->filesystem->dumpFile($moduleDir . $targetFile, $compiled);
+                    $this->output->writeln('<info> - Javascript template generated at ' . $moduleDir . $targetFile . '</info>');
+                }
+                
+                continue;
+            }
+
+            $targetFile = $this->generated['template']['dir_path'] . '/' . $stub;
 
             $this->filesystem->dumpFile($targetFile, $compiled);
             $this->output->writeln('<info> - Template generated at '. $targetFile .'</info>');
@@ -543,23 +541,22 @@ class GenerateScaffoldingCommand extends Command
     protected function appendRoute()
     {
         $this->output->writeln("<comment>Creating route to the resource</comment>");
-        $routePath = $this->resources && $this->resources->routes
+        $routePath  = $this->resources && $this->resources->routes
                     ? $this->basePath . $this->resources->routes
                     : $this->basePath . 'routes.php';
 
-        $replacement = [
+        $variables  = [
             'controller'=> $this->generated['controller']['class'],
             'namespace' => $this->generated['controller']['namespace'],
             'entity'    => $this->entity,
-            'routeName' => $this->module ? $this->module . '.' . $this->entity : $this->entity,
+            'route_name'=> $this->module ? $this->module . '.' . $this->entity : $this->entity,
         ];
 
-        $routeCode  = $this->app['twig']->render('@stubs/' . $this->mode . '/route.stub', $replacement);
+        $routeCode  = $this->app['twig']->render('@stubs/' . $this->mode . '/route.stub', $variables);
         $routeFile  = fopen($routePath, 'a');
         fwrite($routeFile, $routeCode);
         fclose($routeFile);
 
         $this->output->writeln('<info> - Route configuration written on '. $routePath .'</info>');
-
     }
 }

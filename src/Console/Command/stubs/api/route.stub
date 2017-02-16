@@ -3,8 +3,8 @@ Route::resource(
     '{{entity}}',
     '{{controller}}',
     [
-        'as'        => '{{routeName}}',
+        'as'        => '{{route_name}}',
         'namespace' => '{{namespace}}',
-        'only'      => ['index', 'store', 'update', 'delete']
+        'only'      => ['index', 'paged_index', 'store', 'update', 'delete']
     ]
 );

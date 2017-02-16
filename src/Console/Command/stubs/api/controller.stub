@@ -1,32 +1,51 @@
 <?php
-{{namespace}}
-{{repositoryInterfaceFqcn}}
+namespace {{namespace}};
 
-class {{controller}}
+use Exception;
+use {{repo_interface_fqcn}};
+
+class {{controller_class}}
 {
-    protected $repository;
+    protected ${{repo_prop}};
 
     /**
      * Constructing the controller.
      *
-     * @param {{repositoryInterface}} $repository  The repository object
+     * @param {{repository_interface}} ${{repo_prop}}  The repository object
      */
-    public function __construct({{repositoryInterface}} $repository)
+    public function __construct({{repository_interface}} ${{repo_prop}})
     {
-        $this->repository = $repository;
+        $this->{{repo_prop}} = ${{repo_prop}};
     }
+
+    
 
     /**
      * Show all available resources.
      */
     public function index($page = 1)
     {
-        $datum = $this->repository->findAll();
+        $perPage    = 10;
+        $count      = $this->{{repo_prop}}->count();
+        $entities   = $this->{{repo_prop}}->findAllByPage($page, $perPage)->map(
+            function ($entity) {
+                return $entity->toArray();
+            }
+        );
 
         return Response::json(
             [
-                'datum' => $datum,
-                'page'  => $page,
+                '{{entity_plural}}' => $entities,
+                'meta'      => [
+                    'page'      => $page,
+                    'per_page'  => $perPage,
+                    'count'     => $count,
+                ],
+                'links'     => [
+                    'next'      => $count == 0 || ceil($count/$perPage) == $page ? null : Url::to('{{route_name}}.paged_index', ['page' => $page+1]),
+                    'previous'  => $page == 1 ? null : Url::to('{{route_name}}.paged_index', ['page' => $page-1]),
+                    'current'   => Url::to('{{route_name}}.paged_index', ['page' => $page]),
+                ]
             ]
         );
     }
@@ -36,9 +55,9 @@ class {{controller}}
      */
     public function show($id)
     {
-        $entity = $this->repository->findById($id);
+        $entity = $this->{{repo_prop}}->findById($id);
 
-        return Response::json($entity);
+        return Response::json($entity->toArray());
     }
 
     /**
@@ -46,23 +65,25 @@ class {{controller}}
      */
     public function store()
     {
-        $data   = Request::get('data');
+        $data = Request::json();
 
         try {
-            $entity = $this->repository->create($data);
+            $entity = $this->{{repo_prop}}->entityFactory($data);
+
+            $this->{{repo_prop}}->save($entity);
 
             return Response::json(
                 [
-                    'message'   => 'New {{entity}} has been created!',
-                    'data'      => $entity
+                    'message'   => 'New {{entity|replace('_', ' ')}} has been created!',
+                    '{{entity}}'=> $entity->toArray()
                 ],
                 201
             );
         } catch (Exception $e) {
             return Response::json(
                 [
-                    'message'   => 'Error occured while creating {{entity}}!',
-                    'data'      => $entity,
+                    'message'   => 'Error occured while creating {{entity|replace('_', ' ')}}!',
+                    '{{entity}}'=> $entity,
                     'error'     => [
                         'message'   => $e->getMessage(),
                         'code'      => $e->getCode()
@@ -78,23 +99,28 @@ class {{controller}}
      */
     public function update($id)
     {
-        $data = Request::get('data');
+        $data = Request::json();
 
         try {
-            $entity = $this->repository->update($id, $data);
+            $entity = $this->{{repo_prop}}->findById($id);
+
+            {% for field in fields %}$entity->set{{field.name_studly}}($data['{{field.name}}']);
+            {% endfor %}
+
+            $this->{{repo_prop}}->save($entity);
 
             return Response::json(
                 [
-                    'message'   => '{{entity}} has been updated!',
-                    'data'      => $entity
+                    'message'   => '{{entity|replace('_', ' ')|capitalize}} has been updated!',
+                    '{{entity}}'=> $entity->toArray()
                 ],
                 200
             );
         } catch (Exception $e) {
             return Response::json(
                 [
-                    'message'   => 'Error occured while updating {{entity}}!',
-                    'data'      => $entity,
+                    'message'   => 'Error occured while updating {{entity|replace('_', ' ')}}!',
+                    '{{entity}}'=> $data,
                     'error'     => [
                         'message'   => $e->getMessage(),
                         'code'      => $e->getCode()
@@ -110,16 +136,18 @@ class {{controller}}
      */
     public function delete($id)
     {
-        try {
-            $this->repository->delete($id);
+        $entity = $this->{{repo_prop}}->entityFactory(['id' => $id]);
 
-            return Response::json(['message' => '{{entity}} has been deleted!'], 200);
+        try {
+            $this->{{repo_prop}}->delete($entity);
+
+            return Response::json(['message' => '{{entity|replace('_', ' ')|capitalize}} has been deleted!'], 200);
 
         } catch (Exception $e) {
             return Response::json(
                 [
-                    'message'   => 'Error occured while deleting {{entity}}!',
-                    'data'      => $entity,
+                    'message'   => 'Error occured while deleting {{entity|replace('_', ' ')}}!',
+                    '{{entity}}'=> $entity,
                     'error'     => [
                         'message'   => $e->getMessage(),
                         'code'      => $e->getCode()

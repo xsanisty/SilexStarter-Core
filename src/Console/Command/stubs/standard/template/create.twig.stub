@@ -4,7 +4,7 @@
 {% block content %}
     <div class="box">
         <div class="box-header with-border">
-            <h3 class="box-title">Create {{entity}}</h3>
+            <h3 class="box-title">Create {% endraw %}{{entity|replace('_', ' ')}}{% raw %}</h3>
         </div>
         <div class="box-body">
             {% if status == 'success' %}
@@ -22,14 +22,14 @@
                 </div>
             {% endif %}
 
-            <form action="{{action}}" class="form-horizontal" id="{{entity}}_form" method="post">
+            <form action="{{action}}" class="form-horizontal" id="{% endraw %}{{entity}}{% raw %}_form" method="post">
                 <input type="hidden" id="_method_field" name="_method" value="POST">{% endraw %}
-                {% for field in fields %}{% if field.name == 'id' %}<input type="hidden" id="id_field" name="data[id]">{% else %}
+                {% for field in fields %}{% if field.name == 'id' %}<input type="hidden" id="{{entity}}_id_field" name="{{entity}}_data[id]">{% else %}
 
                 <div class="form-group">
-                    <label for="{{field.name ~ '_field'}}" class="col-md-4">{{field.name}}</label>
+                    <label for="{{entity ~ '_' ~ field.name ~ '_field'}}" class="col-md-4">{{field.name}}</label>
                     <div class="col-md-8">
-                        <input id="{{field.name ~ '_field'}}" name="data[{{field.name}}]" type="text" class="form-control input-sm">
+                        <input id="{{entity ~ '_' ~ field.name ~ '_field'}}" name="{{entity}}_data[{{field.name}}]" type="text" class="form-control input-sm">
                     </div>
                 </div>{% endif %}
                 {% endfor %}
@@ -40,7 +40,7 @@
                 <div class="form-group">
                     <div class="col-md-12">
                         <button type="submit" class="btn btn-primary btn-sm pull-right" style="margin-left:5px">Save</button>
-                        <a href="{{url_for('{{module}}.{{entity}}.index')}}" class="btn btn-danger btn-sm pull-right" style="margin-left:5px">Cancel</a>
+                        <a href="{{url_for('{% endraw %}{{module}}.{{entity}}{% raw %}.index')}}" class="btn btn-danger btn-sm pull-right" style="margin-left:5px">Back</a>
                     </div>
                 </div>
             </form>

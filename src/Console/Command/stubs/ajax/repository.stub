@@ -1,58 +1,131 @@
 <?php
-{{namespace}}
-{{modelFqcn}}
-{{ifaceFqcn}}
+namespace {{namespace}};
 
-class {{model}}Repository implements {{model}}RepositoryInterface
+use Exception;
+use {{model_fqcn}} as {{model_class_alias}};
+use {{entity_fqcn}};
+use {{interface_fqcn}};
+
+class {{entity_class}}Repository implements {{entity_class}}RepositoryInterface
 {
-    protected ${{entity}};
+    protected ${{model_prop}};
 
-    public function __construct({{model}} ${{entity}})
+    public function __construct({{model_class_alias}} ${{model_prop}})
     {
-        $this->{{entity}} = ${{entity}};
+        $this->{{model_prop}} = ${{model_prop}};
     }
 
     /**
      * {@inheritdoc}
      */
-    public function findById($id)
+    public function findAll() #:iterable
     {
-        return $this->{{entity}}->find($id);
+        return $this->{{model_prop}}->all()->map(
+            function ($record) {
+                return $record->toEntity();
+            }
+        );
     }
 
     /**
      * {@inheritdoc}
      */
-    public function create(array $data)
+    public function findAllByPage($page, $entityPerPage = 10) #:iterable
     {
-        return $this->{{entity}}->create($data);
+        $skip = --$page*$entityPerPage;
+
+        return $this->{{model_prop}}
+            ->skip($skip)
+            ->take($entityPerPage)
+            ->get()
+            ->map(
+                function ($record) {
+                    return $record->toEntity();
+                }
+            );
     }
 
     /**
      * {@inheritdoc}
      */
-    public function update($id, array $data)
+    public function count() #:int
     {
-        $this->{{entity}}->newQuery()
-            ->where('id', '=', $id)
-            ->update($data);
-
-        return $this->{{entity}}->newQuery()->find($id);
+        return $this->{{model_prop}}->count();
     }
 
     /**
      * {@inheritdoc}
      */
-    public function delete($id)
+    public function findById($id) #:{{entity_class}}
     {
-        return $this->{{entity}}->newQuery()->where('id', '=', $id)->delete();
+        $model = $this->{{model_prop}}->find($id);
+
+        if (!$model) {
+            throw new Exception("Can not find {{entity|replace('_', ' ')}} with id = $id", 404);
+        }
+
+        return $model->toEntity();
     }
 
     /**
      * {@inheritdoc}
      */
-    public function createDatatableQuery()
+    public function entityFactory(array $data) #:{{entity_class}}
     {
-        return $this->{{entity}}->newQuery();
+        return new {{entity_class}}($data);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function save({{entity_class}} $entity) #:{{entity_class}}
+    {
+        $entityArray = $entity->toArray();
+
+        try {
+            $model = $this->{{model_prop}}->findOrFail($entity->getId());
+
+            $model->update($entityArray);
+            
+            return $model->toEntity();
+        } catch(Exception $e) {
+            return $this->{{model_prop}}
+                ->create($entityArray)
+                ->toEntity();
+        }
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function delete({{entity_class}} $entity) #:bool
+    {
+        $entityArray = $entity->toArray();
+        $primaryKey  = $this->{{model_prop}}->getKeyName();
+
+        if (isset($entityArray[$primaryKey]) && $entityArray[$primaryKey]) {
+            return $this->{{model_prop}}
+                ->newQuery()
+                ->where($primaryKey, '=', $entityArray[$primaryKey])
+                ->delete();
+        } else {
+            $query = $this->{{model_prop}}->newQuery();
+
+            foreach ($entityArray as $prop => $value) {
+                if (!is_null($value)) {
+                    $query->where($prop, '=', $value);
+                }
+            }
+
+            return $query->delete();
+        }
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function buildDatatableQuery()
+    {
+        return $this->{{model_prop}}->newQuery();
     }
 }

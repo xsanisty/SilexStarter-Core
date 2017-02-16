@@ -1,61 +1,71 @@
 <?php
-{{namespace}}
-{{modelFqcn}}
-{{entityFqcn}}
+namespace {{namespace}};
 
-interface {{model}}RepositoryInterface
+use {{entity_fqcn}};
+
+interface {{entity_class}}RepositoryInterface
 {
     /**
-     * Create entity object from array of data
-
-     * @param  array  $data         Array of entity data
-
-     * @return {{entityFqcn}}       Entity object
+     * Find all available records.
+     *
+     * @return iterable<{{entity_fqcn}}>
      */
-    public function entityFactory(array $data) //:{{entityClass}};
+    public function findAll(); #:iterable
+
+    /**
+     * Find all available records by page.
+     *
+     * @return iterable<{{entity_fqcn}}>
+     */
+    public function findAllByPage($page); #:iterable
 
     /**
      * Find records by id.
      *
      * @param  integer  $id     The record id
      *
-     * @return {{entityFqcn}}   Entity object of the specified record
+     * @return {{entity_fqcn}}
      */
-    public function findById($id) //:{{entityClass}};
+    public function findById($id); #:{{entity_class}}
 
     /**
-     * Create new record based on given entity.
+     * Count all available records
      *
-     * @param  array    $data   The data need to be created
-     *
-     * @return {{model}}          The generated model
-     * @throws Exception        Exception thrown if operation failed
+     * @return int
      */
-    public function create(array $data);
+    public function count(); #:int
 
     /**
-     * Update specific record related to given model
+     * Create new entity object based on given data.
      *
-     * @param  integer  $id     The id of the model
-     * @param  array    $data   The model object need to be updated.
+     * @param  array    $data   The entity data need to be created
      *
-     * @return {{entityClass}}  The updated model
-     * @throws Exception        Exception thrown if operation failed
+     * @return {{entity_class}}
      */
-    public function update({{entityClass}} $entity);
+    public function entityFactory(array $data); #:{{entity_class}}
 
     /**
-     * Delete records by id.
+     * Persist entity into persitent storage
      *
-     * @param  integer  $id     The record id
+     * @param  {{entity_fqcn}}  $entity     The entity object
      *
-     * @return bool             Return true on success
-     * @throws Exception        Exception thrown if operation failed
+     * @return {{entity_fqcn}}              The updated entity
+     * @throws Exception                    Exception thrown if operation failed
      */
-    public function delete($id);
+    public function save({{entity_class}} $entity); #:{{entity_class}}
 
     /**
-     * Create a query to be consumed by datatable library.
+     * Remove entity from the persistent storage.
+     *
+     * @param  {{entity_fqcn}}  $entity     The entity object
+     *
+     * @return boolean            Return true on success
+     * @throws Exception          Exception thrown if operation failed
      */
-    public function createDatatableQuery();
+    public function delete({{entity_class}} $entity); #:bool
+
+    /**
+     * Build eloquent query to be consumed by datatable builder.
+     */
+    public function buildDatatableQuery();
 }

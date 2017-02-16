@@ -1,20 +1,21 @@
 <?php
-{{namespace}}
-{{repositoryInterfaceFqcn}}
-use Xsanisty\Admin\DashboardModule;
+namespace {{namespace}};
 
-class {{controller}}
+use Exception;
+use {{repo_interface_fqcn}};
+
+class {{controller_class}}
 {
-    protected $repository;
+    protected ${{repo_prop}};
 
     /**
      * Constructing the controller.
      *
-     * @param {{repositoryInterface}} $repository  The repository object
+     * @param {{repository_interface}} ${{repo_prop}}  The repository object
      */
-    public function __construct({{repositoryInterface}} $repository)
+    public function __construct({{repository_interface}} ${{repo_prop}})
     {
-        $this->repository = $repository;
+        $this->{{repo_prop}} = ${{repo_prop}};
     }
 
     /**
@@ -22,20 +23,13 @@ class {{controller}}
      */
     public function index()
     {
-        Event::fire(DashboardModule::INIT);
-        Menu::get('admin_breadcrumb')->createItem(
-            'manage-{{entity}}',
-            [
-                'label' => ucfirst('{{entity}}') . ' list',
-                'url'   => Url::to('{{urlName}}.index')
-            ]
-        );
+        $entities = $this->{{repo_prop}}->findAll();
 
         return View::make(
-            '{{templatePath}}/index',
+            '{{template_path}}/index',
             [
-                'title'     => ucfirst('{{entity}}') . ' list',
-                'page_title'=> ucfirst('{{entity}}') . ' list',
+                'title'     => '{{entity|replace('_', ' ')|capitalize}} list',
+                'page_title'=> '{{entity|replace('_', ' ')|capitalize}} list',
             ]
         );
     }
@@ -45,20 +39,20 @@ class {{controller}}
      */
     public function show($id)
     {
-        $data = $this->repository->findById($id);
-
-        if ($data) {
-            return Response::json($data);
+        try {
+            $entity = $this->{{repo_prop}}->findById($id);
+            
+            return Response::json($entity->toArray());
+        } catch (Exception $e) {
+            return Response::ajax(
+                'Error occured while retrieving {{entity|replace('_', ' ')}}',
+                500,
+                [[
+                    'message'   => $e->getMessage(),
+                    'code'      => $e->getCode()
+                ]]
+            );
         }
-
-        return Response::ajax(
-            ucfirst('{{entity}}') . ' not found!',
-            404,
-            [[
-                'message'   => $e->getMessage(),
-                'code'      => $e->getCode()
-            ]]
-        );
     }
 
     /**
@@ -66,16 +60,18 @@ class {{controller}}
      */
     public function store()
     {
-        $data   = Request::get('data');
+        $data   = Request::get('{{entity}}_data');
+        $entity = $this->{{repo_prop}}->entityFactory($data);
 
         try {
-            $entity = $this->repository->create($data);
+            $entity = $this->{{repo_prop}}->save($entity);
 
-            return Response::ajax('New ' . ucfirst('{{entity}}') . ' has been created!', 201);
+            return Response::ajax('New {{entity|replace('_', ' ')}} has been created!', 201);
+            
 
         } catch (Exception $e) {
             return Response::ajax(
-                'Error occured while creating new {{entity}}!',
+                'Error occured while creating new {{entity|replace('_',' ')}}!',
                 500,
                 [[
                     'message'   => $e->getMessage(),
@@ -90,16 +86,22 @@ class {{controller}}
      */
     public function update($id)
     {
-        $data = Request::get('data');
-
         try {
-            $entity = $this->repository->update($id, $data);
+            $entity = $this->{{repo_prop}}->findById($id);
 
-            return Response::ajax(ucfirst('{{entity}}') . ' has been updated!');
+            $data   = Request::get('{{entity}}_data');
+
+            {% for field in fields %}$entity->set{{field.name_studly}}($data['{{field.name_camel}}']);
+            {% endfor %}
+
+            $entity = $this->{{repo_prop}}->save($entity);
+
+            return Response::ajax('{{entity|replace('_', ' ')|capitalize}} has been updated!');
+            
 
         } catch (Exception $e) {
             return Response::ajax(
-                'Error occured while updating {{entity}}!',
+                'Error occured while updating {{entity|replace('_', ' ')}}!',
                 500,
                 [[
                     'message'   => $e->getMessage(),
@@ -107,6 +109,8 @@ class {{controller}}
                 ]]
             );
         }
+
+        return Response::redirect(Url::to('{{url_name}}.edit', ['id' => $entity->getId()]));
     }
 
     /**
@@ -115,13 +119,15 @@ class {{controller}}
     public function delete($id)
     {
         try {
-            $this->repository->delete($id);
+            $entity = $this->{{repo_prop}}->entityFactory(['id' => $id]);
 
-            return Response::ajax(ucfirst('{{entity}}') . ' has been deleted!');
+            $this->{{repo_prop}}->delete($entity);
+
+            return Response::ajax('{{entity|replace('_', ' ')|capitalize}} has been deleted!');
 
         } catch (Exception $e) {
             return Response::ajax(
-                'Error occured while deleting {{entity}}!',
+                'Error occured while deleting {{entity|replace('_', ' ')}}!',
                 500,
                 [[
                     'message'   => $e->getMessage(),
@@ -131,22 +137,23 @@ class {{controller}}
         }
     }
 
+
     /**
      * Build a datatable response.
      */
     public function datatable()
     {
-        $datatable = Datatable::of($this->repository->createDatatableQuery())
+        $datatable = Datatable::of($this->{{repo_prop}}->buildDatatableQuery())
         /** add more fields based on your table */
         ->setColumn([{% for field in fields %}'{{field.name}}', {% endfor %}])
         ->setFormatter(
             function ($row) {
-                $showUrl        = Url::to('{{urlName}}.show', ['id' => $row->id]);
-                $deleteUrl      = Url::to('{{urlName}}.delete', ['id' => $row->id]);
+                $showUrl        = Url::to('{{url_name}}.show', ['id' => $row->id]);
+                $deleteUrl      = Url::to('{{url_name}}.delete', ['id' => $row->id]);
 
-                $showButton     = '<button href="' . $showUrl . '" class="btn btn-xs btn-info btn-{{entity}}-show" style="margin-right: 5px">show</button>';
-                $editButton     = '<button href="' . $showUrl . '" class="btn btn-xs btn-primary btn-{{entity}}-edit" style="margin-right: 5px">edit</button>';
-                $deleteButton   = '<button href="' . $deleteUrl . '" class="btn btn-xs btn-danger btn-{{entity}}-delete" style="margin-right: 5px">delete</button>';
+                $showButton     = '<button href="' . $showUrl . '" class="btn btn-xs btn-info btn-{{entity|replace('_','-')}}-show" style="margin-right: 5px">show</button>';
+                $editButton     = '<button href="' . $showUrl . '" class="btn btn-xs btn-primary btn-{{entity|replace('_','-')}}-edit" style="margin-right: 5px">edit</button>';
+                $deleteButton   = '<button href="' . $deleteUrl . '" class="btn btn-xs btn-danger btn-{{entity|replace('_','-')}}-delete" style="margin-right: 5px">delete</button>';
 
                 /** format your fields as you need */
                 return [

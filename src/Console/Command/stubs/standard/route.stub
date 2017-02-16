@@ -3,7 +3,7 @@ Route::resource(
     '{{entity}}',
     '{{controller}}',
     [
-        'as'        => '{{routeName}}',
+        'as'        => '{{route_name}}',
         'namespace' => '{{namespace}}'
     ]
 );

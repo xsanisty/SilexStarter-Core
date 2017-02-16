@@ -1,34 +1,21 @@
 <?php
-{{namespace}}
-{{repositoryInterfaceFqcn}}
+namespace {{namespace}};
 
-use Xsanisty\Admin\DashboardModule;
+use Exception;
+use {{repo_interface_fqcn}};
 
-class {{controller}}
+class {{controller_class}}
 {
-    protected $repository;
+    protected ${{repo_prop}};
 
     /**
      * Constructing the controller.
      *
-     * @param {{repositoryInterface}} $repository  The repository object
+     * @param {{repository_interface}} ${{repo_prop}}  The repository object
      */
-    public function __construct({{repositoryInterface}} $repository)
+    public function __construct({{repository_interface}} ${{repo_prop}})
     {
-        $this->repository = $repository;
-
-        Event::listen(
-            DashboardModule::INIT,
-            function () {
-                Menu::get('admin_breadcrumb')->createItem(
-                    'manage-{{entity}}',
-                    [
-                        'label' => ucfirst('{{entity}}') . ' list',
-                        'url'   => Url::to('{{urlName}}.index')
-                    ]
-                );
-            }
-        );
+        $this->{{repo_prop}} = ${{repo_prop}};
     }
 
     /**
@@ -36,17 +23,16 @@ class {{controller}}
      */
     public function index()
     {
-        Event::fire(DashboardModule::INIT);
-        $datum = $this->repository->findAll();
+        $entities = $this->{{repo_prop}}->findAll();
 
         return View::make(
-            '{{templatePath}}/index',
+            '{{template_path}}/index',
             [
-                'datum'     => $datum,
+                'entities'  => $entities,
                 'status'    => Session::getFlash('status'),
                 'message'   => Session::getFlash('message'),
-                'title'     => ucfirst('{{entity}}') . ' list',
-                'page_title'=> ucfirst('{{entity}}') . ' list',
+                'title'     => '{{entity|replace('_', ' ')|capitalize}} list',
+                'page_title'=> '{{entity|replace('_', ' ')|capitalize}} list',
             ]
         );
     }
@@ -56,18 +42,9 @@ class {{controller}}
      */
     public function show($id)
     {
-        Event::fire(DashboardModule::INIT);
-        Menu::get('admin_breadcrumb')->createItem(
-            'show-{{entity}}',
-            [
-                'label' => ucfirst('{{entity}}') . ' details',
-                'url'   => Url::to('{{urlName}}.show', ['id' => $id])
-            ]
-        );
+        $entity = $this->{{repo_prop}}->findById($id);
 
-        $data = $this->repository->findById($id);
-
-        return View::make('{{templatePath}}/show', ['data' => $data]);
+        return View::make('{{template_path}}/show', ['entity' => $entity]);
     }
 
     /**
@@ -75,26 +52,17 @@ class {{controller}}
      */
     public function create()
     {
-        Event::fire(DashboardModule::INIT);
-        Menu::get('admin_breadcrumb')->createItem(
-            'create-{{entity}}',
-            [
-                'label' => 'Create {{entity}}',
-                'url'   => Url::to('{{urlName}}.create')
-            ]
-        );
-
-        $data = Session::getFlash('data', []);
+        $data   = Session::getFlash('{{entity}}_data', []);
 
         return View::make(
-            '{{templatePath}}/create',
+            '{{template_path}}/create',
             [
-                'action'    => Url::to('{{urlName}}.store'),
-                'data'      => $data,
+                'action'    => Url::to('{{url_name}}.store'),
+                'entity'    => $this->{{repo_prop}}->entityFactory($data),
                 'status'    => Session::getFlash('status'),
                 'message'   => Session::getFlash('message'),
-                'title'     => 'Create {{entity}}',
-                'page_title'=> 'Create {{entity}}',
+                'title'     => 'Create {{entity|replace('_', ' ')}}',
+                'page_title'=> 'Create {{entity|replace('_', ' ')}}',
             ]
         );
     }
@@ -104,22 +72,23 @@ class {{controller}}
      */
     public function store()
     {
-        $data   = Request::get('data');
+        $data   = Request::get('{{entity}}_data');
+        $entity = $this->{{repo_prop}}->entityFactory($data);
 
         try {
-            $entity = $this->repository->create($data);
+            $entity = $this->{{repo_prop}}->save($entity);
 
             Session::flash('status', 'success');
-            Session::flash('message', 'New ' . ucfirst('{{entity}}') . ' has been created!');
+            Session::flash('message', 'New {{entity|replace('_', ' ')}} has been created!');
 
-            return Response::redirect(Url::to('{{urlName}}.edit', ['id' => $entity->id]));
+            return Response::redirect(Url::to('{{url_name}}.edit', ['id' => $entity->getId()]));
 
         } catch (Exception $e) {
             Session::flash('status', 'error');
             Session::flash('message', $e->getMessage());
-            Session::flash('data', $data);
+            Session::flash('{{entity}}_data', $data);
 
-            return Response::redirect(Url::to('{{urlName}}.create'));
+            return Response::redirect(Url::to('{{url_name}}.create'));
         }
     }
 
@@ -128,26 +97,17 @@ class {{controller}}
      */
     public function edit($id)
     {
-        Event::fire(DashboardModule::INIT);
-        Menu::get('admin_breadcrumb')->createItem(
-            'edit-{{entity}}',
-            [
-                'label' => 'Edit {{entity}}',
-                'url'   => Url::to('{{urlName}}.edit', ['id' => $id])
-            ]
-        );
-
-        $data = $this->repository->findById($id);
+        $entity = $this->{{repo_prop}}->findById($id);
 
         return Response::view(
-            '{{templatePath}}/edit',
+            '{{template_path}}/edit',
             [
-                'action'    => Url::to('{{urlName}}.update', ['id' => $id]),
-                'data'      => $data,
+                'action'    => Url::to('{{url_name}}.update', ['id' => $id]),
+                'entity'    => $entity,
                 'status'    => Session::getFlash('status'),
                 'message'   => Session::getFlash('message'),
-                'title'     => 'Edit {{entity}}',
-                'page_title'=> 'Edit {{entity}}',
+                'title'     => 'Edit {{entity|replace('_', ' ')}}',
+                'page_title'=> 'Edit {{entity|replace('_', ' ')}}',
             ]
         );
     }
@@ -157,20 +117,25 @@ class {{controller}}
      */
     public function update($id)
     {
-        $data = Request::get('data');
-
         try {
-            $entity = $this->repository->update($id, $data);
+            $entity = $this->{{repo_prop}}->findById($id);
+
+            $data   = Request::get('{{entity}}_data');
+
+            {% for field in fields %}$entity->set{{field.name_studly}}($data['{{field.name}}']);
+            {% endfor %}
+
+            $entity = $this->{{repo_prop}}->save($entity);
 
             Session::flash('status', 'success');
-            Session::flash('message', ucfirst('{{entity}}') . ' has been updated!');
+            Session::flash('message', '{{entity|replace('_', ' ')|capitalize}} has been updated!');
 
         } catch (Exception $e) {
             Session::flash('status', 'error');
             Session::flash('message', $e->getMessage());
         }
 
-        return Response::redirect(Url::to('{{urlName}}.edit', ['id' => $entity->id]));
+        return Response::redirect(Url::to('{{url_name}}.edit', ['id' => $entity->getId()]));
     }
 
     /**
@@ -179,10 +144,12 @@ class {{controller}}
     public function delete($id)
     {
         try {
-            $this->repository->delete($id);
+            $entity = $this->{{repo_prop}}->entityFactory(['id' => $id]);
+
+            $this->{{repo_prop}}->delete($entity);
 
             Session::flash('status', 'success');
-            Session::flash('message', ucfirst('{{entity}}') . ' has been deleted!');
+            Session::flash('message', '{{entity|replace('_', ' ')|capitalize}} has been deleted!');
             $status = 200;
 
         } catch (Exception $e) {
@@ -201,6 +168,6 @@ class {{controller}}
             );
         }
 
-        return Response::redirect(Url::to('{{urlName}}.index'));
+        return Response::redirect(Url::to('{{url_name}}.index'));
     }
 }

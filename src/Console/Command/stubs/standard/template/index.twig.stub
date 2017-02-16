@@ -20,15 +20,15 @@
 
     <div class="box box-primary">
         <div class="box-header with-border">
-            <h3 class="box-title">{{entity}} list</h3>
+            <h3 class="box-title">{% endraw %}{{entity|replace('_', ' ')|capitalize}}{% raw %} list</h3>
 
             <div class="box-tools pull-right">
-                <a href="{{ url_for('{% if module %}{{module}}.{% endif %}{{entity}}.create') }}" class="btn btn-sm btn-primary">Create {{entity}}</a>
+                <a href="{{ url_for('{% endraw %}{% if module %}{{module}}.{% endif %}{{entity}}{% raw %}.create') }}" class="btn btn-sm btn-primary">Create {% endraw %}{{entity|replace('_', ' ')}}{% raw %}</a>
             </div>
         </div>
         <div class="box-body">
             {# add more field based on your entity model #}
-            <table class="table table-condensed table-striped" id="{{entity}}_table" style="width: 100%;">
+            <table class="table table-condensed table-striped" id="{% endraw %}{{entity}}{% raw %}_table" style="width: 100%;">
                 <thead>
                     <tr>{% endraw %}
                         {% for field in fields %}<th>{{field.name}}</th>
@@ -37,16 +37,16 @@
                     </tr>
                 </thead>
                 <tbody>
-                    {% if datum %}
-                        {% for data in datum %}
+                    {% if entities %}
+                        {% for entity in entities %}
                             <tr>{% endraw %}
-                                {% for field in fields %}<td>{{ '{{data.' ~ field.name ~ '}}' }}</td>
+                                {% for field in fields %}<td>{{ '{{entity.' ~ field.name ~ '}}' }}</td>
                                 {% endfor %}
                                 {% raw %}
                                 <td class=" text-center">
-                                    <a style="margin-right: 5px" class="btn btn-xs btn-info btn-show" href="{{ url_for('{{module}}.{{entity}}.show', {'id' : data.id}) }}">show</button>
-                                    <a style="margin-right: 5px" class="btn btn-xs btn-primary btn-edit" href="{{ url_for('{{module}}.{{entity}}.edit', {'id' : data.id}) }}">edit</button>
-                                    <a style="margin-right: 5px" class="btn btn-xs btn-danger btn-delete" href="{{ url_for('{{module}}.{{entity}}.delete', {'id' : data.id}) }}">delete</button>
+                                    <a style="margin-right: 5px" class="btn btn-xs btn-info btn-show" href="{{ url_for('{% endraw %}{{module}}.{{entity}}{% raw %}.show', {'id' : entity.id}) }}">show</button>
+                                    <a style="margin-right: 5px" class="btn btn-xs btn-primary btn-edit" href="{{ url_for('{% endraw %}{{module}}.{{entity}}{% raw %}.edit', {'id' : entity.id}) }}">edit</button>
+                                    <a style="margin-right: 5px" class="btn btn-xs btn-danger btn-delete" href="{{ url_for('{% endraw %}{{module}}.{{entity}}{% raw %}.delete', {'id' : entity.id}) }}">delete</button>
                                 </td>
                             </tr>
                         {% endfor %}
@@ -65,11 +65,11 @@
     {{ parent() }}
 
     <script>
-        $('#{{entity}}_table').on('click', '.btn-delete', function(e){
+        $('#{% endraw %}{{entity}}{% raw %}_table').on('click', '.btn-delete', function(e){
             e.preventDefault();
             var $btn = $(this);
 
-            if(confirm('Are you sure to delete this {{entity}}')){
+            if(confirm('Are you sure to delete this {% endraw %}{{entity}}{% raw %}')){
                 $.ajax({
                     'method' : 'DELETE',
                     'url' : $btn.attr('href'),
@@ -77,7 +77,7 @@
                         $btn.parents('tr').remove();
                     },
                     'error' : function(){
-                        alert('Error occured while deleting {{entity}}')
+                        alert('Error occured while deleting {% endraw %}{{entity|replace('_',' ')}}{% raw %}')
                     }
                 });
             }

@@ -1,6 +1,20 @@
 <?php
-{{namespace}}
-class {{model}} extends Model
+namespace {{namespace}};
+
+use Illuminate\Database\Eloquent\Model;
+use {{entity_fqcn}} as {{entity_class_alias}};
+
+class {{model_class}} extends Model
 {
     protected $guarded = ['id'];
+
+    /**
+     * Convert model class to entity class.
+     *
+     * @return {{entity_fqcn}}
+     */
+    public function toEntity() #:{{entity_class_alias}}
+    {
+        return new {{entity_class_alias}}($this->toArray());
+    }
 }

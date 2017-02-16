@@ -3,7 +3,7 @@ Route::resource(
     '{{entity}}',
     '{{controller}}',
     [
-        'as'        => '{{routeName}}',
+        'as'        => '{{route_name}}',
         'namespace' => '{{namespace}}',
         'except'    => ['create', 'edit']
     ]
@@ -13,7 +13,7 @@ Route::post(
     '{{entity}}/datatable',
     '{{controller}}:datatable',
     [
-        'as'        => '{{routeName}}.datatable',
+        'as'        => '{{route_name}}.datatable',
         'namespace' => '{{namespace}}'
     ]
 );

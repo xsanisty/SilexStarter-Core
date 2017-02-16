@@ -4,17 +4,19 @@
 {% block content %}
     <div class="box">
         <div class="box-header with-border">
-            <h3 class="box-title">{{entity}} Detail</h3>
+            <h3 class="box-title">{% endraw %}{{entity|replace('_', ' ')|capitalize}}{% raw %} detail</h3>
         </div>
         <div class="box-body">
             {% endraw %}
             {% for field in fields %}<div class="row">
                 <label for="{{field.name ~ '_field'}}" class="col-md-4">{{field.name}}</label>
-                <div class="col-md-8" id="{{field.name ~ '_field'}}">{{ '{{data.' ~ field.name ~ '}}' }}</div>
+                <div class="col-md-8" id="{{field.name ~ '_field'}}">{{ '{{entity.' ~ field.name ~ '}}' }}</div>
             </div>{% endfor %}
             {% raw %}
 
             {# add more field based on your entity model #}
+            <a href="{{url_for('{% endraw %}{{module}}.{{entity}}{% raw %}.index')}}" class="btn btn-danger btn-sm pull-right" style="margin-left:5px">Back</a>
+
         </div>
     </div>
 {% endblock %}{% endraw %}

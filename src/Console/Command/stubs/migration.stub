@@ -1,8 +1,8 @@
 <?php
-{{classNamespace}}
+{{class_namespace}}
 use SilexStarter\Migration\Migration;
 
-class {{className}} extends Migration
+class {{class_name}} extends Migration
 {
     /**
      * Run upgrade migration.
@@ -10,9 +10,9 @@ class {{className}} extends Migration
     public function up()
     {
         $this->schema->create(
-            '{{tableName}}',
+            '{{table_name}}',
             function ($table) {
-                {{tableDefinition}}
+                {{table_definition}}
                 $table->nullableTimestamps();
 
                 //add more fields to your table here
@@ -25,6 +25,6 @@ class {{className}} extends Migration
      */
     public function down()
     {
-        $this->schema->drop('{{tableName}}');
+        $this->schema->drop('{{table_name}}');
     }
 }

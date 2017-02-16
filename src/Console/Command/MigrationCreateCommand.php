@@ -65,7 +65,7 @@ class MigrationCreateCommand extends Command
         $fileName   = "{$timestamp}{$className}.php";
         $classCode  = file_get_contents(__DIR__.'/stubs/migration.stub');
         $classCode  = str_replace(
-            ['{{classNamespace}}', '{{className}}', '{{tableName}}', '{{tableDefinition}}'],
+            ['{{class_namespace}}', '{{class_name}}', '{{table_name}}', '{{table_definition}}'],
             [$moduleNs, $className, $tableName, $tableFields],
             $classCode
         );

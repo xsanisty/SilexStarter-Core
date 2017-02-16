@@ -266,7 +266,6 @@ class ApplicationOptimizeCommand extends Command
         }
 
         return $configPath;
-
     }
 
     /**
@@ -323,7 +322,6 @@ class ApplicationOptimizeCommand extends Command
         $routeFiles     = [];
 
         foreach ($this->moduleManager->getRouteFiles() as $route) {
-
             $routePath    = $this->app['filesystem']->makePathRelative(dirname($route), $this->app['path.app']);
             $routeName    = basename($route);
             $routeFiles[] = "require_once __DIR__ . '/{$routePath}{$routeName}';";

@@ -220,10 +220,12 @@ class ModuleManager
     protected function registerModuleController(ModuleProviderInterface $module)
     {
         if ($this->app['controller_as_service'] && $module->getResources()->controllers) {
-            $this->app->registerControllerDirectory(
-                $this->path[$module->getModuleIdentifier()] . $module->getResources()->controllers,
-                $this->namespace[$module->getModuleIdentifier()] . '\\' . $module->getResources()->controllers
-            );
+            foreach ((array) $module->getResources()->controllers as $controllerDirectory) {
+                $this->app->registerControllerDirectory(
+                    $this->path[$module->getModuleIdentifier()] . $controllerDirectory,
+                    $this->namespace[$module->getModuleIdentifier()] . '\\' . str_replace('/', '\\', $controllerDirectory)
+                );
+            }
         }
     }
 

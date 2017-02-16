@@ -24,6 +24,7 @@ class GenerateScaffoldingCommand extends Command
     protected $moduleManager;
     protected $filesystem;
     protected $entity;
+    protected $namespace;
     protected $basePath;
     protected $resources;
     protected $generated = [];
@@ -47,6 +48,13 @@ class GenerateScaffoldingCommand extends Command
                 'm',
                 InputOption::VALUE_REQUIRED,
                 'Create scaffolding for specific module'
+            )
+            ->addOption(
+                'namespace',
+                's',
+                InputOption::VALUE_REQUIRED,
+                'Create scaffolding in specific namespace',
+                ''
             )
             ->addOption(
                 'migrate',
@@ -84,6 +92,7 @@ class GenerateScaffoldingCommand extends Command
         $this->module       = $input->getOption('module');
         $this->entity       = $input->getArgument('entity-name');
         $this->mode         = $input->getOption('mode');
+        $this->namespace    = $input->getOption('namespace');
         $this->fields       = $this->getFields();
 
         if ($this->module) {
@@ -140,6 +149,11 @@ class GenerateScaffoldingCommand extends Command
         $basePath       = $this->basePath;
         $baseClassName  = Str::studly($this->entity);
         $baseNamespace  = $this->module ? $this->moduleManager->getModuleNamespace($this->module) : 'App';
+        
+        if ($this->namespace) {
+            $baseNamespace .= '\\' . $this->namespace;
+            $basePath .=  str_replace('\\', '/', $this->namespace) . '/';
+        }
 
         if ($this->module) {
             $this->generated = [

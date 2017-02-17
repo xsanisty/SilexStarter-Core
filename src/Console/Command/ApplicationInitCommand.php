@@ -87,13 +87,13 @@ class ApplicationInitCommand extends Command
             try {
                 $output->writeln("\n<info>Since database table is now created, let's add new user</info>");
 
-                $this->addDefaultUser($input, $output);
+                $this->addDefaultUser($output);
             } catch (Exception $e) {
                 $output->writeln('<error>Error occured with message:</error>');
                 $output->writeln('<error>'.$e->getMessage().'</error>');
 
                 if ($helper->ask($input, $output, new ConfirmationQuestion('Do you want to retry to add new user? <comment>[Y/n]</comment>'))) {
-                    $this->addDefaultUser($input, $output);
+                    $this->addDefaultUser($output);
                 } else {
                     return;
                 }
@@ -184,10 +184,19 @@ class ApplicationInitCommand extends Command
      * @param InputInterface  $input
      * @param OutputInterface $output
      */
-    protected function addDefaultUser(InputInterface $input, OutputInterface $output)
+    protected function addDefaultUser(OutputInterface $output)
     {
         $command = $this->getApplication()->find('user:create');
-        $command->execute($input, $output);
+        $input   = new ArrayInput(
+            [
+                'command'       => 'user:create',
+                '--login-email' => 'admin@domain.com',
+                '--password'    => 'password',
+                '--admin'       => true,
+                '--first-name'  => 'Administrator',
+            ]
+        );
+        $command->run($input, $output);
     }
 
     /**

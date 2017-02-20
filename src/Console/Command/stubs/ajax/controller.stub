@@ -28,8 +28,9 @@ class {{controller_class}}
         return View::make(
             '{{template_path}}/index',
             [
-                'title'     => '{{entity|replace('_', ' ')|capitalize}} list',
-                'page_title'=> '{{entity|replace('_', ' ')|capitalize}} list',
+                'title'         => '{{entity|replace('_', ' ')|capitalize}} list',
+                'page_title'    => '{{entity|replace('_', ' ')|capitalize}} list',
+                'active_menu'   => {% if module %}'admin_sidebar.{{module}}.{{entity}}'{% else %}'admin_sidebar.{{entity}}'{% endif %}
             ]
         );
     }
@@ -67,8 +68,6 @@ class {{controller_class}}
             $entity = $this->{{repo_prop}}->save($entity);
 
             return Response::ajax('New {{entity|replace('_', ' ')}} has been created!', 201);
-            
-
         } catch (Exception $e) {
             return Response::ajax(
                 'Error occured while creating new {{entity|replace('_',' ')}}!',
@@ -97,8 +96,6 @@ class {{controller_class}}
             $entity = $this->{{repo_prop}}->save($entity);
 
             return Response::ajax('{{entity|replace('_', ' ')|capitalize}} has been updated!');
-            
-
         } catch (Exception $e) {
             return Response::ajax(
                 'Error occured while updating {{entity|replace('_', ' ')}}!',
@@ -124,7 +121,6 @@ class {{controller_class}}
             $this->{{repo_prop}}->delete($entity);
 
             return Response::ajax('{{entity|replace('_', ' ')|capitalize}} has been deleted!');
-
         } catch (Exception $e) {
             return Response::ajax(
                 'Error occured while deleting {{entity|replace('_', ' ')}}!',

@@ -36,8 +36,8 @@
 {# Modal Block #}
 {% block modal %}
     {{parent()}}
-    {% include '@{% endraw %}{{module}}/{{entity}}{% raw %}/form-modal.twig' %}
-    {% include '@{% endraw %}{{module}}/{{entity}}{% raw %}/show-modal.twig' %}
+    {% include '{% endraw %}{% if module %}@{{module}}/{{entity}}{% else %}{{entity}}{% endif %}{% raw %}/form-modal.twig' %}
+    {% include '{% endraw %}{% if module %}@{{module}}/{{entity}}{% else %}{{entity}}{% endif %}{% raw %}/show-modal.twig' %}
 {% endblock %}
 
 {# Javascript Block #}

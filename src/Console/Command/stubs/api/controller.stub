@@ -142,7 +142,6 @@ class {{controller_class}}
             $this->{{repo_prop}}->delete($entity);
 
             return Response::json(['message' => '{{entity|replace('_', ' ')|capitalize}} has been deleted!'], 200);
-
         } catch (Exception $e) {
             return Response::json(
                 [

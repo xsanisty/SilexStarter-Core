@@ -115,6 +115,7 @@ class GenerateScaffoldingCommand extends Command
         $this->generateTemplate();
         $this->registerServiceProvider();
         $this->appendRoute();
+        $this->appendMenu();
 
         if ($input->getOption('migrate')) {
             $this->runMigration();
@@ -317,6 +318,73 @@ class GenerateScaffoldingCommand extends Command
     }
 
     /**
+     * Try to append menu into module menu.
+     */
+    protected function appendMenu()
+    {
+
+        if ($this->module) {
+            $this->output->writeln("<comment>Trying to register module menu</comment>");
+            try {
+                $menu = $this->app['config']->get('@' . $this->module . '.menus');
+
+                $menu['admin_sidebar'][$this->module]['submenu'][$this->entity] = [
+                    'icon'          => 'chevron-circle-right',
+                    'label'         => ucwords(str_replace(['_', '-'], ' ', $this->entity)),
+                    'url'           => '{{module_entity_url}}',
+                    'permissions'   => [
+                        $this->module . '.' . $this->entity . '.access'
+                    ]
+                ];
+
+                $this->app['config']->save('@' . $this->module . '.menus', $menu);
+
+                $configPath     = $this->basePath . $this->resources->config . '/menus.php';
+                $configCode     = file_get_contents($configPath);
+                $compiledCode   = str_replace(
+                    '"{{module_entity_url}}"',
+                    'Url::to(\'' . $this->module . '.' . $this->entity . '.index\')',
+                    $configCode
+                );
+
+                file_put_contents($configPath, $compiledCode);
+
+                $this->output->writeln("<info>Menu registered successfully</info>");
+            } catch (Exception $e) {
+                $this->output->writeln("<info>Module doesn't have menu configuration</info>");
+                $this->output->writeln("<error>".$e->getMessage()."</error>");
+            }
+        } else {
+            $this->output->writeln("<comment>Trying to register menu</comment>");
+
+            $menu = $this->app['config']->get('menus');
+
+            $menu['admin_sidebar'][$this->entity] = [
+                'icon'          => 'chevron-circle-right',
+                'label'         => ucwords(str_replace(['_', '-'], ' ', $this->entity)),
+                'url'           => '{{module_entity_url}}',
+                'permissions'   => [
+                    $this->entity . '.access'
+                ]
+            ];
+
+            $this->app['config']->save('menus', $menu);
+
+            $configPath     = $this->basePath . 'app/config/menus.php';
+            $configCode     = file_get_contents($configPath);
+            $compiledCode   = str_replace(
+                '"{{module_entity_url}}"',
+                'Url::to(\'' . $this->entity . '.index\')',
+                $configCode
+            );
+
+            file_put_contents($configPath, $compiledCode);
+
+            $this->output->writeln("<info>Menu registered successfully</info>");
+        }
+    }
+
+    /**
      * Generate controller for the specified table.
      */
     protected function generateController()
@@ -341,6 +409,7 @@ class GenerateScaffoldingCommand extends Command
             'entity_plural'             => Str::plural($this->entity),
             'fields'                    => $this->fields,
             'route_name'                => $this->module ? $this->module . '.' . $this->entity : $this->entity,
+            'module'                    => $this->module
         ];
 
         $compiledCode  = $this->app['twig']->render($this->generated['controller']['template'], $variables);
@@ -560,12 +629,12 @@ class GenerateScaffoldingCommand extends Command
         $this->output->writeln("<comment>Creating route to the resource</comment>");
         $routePath  = $this->resources && $this->resources->routes
                     ? $this->basePath . $this->resources->routes
-                    : $this->basePath . 'routes.php';
+                    : $this->basePath . 'app/routes.php';
 
         $variables  = [
             'controller'=> $this->generated['controller']['class'],
             'namespace' => $this->generated['controller']['namespace'],
-            'entity'    => $this->entity,
+            'entity'    => $this->module ? $this->module . '/' . $this->entity : $this->entity,
             'route_name'=> $this->module ? $this->module . '.' . $this->entity : $this->entity,
         ];
 

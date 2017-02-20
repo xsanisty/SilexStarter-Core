@@ -28,11 +28,12 @@ class {{controller_class}}
         return View::make(
             '{{template_path}}/index',
             [
-                'entities'  => $entities,
-                'status'    => Session::getFlash('status'),
-                'message'   => Session::getFlash('message'),
-                'title'     => '{{entity|replace('_', ' ')|capitalize}} list',
-                'page_title'=> '{{entity|replace('_', ' ')|capitalize}} list',
+                'entities'      => $entities,
+                'status'        => Session::getFlash('status'),
+                'message'       => Session::getFlash('message'),
+                'title'         => '{{entity|replace('_', ' ')|capitalize}} list',
+                'page_title'    => '{{entity|replace('_', ' ')|capitalize}} list',
+                'active_menu'   => {% if module %}'admin_sidebar.{{module}}.{{entity}}'{% else %}'admin_sidebar.{{entity}}'{% endif %}
             ]
         );
     }
@@ -82,7 +83,6 @@ class {{controller_class}}
             Session::flash('message', 'New {{entity|replace('_', ' ')}} has been created!');
 
             return Response::redirect(Url::to('{{url_name}}.edit', ['id' => $entity->getId()]));
-
         } catch (Exception $e) {
             Session::flash('status', 'error');
             Session::flash('message', $e->getMessage());
@@ -129,7 +129,6 @@ class {{controller_class}}
 
             Session::flash('status', 'success');
             Session::flash('message', '{{entity|replace('_', ' ')|capitalize}} has been updated!');
-
         } catch (Exception $e) {
             Session::flash('status', 'error');
             Session::flash('message', $e->getMessage());
@@ -151,7 +150,6 @@ class {{controller_class}}
             Session::flash('status', 'success');
             Session::flash('message', '{{entity|replace('_', ' ')|capitalize}} has been deleted!');
             $status = 200;
-
         } catch (Exception $e) {
             Session::flash('status', 'error');
             Session::flash('message', $e->getMessage());

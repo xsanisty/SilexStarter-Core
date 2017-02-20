@@ -181,6 +181,8 @@ class ModuleManager
             $this->modules[$moduleIdentifier]   = $module;
             $this->assets[$moduleIdentifier]    = $modulePath.$moduleResources->assets;
             $this->config[$moduleIdentifier]    = $modulePath.$moduleResources->config;
+            
+            $this->registerModuleServices($module);
 
             $module->register();
 

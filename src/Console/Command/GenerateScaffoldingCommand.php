@@ -331,24 +331,19 @@ class GenerateScaffoldingCommand extends Command
             try {
                 $menu = $this->app['config']->get('@' . $this->module . '.menus');
 
-                $menu['admin_sidebar'][$this->module]['submenu'][$this->entity] = [
-                    'icon'          => 'chevron-circle-right',
-                    'label'         => ucwords(str_replace(['_', '-'], ' ', $this->entity)),
-                    'url'           => '{{module_entity_url}}',
-                    'permissions'   => [
-                        $this->module . '.' . $this->entity . '.access'
+                $template = '
+                "' . $this->entity . '" => [
+                    "icon"  => "chevron-circle-right",
+                    "label" => "' . ucwords(str_replace(['_', '-'], ' ', $this->entity)) . '",
+                    "url"   => Url::to(\'' . $this->module . '.' . $this->entity . '.index\'),
+                    "permissions" => [
+                        "' . $this->module . '.' . $this->entity . '.access"
                     ]
-                ];
-
-                $this->app['config']->save('@' . $this->module . '.menus', $menu);
+                ],';
 
                 $configPath     = $this->basePath . $this->resources->config . '/menus.php';
                 $configCode     = file_get_contents($configPath);
-                $compiledCode   = str_replace(
-                    '"{{module_entity_url}}"',
-                    'Url::to(\'' . $this->module . '.' . $this->entity . '.index\')',
-                    $configCode
-                );
+                $compiledCode   = substr_replace($configCode, $template, -34, 0);
 
                 file_put_contents($configPath, $compiledCode);
 
@@ -362,24 +357,19 @@ class GenerateScaffoldingCommand extends Command
 
             $menu = $this->app['config']->get('menus');
 
-            $menu['admin_sidebar'][$this->entity] = [
-                'icon'          => 'chevron-circle-right',
-                'label'         => ucwords(str_replace(['_', '-'], ' ', $this->entity)),
-                'url'           => '{{module_entity_url}}',
-                'permissions'   => [
-                    $this->entity . '.access'
-                ]
-            ];
-
-            $this->app['config']->save('menus', $menu);
+            $template = '
+        "' . $this->entity . '" => [
+            "icon"  => "chevron-circle-right",
+            "label" => "' . ucwords(str_replace(['_', '-'], ' ', $this->entity)) . '",
+            "url"   => Url::to(\'' . $this->entity . '.index\'),
+            "permissions" => [
+                "' . $this->entity . '.access"
+            ]
+        ],';
 
             $configPath     = $this->basePath . 'app/config/menus.php';
             $configCode     = file_get_contents($configPath);
-            $compiledCode   = str_replace(
-                '"{{module_entity_url}}"',
-                'Url::to(\'' . $this->entity . '.index\')',
-                $configCode
-            );
+            $compiledCode   = substr_replace($configCode, $template, -10, 0);
 
             file_put_contents($configPath, $compiledCode);
 

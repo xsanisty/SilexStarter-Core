@@ -180,12 +180,12 @@ class ApplicationOptimizeCommand extends Command
             }
 
             $templateDir  = $this->moduleManager->getModulePath($identifier) . $resources->views;
-            $templateDir  = $this->app['filesystem']->makePathRelative($templateDir, $this->app['path.app'] . 'services/');
+            $templateDir  = $this->app['filesystem']->makePathRelative($templateDir, $this->app['path.src'] . 'App/Provider');
 
             $publishedDir = $this->app['config']['twig.template_dir'] . '/module/' . $identifier;
 
             if ($this->app['filesystem']->exists($publishedDir)) {
-                $publishedDir = $this->app['filesystem']->makePathRelative($publishedDir, $this->app['path.app'] . 'services/');
+                $publishedDir = $this->app['filesystem']->makePathRelative($publishedDir, $this->app['path.src'] . 'App/Provider');
                 $twigPath .= "\$app['twig.loader.filesystem']->addPath(__DIR__ . '/$publishedDir', '$identifier');\n$indentation";
             }
 
@@ -204,7 +204,7 @@ class ApplicationOptimizeCommand extends Command
         $commandProviderCode = '';
         $commandDirectories  = [
             'main'  => [
-                'dir'   => $this->app['path.app'] . 'commands',
+                'dir'   => $this->app['path.src'] . 'App/Command',
                 'ns'    => ''
             ]
         ];
@@ -231,7 +231,7 @@ class ApplicationOptimizeCommand extends Command
             foreach ($files as $file) {
                 $commandClass = str_replace([$command['dir'], '.php', DIRECTORY_SEPARATOR], ['', '', '\\'], $file);
                 $commandClass = $command['ns'] . '\\' . ltrim($commandClass, '\\');
-                $commandClass = ltrim($commandClass, '\\');
+                $commandClass = '\\' . ltrim($commandClass, '\\');
 
                 $commandProviderCode .= "\n                \$app['console']->registerCommand(new $commandClass);";
             }
@@ -260,7 +260,7 @@ class ApplicationOptimizeCommand extends Command
             }
 
             $configDir  = $this->moduleManager->getModulePath($identifier) . $resources->config;
-            $configDir  = $this->app['filesystem']->makePathRelative($configDir, $this->app['path.app'] . 'services/');
+            $configDir  = $this->app['filesystem']->makePathRelative($configDir, $this->app['path.src'] . 'App/Provider');
 
             $configPath .= "\$app['config']->addDirectory(__DIR__ . '/$configDir', '$identifier');\n$indentation";
         }
@@ -277,8 +277,8 @@ class ApplicationOptimizeCommand extends Command
 
         $services = $this->app['config']->get('services.common');
 
-        if (false === array_search('OptimizedApplicationServiceProvider', $services)) {
-            $services[] = 'OptimizedApplicationServiceProvider';
+        if (false === array_search('App\Provider\OptimizedApplicationServiceProvider', $services)) {
+            $services[] = 'App\Provider\OptimizedApplicationServiceProvider';
         }
 
         $this->app['config']->set('services.common', $services);

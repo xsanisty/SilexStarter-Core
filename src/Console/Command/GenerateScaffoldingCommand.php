@@ -322,6 +322,9 @@ class GenerateScaffoldingCommand extends Command
      */
     protected function appendMenu()
     {
+        if ($this->mode == 'api') {
+            return;
+        }
 
         if ($this->module) {
             $this->output->writeln("<comment>Trying to register module menu</comment>");

@@ -332,12 +332,12 @@ class GenerateScaffoldingCommand extends Command
                 $menu = $this->app['config']->get('@' . $this->module . '.menus');
 
                 $template = '
-                "' . $this->entity . '" => [
-                    "icon"  => "chevron-circle-right",
-                    "label" => "' . ucwords(str_replace(['_', '-'], ' ', $this->entity)) . '",
-                    "url"   => Url::to(\'' . $this->module . '.' . $this->entity . '.index\'),
-                    "permissions" => [
-                        "' . $this->module . '.' . $this->entity . '.access"
+                \'' . str_replace(['_', '-'], ' ', $this->entity)) . '\' => [
+                    \'icon\'  => \'chevron-circle-right\',
+                    \'label\' => \'' . ucwords(str_replace(['_', '-'], ' ', $this->entity)) . '\',
+                    \'url\'   => Url::to(\'' . $this->module . '.' . $this->entity . '.index\'),
+                    \'permissions\' => [
+                        \'' . $this->module . '.' . $this->entity . '.access\'
                     ]
                 ],';
 
@@ -358,12 +358,12 @@ class GenerateScaffoldingCommand extends Command
             $menu = $this->app['config']->get('menus');
 
             $template = '
-        "' . $this->entity . '" => [
-            "icon"  => "chevron-circle-right",
-            "label" => "' . ucwords(str_replace(['_', '-'], ' ', $this->entity)) . '",
-            "url"   => Url::to(\'' . $this->entity . '.index\'),
-            "permissions" => [
-                "' . $this->entity . '.access"
+        \'' . str_replace(['_', '-'], ' ', $this->entity)) . '\' => [
+            \'icon\'  => \'chevron-circle-right\',
+            \'label\' => \'' . ucwords(str_replace(['_', '-'], ' ', $this->entity)) . '\',
+            \'url\'   => Url::to(\'' . $this->entity . '.index\'),
+            \'permissions\' => [
+                \'' . $this->entity . '.access\'
             ]
         ],';
 

@@ -332,7 +332,7 @@ class GenerateScaffoldingCommand extends Command
                 $menu = $this->app['config']->get('@' . $this->module . '.menus');
 
                 $template = '
-                \'' . str_replace(['_', '-'], ' ', $this->entity)) . '\' => [
+                \'' . str_replace(['_', '-'], ' ', $this->entity) . '\' => [
                     \'icon\'  => \'chevron-circle-right\',
                     \'label\' => \'' . ucwords(str_replace(['_', '-'], ' ', $this->entity)) . '\',
                     \'url\'   => Url::to(\'' . $this->module . '.' . $this->entity . '.index\'),
@@ -358,7 +358,7 @@ class GenerateScaffoldingCommand extends Command
             $menu = $this->app['config']->get('menus');
 
             $template = '
-        \'' . str_replace(['_', '-'], ' ', $this->entity)) . '\' => [
+        \'' . str_replace(['_', '-'], ' ', $this->entity) . '\' => [
             \'icon\'  => \'chevron-circle-right\',
             \'label\' => \'' . ucwords(str_replace(['_', '-'], ' ', $this->entity)) . '\',
             \'url\'   => Url::to(\'' . $this->entity . '.index\'),

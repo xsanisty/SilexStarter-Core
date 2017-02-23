@@ -90,7 +90,7 @@ class {{controller_class}}
 
             $data   = Request::get('{{entity}}_data');
 
-            {% for field in fields %}$entity->set{{field.name_studly}}($data['{{field.name_camel}}']);
+            {% for field in fields %}$entity->set{{field.name_studly}}($data['{{field.name}}']);
             {% endfor %}
 
             $entity = $this->{{repo_prop}}->save($entity);

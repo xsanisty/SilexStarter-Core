@@ -4,7 +4,6 @@ namespace SilexStarter\Config;
 
 use Silex\Application;
 use ArrayAccess;
-use Exception;
 
 class ConfigurationContainer implements ArrayAccess
 {
@@ -82,7 +81,7 @@ class ConfigurationContainer implements ArrayAccess
             }
         }
 
-        throw new Exception("Can not resolve the path of $file");
+        throw new ConfigurationNotFoundException("Can not resolve the path of $file");
     }
 
     /**
@@ -111,7 +110,7 @@ class ConfigurationContainer implements ArrayAccess
             return $originalPath;
         }
 
-        throw new Exception("Can not resolve config path of $file in $namespace namespace");
+        throw new ConfigurationNotFoundException("Can not resolve config path of $file in $namespace namespace");
     }
 
     /**
@@ -190,7 +189,7 @@ class ConfigurationContainer implements ArrayAccess
             } elseif (is_array($configVal) && isset($configVal[$key])) {
                 $configVal = $configVal[$key];
             } else {
-                throw new Exception("'{$keys[$count - 1]}' doesn't have '$key' sub configuration", 1);
+                throw new ConfigurationNotFoundException("'{$keys[$count - 1]}' doesn't have '$key' sub configuration", 1);
             }
         }
 
@@ -245,7 +244,7 @@ class ConfigurationContainer implements ArrayAccess
     protected function getNamespacedValue($namespace, $key)
     {
         if (!isset($this->namespacedConfig[$namespace])) {
-            throw new Exception("Namespace $namespace is not registered");
+            throw new ConfigurationNotFoundException("Namespace $namespace is not registered");
         }
 
         $configFile = explode('.', $key, 2)[0];
@@ -397,7 +396,7 @@ class ConfigurationContainer implements ArrayAccess
             $this->get($key);
 
             return true;
-        } catch (Exception $e) {
+        } catch (ConfigurationNotFoundException $e) {
             return false;
         }
     }

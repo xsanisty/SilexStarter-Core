@@ -16,7 +16,7 @@
     "minimum-stability": "stable",
     "require" : {
         "php": ">= 7.0",
-        "silex/silex": "2.3.*",
+        "silex/silex": "^2.3",
         "twig/twig": "~2.0",
         "cartalyst/sentry" : "~2.0",
         "symfony/event-dispatcher": "4.2.*",

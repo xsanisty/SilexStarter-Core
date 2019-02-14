@@ -181,7 +181,7 @@ class ModuleManager
             $this->modules[$moduleIdentifier]   = $module;
             $this->assets[$moduleIdentifier]    = $modulePath.$moduleResources->assets;
             $this->config[$moduleIdentifier]    = $modulePath.$moduleResources->config;
-            
+
             $this->registerModuleServices($module);
 
             $module->register();
@@ -370,9 +370,10 @@ class ModuleManager
     /**
      * Publish module assets into public asset directory.
      *
-     * @param string $module The module identifier
+     * @param string  $module  The module identifier
+     * @param boolean $symlink Publish asset as symlink instead of mirroring
      */
-    public function publishAsset($module)
+    public function publishAsset($module, $symlink = false)
     {
         if (!$this->modules[$module]->getResources()->assets) {
             throw new Exception("Module $module has no defined assets");
@@ -381,7 +382,11 @@ class ModuleManager
         $moduleAsset = $this->assets[$module];
         $publicAsset = $this->app['path.public'].'assets/'.$module;
 
-        $this->app['filesystem']->mirror($moduleAsset, $publicAsset);
+        if ($symlink) {
+            $this->app['filesystem']->symlink($moduleAsset, $publicAsset, true);
+        } else {
+            $this->app['filesystem']->mirror($moduleAsset, $publicAsset);
+        }
     }
 
     /**

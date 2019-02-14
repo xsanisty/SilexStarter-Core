@@ -9,8 +9,8 @@
 namespace SilexStarter\Provider;
 
 use RuntimeException;
-use Silex\Application;
-use Silex\ServiceProviderInterface;
+use Pimple\Container;
+use Pimple\ServiceProviderInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\HttpException;
@@ -23,9 +23,9 @@ use Whoops\Run;
 class WhoopsServiceProvider implements ServiceProviderInterface
 {
     /**
-     * @param Application $app
+     * @param Container $app
      */
-    public function register(Application $app)
+    public function register(Container $app)
     {
         // There's only ever going to be one error page...right?
         $app['whoops.error_page_handler'] = $app->share(
@@ -71,28 +71,29 @@ class WhoopsServiceProvider implements ServiceProviderInterface
                             'Charset'          => $app['charset'],
                             'Locale'           => $app['locale'],
                             'Route Class'      => $app['route_class'],
-                            'Dispatcher Class' => $app['dispatcher_class'],
                             'Application Class' => get_class($app),
                         ]
                     );
 
                     // Request info:
-                    $errorPageHandler->addDataTable(
-                        'Silex Application (Request)',
-                        [
-                            'URI'         => $request->getUri(),
-                            'Request URI' => $request->getRequestUri(),
-                            'Path Info'   => $request->getPathInfo(),
-                            'Query String'=> $request->getQueryString() ?: '<none>',
-                            'HTTP Method' => $request->getMethod(),
-                            'Script Name' => $request->getScriptName(),
-                            'Base Path'   => $request->getBasePath(),
-                            'Base URL'    => $request->getBaseUrl(),
-                            'Scheme'      => $request->getScheme(),
-                            'Port'        => $request->getPort(),
-                            'Host'        => $request->getHost(),
-                        ]
-                    );
+                    if ($request) {
+                        $errorPageHandler->addDataTable(
+                            'Silex Application (Request)',
+                            [
+                                'URI'         => $request->getUri(),
+                                'Request URI' => $request->getRequestUri(),
+                                'Path Info'   => $request->getPathInfo(),
+                                'Query String'=> $request->getQueryString() ?: '<none>',
+                                'HTTP Method' => $request->getMethod(),
+                                'Script Name' => $request->getScriptName(),
+                                'Base Path'   => $request->getBasePath(),
+                                'Base URL'    => $request->getBaseUrl(),
+                                'Scheme'      => $request->getScheme(),
+                                'Port'        => $request->getPort(),
+                                'Host'        => $request->getHost(),
+                            ]
+                        );
+                    }
                 }
             }
         );
@@ -121,12 +122,5 @@ class WhoopsServiceProvider implements ServiceProviderInterface
         );
 
         $app['whoops']->register();
-    }
-
-    /**
-     * @see Silex\ServiceProviderInterface::boot
-     */
-    public function boot(Application $app)
-    {
     }
 }

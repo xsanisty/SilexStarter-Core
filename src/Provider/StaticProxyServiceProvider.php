@@ -2,14 +2,14 @@
 
 namespace SilexStarter\Provider;
 
-use Silex\Application;
-use Silex\ServiceProviderInterface;
+use Pimple\Container;
+use Pimple\ServiceProviderInterface;
 use Acclimate\Container\ContainerAcclimator;
 use XStatic\ProxyManager;
 
 class StaticProxyServiceProvider implements ServiceProviderInterface
 {
-    public function register(Application $app)
+    public function register(Container $app)
     {
         if ($app['enable_static_proxy']) {
             $app['static_proxy_manager'] = $app->share(
@@ -23,9 +23,5 @@ class StaticProxyServiceProvider implements ServiceProviderInterface
                 }
             );
         }
-    }
-
-    public function boot(Application $app)
-    {
     }
 }

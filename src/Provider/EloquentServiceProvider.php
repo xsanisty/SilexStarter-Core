@@ -2,15 +2,17 @@
 
 namespace SilexStarter\Provider;
 
+use Pimple\Container;
+use Pimple\ServiceProviderInterface;
 use Silex\Application;
-use Silex\ServiceProviderInterface;
+use Silex\Api\BootableProviderInterface;
 use SilexStarter\SilexStarter;
 use Illuminate\Events\Dispatcher;
 use Illuminate\Database\Capsule\Manager as CapsuleManager;
 
-class EloquentServiceProvider implements ServiceProviderInterface
+class EloquentServiceProvider implements ServiceProviderInterface, BootableProviderInterface
 {
-    public function register(Application $app)
+    public function register(Container $app)
     {
         $app['capsule'] = $app->share(
             function ($app) {

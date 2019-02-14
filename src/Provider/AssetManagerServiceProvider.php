@@ -2,17 +2,17 @@
 
 namespace SilexStarter\Provider;
 
-use Silex\Application;
-use Silex\ServiceProviderInterface;
+use Pimple\Container;
+use Pimple\ServiceProviderInterface;
 use SilexStarter\SilexStarter;
 use SilexStarter\Asset\AssetManager;
 
 class AssetManagerServiceProvider implements ServiceProviderInterface
 {
-    public function register(Application $app)
+    public function register(Container $app)
     {
         $app['asset_manager'] = $app->share(
-            function (Application $app) {
+            function (Container $app) {
                 return new AssetManager(
                     $app['request_stack'],
                     'assets'
@@ -23,9 +23,5 @@ class AssetManagerServiceProvider implements ServiceProviderInterface
         if ($app instanceof SilexStarter) {
             $app->bind('SilexStarter\Asset\AssetManager', 'asset_manager');
         }
-    }
-
-    public function boot(Application $app)
-    {
     }
 }

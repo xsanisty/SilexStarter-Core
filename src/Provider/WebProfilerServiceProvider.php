@@ -2,12 +2,13 @@
 
 namespace SilexStarter\Provider;
 
+use Pimple\Container;
 use Silex\Application;
 use Silex\Provider\WebProfilerServiceProvider as SilexProfilerServiceProvider;
 
 class WebProfilerServiceProvider extends SilexProfilerServiceProvider
 {
-    public function register(Application $app)
+    public function register(Container $app)
     {
         if ($app['enable_profiler']) {
             parent::register($app);

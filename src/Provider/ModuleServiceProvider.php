@@ -2,17 +2,17 @@
 
 namespace SilexStarter\Provider;
 
-use Silex\Application;
-use Silex\ServiceProviderInterface;
+use Pimple\Container;
+use Pimple\ServiceProviderInterface;
 use SilexStarter\SilexStarter;
 use SilexStarter\Module\ModuleManager;
 
 class ModuleServiceProvider implements ServiceProviderInterface
 {
-    public function register(Application $app)
+    public function register(Container $app)
     {
         $app['module'] = $app->share(
-            function (Application $app) {
+            function (Container $app) {
                 return new ModuleManager($app);
             }
         );
@@ -20,9 +20,5 @@ class ModuleServiceProvider implements ServiceProviderInterface
         if ($app instanceof SilexStarter) {
             $app->bind('SilexStarter\Module\ModuleManager', 'module');
         }
-    }
-
-    public function boot(Application $app)
-    {
     }
 }

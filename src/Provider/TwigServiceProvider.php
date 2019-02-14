@@ -4,8 +4,9 @@ namespace SilexStarter\Provider;
 
 use Exception;
 use Twig_Extension_Debug;
-use Silex\Application;
-use Silex\ServiceProviderInterface;
+use Pimple\Container;
+use Pimple\ServiceProviderInterface;
+use Silex\Provider\Twig\RuntimeLoader;
 use SilexStarter\TwigExtension\TwigCookieExtension;
 use SilexStarter\TwigExtension\TwigAssetExtension;
 use SilexStarter\TwigExtension\TwigEventExtension;
@@ -14,20 +15,21 @@ use Symfony\Bridge\Twig\Extension\RoutingExtension;
 use Symfony\Bridge\Twig\Extension\TranslationExtension;
 use Symfony\Bridge\Twig\Extension\SecurityExtension;
 use Symfony\Bridge\Twig\Extension\HttpKernelExtension;
+use Symfony\Bridge\Twig\Extension\HttpKernelRuntime;
 
 class TwigServiceProvider implements ServiceProviderInterface
 {
     /**
-     * The Silex Application instance.
+     * The Silex Container instance.
      *
-     * @var \Silex\Application
+     * @var \Pimple\Container
      */
     protected $app;
 
     protected function registerFilesystemLoader()
     {
         $this->app['twig.loader.filesystem'] = $this->app->share(
-            function (Application $app) {
+            function (Container $app) {
                 return new \Twig_Loader_Filesystem($app['config']['twig.template_dir']);
             }
         );
@@ -36,16 +38,33 @@ class TwigServiceProvider implements ServiceProviderInterface
     protected function registerTwigLoader()
     {
         $this->app['twig.loader'] = $this->app->share(
-            function (Application $app) {
+            function (Container $app) {
                 return $app['twig.loader.filesystem'];
             }
         );
     }
 
+    protected function registerRuntimeLoader()
+    {
+        $this->app['twig.runtime.httpkernel'] = function ($app) {
+            return new HttpKernelRuntime($this->app['fragment.handler']);
+        };
+
+        $this->app['twig.runtimes'] = function ($app) {
+            return [
+                HttpKernelRuntime::class => 'twig.runtime.httpkernel',
+            ];
+        };
+
+        $this->app['twig.runtime_loader'] = function ($app) {
+            return new RuntimeLoader($app, $app['twig.runtimes']);
+        };
+    }
+
     protected function registerTwig()
     {
         $this->app['twig'] = $this->app->share(
-            function (Application $app) {
+            function (Container $app) {
                 $twigOptions = array_replace(
                     [
                         'charset'          => $app['charset'],
@@ -106,6 +125,9 @@ class TwigServiceProvider implements ServiceProviderInterface
 
                             $twigEnv->addExtension(new HttpKernelExtension($app['fragment.handler']));
                         }
+
+                        $twigEnv->addRuntimeLoader($app['twig.runtime_loader']);
+                        //$twigEnv->addExtension(new WebLinkExtension($app['request_stack']));
                     }
                 }
 
@@ -115,15 +137,12 @@ class TwigServiceProvider implements ServiceProviderInterface
         );
     }
 
-    public function register(Application $app)
+    public function register(Container $app)
     {
         $this->app = $app;
         $this->registerFilesystemLoader();
         $this->registerTwigLoader();
+        $this->registerRuntimeLoader();
         $this->registerTwig();
-    }
-
-    public function boot(Application $app)
-    {
     }
 }

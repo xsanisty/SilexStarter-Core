@@ -2,18 +2,18 @@
 
 namespace SilexStarter\Provider;
 
-use Silex\Application;
-use Silex\ServiceProviderInterface;
+use Pimple\Container;
+use Pimple\ServiceProviderInterface;
 use Symfony\Component\Translation\Translator;
 use Symfony\Component\Translation\MessageSelector;
 use Symfony\Component\Translation\Loader\ArrayLoader;
 
 class TranslationServiceProvider implements ServiceProviderInterface
 {
-    public function register(Application $app)
+    public function register(Container $app)
     {
         $app['translator'] = $app->share(
-            function (Application $app) {
+            function (Container $app) {
                 $translator = new Translator($app['locale'], new MessageSelector(), $app['config']['translator.cache_dir'], $app['debug']);
 
                 $translator->addLoader('array', new ArrayLoader());
@@ -21,7 +21,7 @@ class TranslationServiceProvider implements ServiceProviderInterface
         );
     }
 
-    public function boot(Application $app)
+    public function boot(Container $app)
     {
     }
 }

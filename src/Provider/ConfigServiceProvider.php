@@ -2,14 +2,14 @@
 
 namespace SilexStarter\Provider;
 
-use Silex\Application;
-use Silex\ServiceProviderInterface;
+use Pimple\Container;
+use Pimple\ServiceProviderInterface;
 use SilexStarter\SilexStarter;
 use SilexStarter\Config\ConfigurationContainer;
 
 class ConfigServiceProvider implements ServiceProviderInterface
 {
-    public function register(Application $app)
+    public function register(Container $app)
     {
         $app['config'] = $app->share(
             function ($app) {
@@ -20,9 +20,5 @@ class ConfigServiceProvider implements ServiceProviderInterface
         if ($app instanceof SilexStarter) {
             $app->bind('SilexStarter\Config\ConfigurationContainer', 'config');
         }
-    }
-
-    public function boot(Application $app)
-    {
     }
 }

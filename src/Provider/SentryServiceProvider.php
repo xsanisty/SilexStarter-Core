@@ -2,8 +2,8 @@
 
 namespace SilexStarter\Provider;
 
-use Silex\Application;
-use Silex\ServiceProviderInterface;
+use Pimple\Container;
+use Pimple\ServiceProviderInterface;
 use SilexStarter\SilexStarter;
 use SilexStarter\Session\SentrySymfonySession;
 use Cartalyst\Sentry\Cookies\NativeCookie;
@@ -20,14 +20,10 @@ class SentryServiceProvider implements ServiceProviderInterface
 {
     protected $app;
 
-    public function boot(Application $app)
-    {
-    }
-
     /**
      * Register the service provider.
      */
-    public function register(Application $app)
+    public function register(Container $app)
     {
         $this->app = $app;
         $this->registerHasher();
@@ -39,7 +35,7 @@ class SentryServiceProvider implements ServiceProviderInterface
         $this->registerSentry();
 
         $app['user'] = $app->share(
-            function (Application $app) {
+            function (Container $app) {
                 return $app['sentry']->getUser();
             }
         );
@@ -56,7 +52,7 @@ class SentryServiceProvider implements ServiceProviderInterface
     protected function registerHasher()
     {
         $this->app['sentry.hasher'] = $this->app->share(
-            function (Application $app) {
+            function (Container $app) {
                 $hasher = $app['config']['sentry.hasher'];
 
                 switch ($hasher) {
@@ -81,7 +77,7 @@ class SentryServiceProvider implements ServiceProviderInterface
     protected function registerUserProvider()
     {
         $this->app['sentry.user'] = $this->app->share(
-            function (Application $app) {
+            function (Container $app) {
                 $model = $app['config']['sentry.users.model'];
 
                 // We will never be accessing a user in Sentry without accessing
@@ -129,7 +125,7 @@ class SentryServiceProvider implements ServiceProviderInterface
     protected function registerGroupProvider()
     {
         $this->app['sentry.group'] = $this->app->share(
-            function (Application $app) {
+            function (Container $app) {
                 $model = $app['config']['sentry.groups.model'];
 
                 // Define the User model to use for relationships.
@@ -163,7 +159,7 @@ class SentryServiceProvider implements ServiceProviderInterface
     protected function registerThrottleProvider()
     {
         $this->app['sentry.throttle'] = $this->app->share(
-            function (Application $app) {
+            function (Container $app) {
                 $model = $app['config']['sentry.throttling.model'];
 
                 $throttleProvider = new ThrottleProvider($app['sentry.user'], $model);
@@ -210,7 +206,7 @@ class SentryServiceProvider implements ServiceProviderInterface
     protected function registerSession()
     {
         $this->app['sentry.session'] = $this->app->share(
-            function (Application $app) {
+            function (Container $app) {
                 $key = $app['config']['sentry.cookie.key'];
 
                 return new SentrySymfonySession($this->app['session'], $key);
@@ -224,7 +220,7 @@ class SentryServiceProvider implements ServiceProviderInterface
     protected function registerCookie()
     {
         $this->app['sentry.cookie'] = $this->app->share(
-            function (Application $app) {
+            function (Container $app) {
                 $key = $app['config']['sentry.cookie.key'];
 
                 return new NativeCookie(['http_only' => true], $key);
@@ -239,7 +235,7 @@ class SentryServiceProvider implements ServiceProviderInterface
     protected function registerSentry()
     {
         $this->app['sentry'] = $this->app->share(
-            function (Application $app) {
+            function (Container $app) {
                 $clientIp = ($app['request_stack']->getCurrentRequest()) ? $app['request_stack']->getCurrentRequest()->getClientIp() : '';
                 return new Sentry(
                     $app['sentry.user'],

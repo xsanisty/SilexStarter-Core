@@ -2,14 +2,14 @@
 
 namespace SilexStarter\Provider;
 
-use Silex\Application;
-use Silex\ServiceProviderInterface;
+use Pimple\Container;
+use Pimple\ServiceProviderInterface;
 use SilexStarter\SilexStarter;
 use Symfony\Component\Filesystem\Filesystem;
 
 class FilesystemServiceProvider implements ServiceProviderInterface
 {
-    public function register(Application $app)
+    public function register(Container $app)
     {
         $app['filesystem'] = $app->share(
             function () {
@@ -20,9 +20,5 @@ class FilesystemServiceProvider implements ServiceProviderInterface
         if ($app instanceof SilexStarter) {
             $app->bind('Symfony\Component\Filesystem\Filesystem', 'filesystem');
         }
-    }
-
-    public function boot(Application $app)
-    {
     }
 }

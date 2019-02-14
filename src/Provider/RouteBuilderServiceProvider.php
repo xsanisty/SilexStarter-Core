@@ -2,24 +2,24 @@
 
 namespace SilexStarter\Provider;
 
-use Silex\Application;
-use Silex\ServiceProviderInterface;
+use Pimple\Container;
+use Pimple\ServiceProviderInterface;
 use Illuminate\Support\Str;
 use SilexStarter\Router\RouteBuilder;
 use SilexStarter\Router\RoutePermissionChecker;
 
 class RouteBuilderServiceProvider implements ServiceProviderInterface
 {
-    public function register(Application $app)
+    public function register(Container $app)
     {
         $app['route_builder'] = $app->share(
-            function (Application $app) {
+            function (Container $app) {
                 return new RouteBuilder($app, new Str());
             }
         );
 
         $app['route_permission_checker'] = $app->share(
-            function (Application $app) {
+            function (Container $app) {
                 return new RoutePermissionChecker(
                     $app['response_builder'],
                     $app['url_generator'],
@@ -27,9 +27,5 @@ class RouteBuilderServiceProvider implements ServiceProviderInterface
                 );
             }
         );
-    }
-
-    public function boot(Application $app)
-    {
     }
 }

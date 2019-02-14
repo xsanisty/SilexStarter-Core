@@ -4,6 +4,7 @@ namespace SilexStarter;
 
 use Exception;
 use ReflectionClass;
+use Pimple\Container;
 use Silex\Application;
 use FilesystemIterator;
 use RecursiveIteratorIterator;
@@ -18,10 +19,14 @@ class SilexStarter extends Application
         parent::__construct();
         $this['app'] = $this;
 
+        $this['request'] = function (Container $app) {
+            return $app['request_stack']->getCurrentRequest();
+        };
+
         $this->bind('Silex\Application', 'app');
         $this->bind('SilexStarter\SilexStarter', 'app');
         $this->bind('Symfony\Component\HttpFoundation\Request', 'request');
-        $this->bind($this['dispatcher_class'], $this['dispatcher']);
+        //$this->bind($this['dispatcher_class'], $this['dispatcher']);
     }
 
     /**
@@ -329,16 +334,15 @@ class SilexStarter extends Application
      */
     public function boot()
     {
-        if (!$this->booted) {
-            foreach ($this->providers as $provider) {
-                $provider->boot($this);
-            }
+        parent::boot();
 
-            if ($this['enable_module']) {
-                $this['module']->boot();
-            }
-
-            $this->booted = true;
+        if ($this['enable_module']) {
+            $this['module']->boot();
         }
+    }
+
+    function share(callable $provider)
+    {
+        return $provider;
     }
 }

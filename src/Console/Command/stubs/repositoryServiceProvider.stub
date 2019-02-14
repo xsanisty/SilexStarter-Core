@@ -1,24 +1,20 @@
 <?php
 namespace {{namespace}};
 
-use Silex\Application;
-use Silex\ServiceProviderInterface;
+use Pimple\Container;
+use Pimple\ServiceProviderInterface;
 use {{model_fqcn}};
 use {{repo_fqcn}};
 
 class {{repo_class}}ServiceProvider implements ServiceProviderInterface
 {
-    public function register(Application $app)
+    public function register(Container $app)
     {
         $app['{{repo_fqcn}}'] = $app->share(
-            function (Application $app) {
+            function (Container $app) {
                 return new {{repo_class}}(new {{model_class}});
             }
         );
         $app->bind('{{repo_interface_fqcn}}', '{{repo_fqcn}}');
-    }
-
-    public function boot(Application $app)
-    {
     }
 }

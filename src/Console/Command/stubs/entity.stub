@@ -14,8 +14,7 @@ class {{entity}}
 
     public function __construct(array $data)
     {
-        {% for field in fields %}
-        if (isset($data['{{field.name}}'])) {
+        {% for field in fields %}if (isset($data['{{field.name}}'])) {
             $this->set{{field.name_studly}}($data['{{field.name}}']);
         }
         {% endfor %}

@@ -3,13 +3,13 @@
 namespace SilexStarter\Controller;
 
 use SilexStarter\Contracts\ContainerAwareInterface;
-use Pimple\Pimple;
+use Pimple\Container;
 
-class ContainerAwareController implements ContainerAwareInterface
+abstract class ContainerAwareController implements ContainerAwareInterface
 {
     protected $container;
 
-    public function setContainer(Pimple $container)
+    public function setContainer(Container $container)
     {
         $this->container = $container;
     }

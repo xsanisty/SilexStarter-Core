@@ -5,7 +5,7 @@ namespace SilexStarter\Controller;
 use SilexStarter\Contracts\DispatcherAwareInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
-class DispatcherAwareController implements DispatcherAwareInterface
+abstract class DispatcherAwareController implements DispatcherAwareInterface
 {
     protected $dispatcher;
 

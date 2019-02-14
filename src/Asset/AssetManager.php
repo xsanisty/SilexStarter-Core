@@ -162,7 +162,7 @@ class AssetManager
      */
     public function renderImage($image, array $options = [])
     {
-        $tagFormat = "<img type=\"text/css\" src=\"%s\" class=\"%s\" id=\"%s\" style=\"%s\">\n";
+        $tagFormat = "<img src=\"%s\" class=\"%s\" id=\"%s\" style=\"%s\">\n";
 
         return sprintf(
             $tagFormat,

@@ -364,6 +364,18 @@ class RouteBuilder
         if ($options['namespace']) {
             $this->popNamespace();
         }
+        
+        if (isset($options['convert'])) {
+            foreach ($options['convert'] as $var => $converter) {
+                $routeCollection->convert($var, $converter);
+            }
+        }
+
+        if (isset($options['default'])) {
+            foreach ($options['default'] as $var => $default) {
+                $routeCollection->value($var, $default);
+            }
+        }
 
         $this->getContext()->mount($prefix, $routeCollection);
 

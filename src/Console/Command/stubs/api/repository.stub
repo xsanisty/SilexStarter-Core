@@ -61,7 +61,7 @@ class {{entity_class}}Repository implements {{entity_class}}RepositoryInterface
         $model = $this->{{model_prop}}->find($id);
 
         if (!$model) {
-            throw new Exception("Can not find {{entity|replace('_', ' ')}} with id = $id", 404);
+            throw new Exception("Can not find {{entity|replace({'_' : ' '})}} with id = $id", 404);
         }
 
         return $model->toEntity();
@@ -86,7 +86,7 @@ class {{entity_class}}Repository implements {{entity_class}}RepositoryInterface
             $model = $this->{{model_prop}}->findOrFail($entity->getId());
 
             $model->update($entityArray);
-            
+
             return $model->toEntity();
         } catch(Exception $e) {
             return $this->{{model_prop}}

@@ -2,6 +2,8 @@
 namespace {{namespace}};
 
 use Exception;
+use SilexStarter\StaticProxy\Request;
+use SilexStarter\StaticProxy\Response;
 use {{repo_interface_fqcn}};
 
 class {{controller_class}}
@@ -18,7 +20,7 @@ class {{controller_class}}
         $this->{{repo_prop}} = ${{repo_prop}};
     }
 
-    
+
 
     /**
      * Show all available resources.
@@ -74,7 +76,7 @@ class {{controller_class}}
 
             return Response::json(
                 [
-                    'message'   => 'New {{entity|replace('_', ' ')}} has been created!',
+                    'message'   => 'New {{entity|replace({'_' : ' '})}} has been created!',
                     '{{entity}}'=> $entity->toArray()
                 ],
                 201
@@ -82,7 +84,7 @@ class {{controller_class}}
         } catch (Exception $e) {
             return Response::json(
                 [
-                    'message'   => 'Error occured while creating {{entity|replace('_', ' ')}}!',
+                    'message'   => 'Error occured while creating {{entity|replace({'_' : ' '})}}!',
                     '{{entity}}'=> $entity,
                     'error'     => [
                         'message'   => $e->getMessage(),
@@ -111,7 +113,7 @@ class {{controller_class}}
 
             return Response::json(
                 [
-                    'message'   => '{{entity|replace('_', ' ')|capitalize}} has been updated!',
+                    'message'   => '{{entity|replace({'_' : ' '})|capitalize}} has been updated!',
                     '{{entity}}'=> $entity->toArray()
                 ],
                 200
@@ -119,7 +121,7 @@ class {{controller_class}}
         } catch (Exception $e) {
             return Response::json(
                 [
-                    'message'   => 'Error occured while updating {{entity|replace('_', ' ')}}!',
+                    'message'   => 'Error occured while updating {{entity|replace({'_' : ' '})}}!',
                     '{{entity}}'=> $data,
                     'error'     => [
                         'message'   => $e->getMessage(),
@@ -141,11 +143,11 @@ class {{controller_class}}
         try {
             $this->{{repo_prop}}->delete($entity);
 
-            return Response::json(['message' => '{{entity|replace('_', ' ')|capitalize}} has been deleted!'], 200);
+            return Response::json(['message' => '{{entity|replace({'_' : ' '})|capitalize}} has been deleted!'], 200);
         } catch (Exception $e) {
             return Response::json(
                 [
-                    'message'   => 'Error occured while deleting {{entity|replace('_', ' ')}}!',
+                    'message'   => 'Error occured while deleting {{entity|replace({'_' : ' '})}}!',
                     '{{entity}}'=> $entity,
                     'error'     => [
                         'message'   => $e->getMessage(),

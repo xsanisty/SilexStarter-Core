@@ -2,6 +2,11 @@
 namespace {{namespace}};
 
 use Exception;
+use SilexStarter\StaticProxy\View;
+use SilexStarter\StaticProxy\Session;
+use SilexStarter\StaticProxy\Request;
+use SilexStarter\StaticProxy\Response;
+use Xsanisty\Datatable\StaticProxy\Datatable;
 use {{repo_interface_fqcn}};
 
 class {{controller_class}}
@@ -31,8 +36,8 @@ class {{controller_class}}
                 'entities'      => $entities,
                 'status'        => Session::getFlash('status'),
                 'message'       => Session::getFlash('message'),
-                'title'         => '{{entity|replace('_', ' ')|capitalize}} list',
-                'page_title'    => '{{entity|replace('_', ' ')|capitalize}} list',
+                'title'         => '{{entity|replace({'_' : ' '})|capitalize}} list',
+                'page_title'    => '{{entity|replace({'_' : ' '})|capitalize}} list',
                 'active_menu'   => {% if module %}'admin_sidebar.{{module}}.{{entity}}'{% else %}'admin_sidebar.{{entity}}'{% endif %}
             ]
         );
@@ -62,8 +67,8 @@ class {{controller_class}}
                 'entity'    => $this->{{repo_prop}}->entityFactory($data),
                 'status'    => Session::getFlash('status'),
                 'message'   => Session::getFlash('message'),
-                'title'     => 'Create {{entity|replace('_', ' ')}}',
-                'page_title'=> 'Create {{entity|replace('_', ' ')}}',
+                'title'     => 'Create {{entity|replace({'_' : ' '})}}',
+                'page_title'=> 'Create {{entity|replace({'_' : ' '})}}',
             ]
         );
     }
@@ -80,7 +85,7 @@ class {{controller_class}}
             $entity = $this->{{repo_prop}}->save($entity);
 
             Session::flash('status', 'success');
-            Session::flash('message', 'New {{entity|replace('_', ' ')}} has been created!');
+            Session::flash('message', 'New {{entity|replace({'_' : ' '})}} has been created!');
 
             return Response::redirect(Url::to('{{url_name}}.edit', ['id' => $entity->getId()]));
         } catch (Exception $e) {
@@ -106,8 +111,8 @@ class {{controller_class}}
                 'entity'    => $entity,
                 'status'    => Session::getFlash('status'),
                 'message'   => Session::getFlash('message'),
-                'title'     => 'Edit {{entity|replace('_', ' ')}}',
-                'page_title'=> 'Edit {{entity|replace('_', ' ')}}',
+                'title'     => 'Edit {{entity|replace({'_' : ' '})}}',
+                'page_title'=> 'Edit {{entity|replace({'_' : ' '})}}',
             ]
         );
     }
@@ -128,7 +133,7 @@ class {{controller_class}}
             $entity = $this->{{repo_prop}}->save($entity);
 
             Session::flash('status', 'success');
-            Session::flash('message', '{{entity|replace('_', ' ')|capitalize}} has been updated!');
+            Session::flash('message', '{{entity|replace({'_' : ' '})|capitalize}} has been updated!');
         } catch (Exception $e) {
             Session::flash('status', 'error');
             Session::flash('message', $e->getMessage());
@@ -148,7 +153,7 @@ class {{controller_class}}
             $this->{{repo_prop}}->delete($entity);
 
             Session::flash('status', 'success');
-            Session::flash('message', '{{entity|replace('_', ' ')|capitalize}} has been deleted!');
+            Session::flash('message', '{{entity|replace({'_' : ' '})|capitalize}} has been deleted!');
             $status = 200;
         } catch (Exception $e) {
             Session::flash('status', 'error');

@@ -1,10 +1,10 @@
-{% raw %}{% set template = config.get('@silexstarter-dashboard.config.template') %}
+{% verbatim %}{% set template = config.get('@silexstarter-dashboard.config.template') %}
 {% extends '@silexstarter-dashboard/'~ template ~'/index.twig' %}
 
 {% block content %}
     <div class="box">
         <div class="box-header with-border">
-            <h3 class="box-title">Create {% endraw %}{{entity|replace('_', ' ')}}{% raw %}</h3>
+            <h3 class="box-title">Create {% endverbatim %}{{entity|replace({'_' : ' '})}}{% verbatim %}</h3>
         </div>
         <div class="box-body">
             {% if status == 'success' %}
@@ -22,8 +22,8 @@
                 </div>
             {% endif %}
 
-            <form action="{{action}}" class="form-horizontal" id="{% endraw %}{{entity}}{% raw %}_form" method="post">
-                <input type="hidden" id="_method_field" name="_method" value="POST">{% endraw %}
+            <form action="{{action}}" class="form-horizontal" id="{% endverbatim %}{{entity}}{% verbatim %}_form" method="post">
+                <input type="hidden" id="_method_field" name="_method" value="POST">{% endverbatim %}
                 {% for field in fields %}{% if field.name == 'id' %}<input type="hidden" id="{{entity}}_id_field" name="{{entity}}_data[id]">{% else %}
 
                 <div class="form-group">
@@ -33,17 +33,17 @@
                     </div>
                 </div>{% endif %}
                 {% endfor %}
-                {% raw %}
+                {% verbatim %}
 
                 {# add more field based on your entity model #}
 
                 <div class="form-group">
                     <div class="col-md-12">
                         <button type="submit" class="btn btn-primary btn-sm pull-right" style="margin-left:5px">Save</button>
-                        <a href="{{url_for('{% endraw %}{{module}}.{{entity}}{% raw %}.index')}}" class="btn btn-danger btn-sm pull-right" style="margin-left:5px">Back</a>
+                        <a href="{{url_for('{% endverbatim %}{% if module %}{{module}}.{% endif %}{{entity}}{% verbatim %}.index')}}" class="btn btn-danger btn-sm pull-right" style="margin-left:5px">Back</a>
                     </div>
                 </div>
             </form>
         </div>
     </div>
-{% endblock %}{% endraw %}
+{% endblock %}{% endverbatim %}

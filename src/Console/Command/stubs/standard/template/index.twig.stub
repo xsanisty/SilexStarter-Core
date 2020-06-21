@@ -1,4 +1,4 @@
-{% raw %}{% set template = config.get('@silexstarter-dashboard.config.template') %}
+{% verbatim %}{% set template = config.get('@silexstarter-dashboard.config.template') %}
 {% extends '@silexstarter-dashboard/'~ template ~'/index.twig' %}
 
 {% block content %}
@@ -20,33 +20,33 @@
 
     <div class="box box-primary">
         <div class="box-header with-border">
-            <h3 class="box-title">{% endraw %}{{entity|replace('_', ' ')|capitalize}}{% raw %} list</h3>
+            <h3 class="box-title">{% endverbatim %}{{entity|replace({'_' :' '})|capitalize}}{% verbatim %} list</h3>
 
             <div class="box-tools pull-right">
-                <a href="{{ url_for('{% endraw %}{% if module %}{{module}}.{% endif %}{{entity}}{% raw %}.create') }}" class="btn btn-sm btn-primary">Create {% endraw %}{{entity|replace('_', ' ')}}{% raw %}</a>
+                <a href="{{ url_for('{% endverbatim %}{% if module %}{{module}}.{% endif %}{{entity}}{% verbatim %}.create') }}" class="btn btn-sm btn-primary">Create {% endverbatim %}{{entity|replace({'_' :' '})}}{% verbatim %}</a>
             </div>
         </div>
         <div class="box-body">
             {# add more field based on your entity model #}
-            <table class="table table-condensed table-striped" id="{% endraw %}{{entity}}{% raw %}_table" style="width: 100%;">
+            <table class="table table-condensed table-striped" id="{% endverbatim %}{{entity}}{% verbatim %}_table" style="width: 100%;">
                 <thead>
-                    <tr>{% endraw %}
+                    <tr>{% endverbatim %}
                         {% for field in fields %}<th>{{field.name}}</th>
-                        {% endfor %}{% raw %}
+                        {% endfor %}{% verbatim %}
                         <th class="text-center" style="width:15%">Action</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% if entities %}
                         {% for entity in entities %}
-                            <tr>{% endraw %}
+                            <tr>{% endverbatim %}
                                 {% for field in fields %}<td>{{ '{{entity.' ~ field.name ~ '}}' }}</td>
                                 {% endfor %}
-                                {% raw %}
+                                {% verbatim %}
                                 <td class=" text-center">
-                                    <a style="margin-right: 5px" class="btn btn-xs btn-info btn-show" href="{{ url_for('{% endraw %}{{module}}.{{entity}}{% raw %}.show', {'id' : entity.id}) }}">show</button>
-                                    <a style="margin-right: 5px" class="btn btn-xs btn-primary btn-edit" href="{{ url_for('{% endraw %}{{module}}.{{entity}}{% raw %}.edit', {'id' : entity.id}) }}">edit</button>
-                                    <a style="margin-right: 5px" class="btn btn-xs btn-danger btn-delete" href="{{ url_for('{% endraw %}{{module}}.{{entity}}{% raw %}.delete', {'id' : entity.id}) }}">delete</button>
+                                    <a style="margin-right: 5px" class="btn btn-xs btn-info btn-show" href="{{ url_for('{% endverbatim %}{% if module %}{{module}}.{% endif %}{{entity}}{% verbatim %}.show', {'id' : entity.id}) }}">show</button>
+                                    <a style="margin-right: 5px" class="btn btn-xs btn-primary btn-edit" href="{{ url_for('{% endverbatim %}{% if module %}{{module}}.{% endif %}{{entity}}{% verbatim %}.edit', {'id' : entity.id}) }}">edit</button>
+                                    <a style="margin-right: 5px" class="btn btn-xs btn-danger btn-delete" href="{{ url_for('{% endverbatim %}{% if module %}{{module}}.{% endif %}{{entity}}{% verbatim %}.delete', {'id' : entity.id}) }}">delete</button>
                                 </td>
                             </tr>
                         {% endfor %}
@@ -65,11 +65,11 @@
     {{ parent() }}
 
     <script>
-        $('#{% endraw %}{{entity}}{% raw %}_table').on('click', '.btn-delete', function(e){
+        $('#{% endverbatim %}{{entity}}{% verbatim %}_table').on('click', '.btn-delete', function(e){
             e.preventDefault();
             var $btn = $(this);
 
-            if(confirm('Are you sure to delete this {% endraw %}{{entity}}{% raw %}')){
+            if(confirm('Are you sure to delete this {% endverbatim %}{{entity}}{% verbatim %}')){
                 $.ajax({
                     'method' : 'DELETE',
                     'url' : $btn.attr('href'),
@@ -77,10 +77,10 @@
                         $btn.parents('tr').remove();
                     },
                     'error' : function(){
-                        alert('Error occured while deleting {% endraw %}{{entity|replace('_',' ')}}{% raw %}')
+                        alert('Error occured while deleting {% endverbatim %}{{entity|replace({'_' : ' '})}}{% verbatim %}')
                     }
                 });
             }
         });
     </script>
-{% endblock %}{% endraw %}
+{% endblock %}{% endverbatim %}

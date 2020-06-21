@@ -2,6 +2,10 @@
 namespace {{namespace}};
 
 use Exception;
+use SilexStarter\StaticProxy\View;
+use SilexStarter\StaticProxy\Request;
+use SilexStarter\StaticProxy\Response;
+use Xsanisty\Datatable\StaticProxy\Datatable;
 use {{repo_interface_fqcn}};
 
 class {{controller_class}}
@@ -23,14 +27,13 @@ class {{controller_class}}
      */
     public function index()
     {
-        $entities = $this->{{repo_prop}}->findAll();
-
         return View::make(
             '{{template_path}}/index',
             [
-                'title'         => '{{entity|replace('_', ' ')|capitalize}} list',
-                'page_title'    => '{{entity|replace('_', ' ')|capitalize}} list',
+                'title'         => '{{entity|replace({'_' : ' '})|capitalize}} list',
+                'page_title'    => '{{entity|replace({'_' : ' '})|capitalize}} list',
                 'active_menu'   => {% if module %}'admin_sidebar.{{module}}.{{entity}}'{% else %}'admin_sidebar.{{entity}}'{% endif %}
+
             ]
         );
     }
@@ -42,11 +45,11 @@ class {{controller_class}}
     {
         try {
             $entity = $this->{{repo_prop}}->findById($id);
-            
+
             return Response::json($entity->toArray());
         } catch (Exception $e) {
             return Response::ajax(
-                'Error occured while retrieving {{entity|replace('_', ' ')}}',
+                'Error occured while retrieving {{entity|replace({'_' : ' '})}}',
                 500,
                 [[
                     'message'   => $e->getMessage(),
@@ -67,10 +70,10 @@ class {{controller_class}}
         try {
             $entity = $this->{{repo_prop}}->save($entity);
 
-            return Response::ajax('New {{entity|replace('_', ' ')}} has been created!', 201);
+            return Response::ajax('New {{entity|replace({'_' : ' '})}} has been created!', 201);
         } catch (Exception $e) {
             return Response::ajax(
-                'Error occured while creating new {{entity|replace('_',' ')}}!',
+                'Error occured while creating new {{entity|replace({'_' : ' '})}}!',
                 500,
                 [[
                     'message'   => $e->getMessage(),
@@ -95,10 +98,10 @@ class {{controller_class}}
 
             $entity = $this->{{repo_prop}}->save($entity);
 
-            return Response::ajax('{{entity|replace('_', ' ')|capitalize}} has been updated!');
+            return Response::ajax('{{entity|replace({'_' : ' '})|capitalize}} has been updated!');
         } catch (Exception $e) {
             return Response::ajax(
-                'Error occured while updating {{entity|replace('_', ' ')}}!',
+                'Error occured while updating {{entity|replace({'_' : ' '})}}!',
                 500,
                 [[
                     'message'   => $e->getMessage(),
@@ -120,10 +123,10 @@ class {{controller_class}}
 
             $this->{{repo_prop}}->delete($entity);
 
-            return Response::ajax('{{entity|replace('_', ' ')|capitalize}} has been deleted!');
+            return Response::ajax('{{entity|replace({'_' : ' '})|capitalize}} has been deleted!');
         } catch (Exception $e) {
             return Response::ajax(
-                'Error occured while deleting {{entity|replace('_', ' ')}}!',
+                'Error occured while deleting {{entity|replace({'_' : ' '})}}!',
                 500,
                 [[
                     'message'   => $e->getMessage(),
@@ -144,19 +147,11 @@ class {{controller_class}}
         ->setColumn([{% for field in fields %}'{{field.name}}', {% endfor %}])
         ->setFormatter(
             function ($row) {
-                $showUrl        = Url::to('{{url_name}}.show', ['id' => $row->id]);
-                $deleteUrl      = Url::to('{{url_name}}.delete', ['id' => $row->id]);
-
-                $showButton     = '<button href="' . $showUrl . '" class="btn btn-xs btn-info btn-{{entity|replace('_','-')}}-show" style="margin-right: 5px">show</button>';
-                $editButton     = '<button href="' . $showUrl . '" class="btn btn-xs btn-primary btn-{{entity|replace('_','-')}}-edit" style="margin-right: 5px">edit</button>';
-                $deleteButton   = '<button href="' . $deleteUrl . '" class="btn btn-xs btn-danger btn-{{entity|replace('_','-')}}-delete" style="margin-right: 5px">delete</button>';
-
                 /** format your fields as you need */
                 return [
-                    {% for field in fields %}$row->{{field.name}},
+                    {% for field in fields %}"{{field.name}}" => $row->{{field.name}},
                     {% endfor %}
 
-                    $showButton . $editButton . $deleteButton
                 ];
             }
         )

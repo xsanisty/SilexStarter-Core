@@ -150,7 +150,7 @@ class GenerateScaffoldingCommand extends Command
         $basePath       = $this->basePath;
         $baseClassName  = Str::studly($this->entity);
         $baseNamespace  = $this->module ? $this->moduleManager->getModuleNamespace($this->module) : 'App';
-        
+
         if ($this->namespace) {
             $baseNamespace .= '\\' . $this->namespace;
             $basePath .=  str_replace('\\', '/', $this->namespace) . '/';
@@ -350,7 +350,7 @@ class GenerateScaffoldingCommand extends Command
                 $this->output->writeln("<info>Menu registered successfully</info>");
             } catch (Exception $e) {
                 $this->output->writeln("<info>Module doesn't have menu configuration</info>");
-                $this->output->writeln("<error>".$e->getMessage()."</error>");
+                $this->output->writeln("<error>" . $e->getMessage() . "</error>");
             }
         } else {
             $this->output->writeln("<comment>Trying to register menu</comment>");
@@ -438,10 +438,10 @@ class GenerateScaffoldingCommand extends Command
 
         $modelFile      = $this->generated['model']['file_path'];
         $variables      = [
-            'namespace'         => $this->generated['model']['namespace'],
-            'model_class'       => $this->generated['model']['class'],
-            'entity_class_alias'=> $this->generated['entity']['class'] . 'Entity',
-            'entity_fqcn'       => $this->generated['entity']['fqcn'],
+            'namespace'             => $this->generated['model']['namespace'],
+            'model_class'           => $this->generated['model']['class'],
+            'entity_class_alias'    => $this->generated['entity']['class'] . 'Entity',
+            'entity_fqcn'           => $this->generated['entity']['fqcn'],
         ];
 
         $compiledCode   = $this->app['twig']->render($this->generated['model']['template'], $variables);
@@ -575,14 +575,14 @@ class GenerateScaffoldingCommand extends Command
         $variables = [
             'module'        => $this->module,
             'entity'        => $this->entity,
-            'colspan'       => count($this->fields)+1,
+            'colspan'       => count($this->fields) + 1,
             'datatable_url' => ($this->module ? $this->module . '.' . $this->entity : $this->entity) . '.datatable',
             'action_url'    => ($this->module ? $this->module . '.' . $this->entity : $this->entity) . '.store',
             'fields'        => $this->fields
         ];
 
         $stubs  = $this->mode == 'ajax'
-                ? ['index.twig', 'form-modal.twig', 'show-modal.twig', 'script.js']
+                ? ['index.twig', 'form-modal.twig', 'show-modal.twig']
                 : ['index.twig', 'edit.twig', 'create.twig', 'show.twig'];
 
         foreach ($stubs as $stub) {
@@ -590,22 +590,6 @@ class GenerateScaffoldingCommand extends Command
                 '@stubs/' . $this->mode . '/template/' . $stub . '.stub',
                 $variables
             );
-
-            if ($stub == 'script.js') {
-                $targetFile = '/js/' . $this->entity . '.js';
-                $publicDir  = $this->generated['assets']['public_path'];
-                $moduleDir  = $this->generated['assets']['module_path'];
-
-                $this->filesystem->dumpFile($publicDir . $targetFile, $compiled);
-                $this->output->writeln('<info> - Javascript template generated at ' . $publicDir . $targetFile . '</info>');
-
-                if ($this->module && $this->resources->assets) {
-                    $this->filesystem->dumpFile($moduleDir . $targetFile, $compiled);
-                    $this->output->writeln('<info> - Javascript template generated at ' . $moduleDir . $targetFile . '</info>');
-                }
-                
-                continue;
-            }
 
             $targetFile = $this->generated['template']['dir_path'] . '/' . $stub;
 
@@ -625,10 +609,10 @@ class GenerateScaffoldingCommand extends Command
                     : $this->basePath . 'app/routes.php';
 
         $variables  = [
-            'controller'=> $this->generated['controller']['class'],
-            'namespace' => $this->generated['controller']['namespace'],
-            'entity'    => $this->module ? $this->module . '/' . $this->entity : $this->entity,
-            'route_name'=> $this->module ? $this->module . '.' . $this->entity : $this->entity,
+            'controller'    => $this->generated['controller']['class'],
+            'namespace'     => $this->generated['controller']['namespace'],
+            'entity'        => $this->module ? $this->module . '/' . $this->entity : $this->entity,
+            'route_name'    => $this->module ? $this->module . '.' . $this->entity : $this->entity,
         ];
 
         $routeCode  = $this->app['twig']->render('@stubs/' . $this->mode . '/route.stub', $variables);

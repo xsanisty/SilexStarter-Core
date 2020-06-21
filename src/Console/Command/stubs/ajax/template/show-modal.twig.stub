@@ -1,13 +1,13 @@
-{% raw %}<div class="modal fade" id="{% endraw %}{{entity}}{% raw %}_show_modal">
+{% verbatim %}<div class="modal fade" id="{% endverbatim %}{{entity}}{% verbatim %}_show_modal">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
-                {% endraw %}{{entity|replace('_', ' ')|capitalize}}{% raw %} detail
+                {% endverbatim %}{{entity|replace({'_' : ' '})|capitalize}}{% verbatim %} detail
             </div>
-            <div class="modal-body">{% endraw %}
+            <div class="modal-body">{% endverbatim %}
                 {% for field in fields %}<div class="row">
                     <label for="{{entity ~ '_' ~ field.name ~ '_show_field'}}" class="col-md-4">{{field.name}}</label>
                     <div class="col-md-8" id="{{entity ~ '_' ~ field.name ~ '_show_field'}}"></div>

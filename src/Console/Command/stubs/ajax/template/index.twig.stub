@@ -1,4 +1,4 @@
-{% raw %}{% set template = config.get('@silexstarter-dashboard.config.template') %}
+{% verbatim %}{% set template = config.get('@silexstarter-dashboard.config.template') %}
 {% extends '@silexstarter-dashboard/'~ template ~'/index.twig' %}
 
 {# Stylesheet Block #}
@@ -8,26 +8,27 @@
     {{ stylesheet([
         '@silexstarter-datatable/css/dataTables.bootstrap.css',
         '@silexstarter-datatable/css/responsive.bootstrap.min.css',
+        '@silexstarter-dashboard/js/toastr/toastr.min.css',
     ]) }}
 {% endblock %}
 
 {# Content Block #}
 {% block content %}
-    <a href="{{ url_for('{% endraw %}{{module}}.{{entity}}{% raw %}.create') }}" class="btn btn-sm btn-primary btn-block-sm" id="btn-{% endraw %}{{entity|replace('_', '-')}}{% raw %}-create">
+    <a href="{{ url_for('{% endverbatim %}{% if module %}{{module}}.{% endif %}{{entity}}{% verbatim %}.create') }}" class="btn btn-sm btn-primary btn-block-sm" id="btn_{% endverbatim %}{{entity}}{% verbatim %}_create">
         <i class="fa fa-fw fa-plus"></i>
-        Create {% endraw %}{{entity|replace('_', ' ')}}{% raw %}
+        Create {% endverbatim %}{{ entity|replace({'_' : ' '}) }}{% verbatim %}
     </a>
-    <table class="table table-condensed table-striped" id="{% endraw %}{{entity}}{% raw %}_table" style="width: 100%">
+    <table class="table table-condensed table-striped" id="{% endverbatim %}{{entity}}{% verbatim %}_table" style="width: 100%">
         <thead>
-            <tr>{% endraw %}
+            <tr>{% endverbatim %}
                 {% for field in fields %}<th class="all">{{field.name}}</th>
-                {% endfor %}{% raw %}
+                {% endfor %}{% verbatim %}
                 <th class="desktop text-center" style="width: 15%">Action</th>
             </tr>
         </thead>
         <tbody>
             <tr>
-                <td class="text-center" colspan="{% endraw %}{{colspan}}{% raw %}">Data not loaded!</td>
+                <td class="text-center" colspan="{% endverbatim %}{{colspan}}{% verbatim %}">Data not loaded!</td>
             </tr>
         </tbody>
     </table>
@@ -36,22 +37,33 @@
 {# Modal Block #}
 {% block modal %}
     {{parent()}}
-    {% include '{% endraw %}{% if module %}@{{module}}/{{entity}}{% else %}{{entity}}{% endif %}{% raw %}/form-modal.twig' %}
-    {% include '{% endraw %}{% if module %}@{{module}}/{{entity}}{% else %}{{entity}}{% endif %}{% raw %}/show-modal.twig' %}
+    {% include '{% endverbatim %}{% if module %}@{{module}}/{{entity}}{% else %}{{entity}}{% endif %}{% verbatim %}/form-modal.twig' %}
+    {% include '{% endverbatim %}{% if module %}@{{module}}/{{entity}}{% else %}{{entity}}{% endif %}{% verbatim %}/show-modal.twig' %}
 {% endblock %}
 
 {# Javascript Block #}
 {% block javascript %}
-    <script>
-        var datatableUrl = '{{ url_for('{% endraw %}{{datatable_url}}{% raw %}') }}';
-        var actionUrl = '{{ url_for('{% endraw %}{{action_url}}{% raw %}') }}'
-    </script>
     {{parent()}}
 
     {{ javascript([
         '@silexstarter-datatable/js/jquery.dataTables.min.js',
         '@silexstarter-datatable/js/dataTables.bootstrap.min.js',
         '@silexstarter-datatable/js/dataTables.responsive.min.js',
-        '@{% endraw %}{{module}}/js/{{entity}}{% raw %}.js'
+        '@silexstarter-dashboard/js/toastr/toastr.min.js',
+        '@silexstarter-dashboard/js/serialize-json/jquery.serializejson.min.js',
+        '@silexstarter-dashboard/js/table-manager.js',
     ]) }}
-{% endblock %}{% endraw %}
+
+    <script>
+        var {% endverbatim %}{{ entity }}{% verbatim %}Manager = new TableManager({
+            restApi     : "{{ url_for('{% endverbatim %}{{action_url}}{% verbatim %}') }}",
+            datatableApi: "{{ url_for('{% endverbatim %}{{datatable_url}}{% verbatim %}') }}",
+            entity      : '{% endverbatim %}{{entity}}',
+            columnDefs  : [
+                {% for field in fields %}{targets : {{loop.index0}}, data : '{{field.name}}'},
+                {% endfor %}
+
+            ]
+        });
+    </script>
+{% verbatim %}{% endblock %}{% endverbatim %}

@@ -1,22 +1,22 @@
-{% raw %}{% set template = config.get('@silexstarter-dashboard.config.template') %}
+{% verbatim %}{% set template = config.get('@silexstarter-dashboard.config.template') %}
 {% extends '@silexstarter-dashboard/'~ template ~'/index.twig' %}
 
 {% block content %}
     <div class="box">
         <div class="box-header with-border">
-            <h3 class="box-title">{% endraw %}{{entity|replace('_', ' ')|capitalize}}{% raw %} detail</h3>
+            <h3 class="box-title">{% endverbatim %}{{entity|replace({'_' : ' '})|capitalize}}{% verbatim %} detail</h3>
         </div>
         <div class="box-body">
-            {% endraw %}
+            {% endverbatim %}
             {% for field in fields %}<div class="row">
                 <label for="{{field.name ~ '_field'}}" class="col-md-4">{{field.name}}</label>
                 <div class="col-md-8" id="{{field.name ~ '_field'}}">{{ '{{entity.' ~ field.name ~ '}}' }}</div>
             </div>{% endfor %}
-            {% raw %}
+            {% verbatim %}
 
             {# add more field based on your entity model #}
-            <a href="{{url_for('{% endraw %}{{module}}.{{entity}}{% raw %}.index')}}" class="btn btn-danger btn-sm pull-right" style="margin-left:5px">Back</a>
+            <a href="{{url_for('{% endverbatim %}{% if module %}{{module}}.{% endif %}{{entity}}{% verbatim %}.index')}}" class="btn btn-danger btn-sm pull-right" style="margin-left:5px">Back</a>
 
         </div>
     </div>
-{% endblock %}{% endraw %}
+{% endblock %}{% endverbatim %}

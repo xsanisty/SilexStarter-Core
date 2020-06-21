@@ -1,31 +1,31 @@
-{% raw %}<div class="modal fade" id="{% endraw %}{{entity}}{% raw %}_form_modal">
+{% verbatim %}<div class="modal fade" id="{% endverbatim %}{{ entity }}{% verbatim %}_form_modal">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
-                Edit {% endraw %}{{entity|replace('_', ' ')}}{% raw %}
+                Edit {% endverbatim %}{{ entity|replace({'_' : ' '}) }}{% verbatim %}
             </div>
             <div class="modal-body">
                 <div class="row">
                     <div class="col-md-12">
-                        <form action="" class="form-horizontal" id="{% endraw %}{{entity}}{% raw %}_form" method="post">
-                            <input type="hidden" id="_method_field" name="_method" value="POST">{% endraw %}
-                            {% for field in fields %}{% if field.name == 'id' %}<input type="hidden" id="{{entity}}_id_field" name="{{entity}}_data[id]">{% else %}
+                        <form action="" class="form-horizontal" id="{% endverbatim %}{{ entity }}{% verbatim %}_form" method="post">
+                            <input type="hidden" id="{% endverbatim %}{{ entity }}{% verbatim %}_method_field" name="_method" value="POST">{% endverbatim %}
+                            {% for field in fields %}{% if field.name == 'id' %}<input type="hidden" id="{{ entity }}_id_field" name="{{ entity }}_data[id]">{% else %}
 
                             <div class="form-group">
-                                <label for="{{entity ~ '_' ~ field.name ~ '_field'}}" class="col-md-4">{{field.name}}</label>
+                                <label for="{{ entity ~ '_' ~ field.name ~ '_field' }}" class="col-md-4">{{ field.name }}</label>
                                 <div class="col-md-8">
-                                    <input id="{{entity ~ '_' ~ field.name ~ '_field'}}" name="{{entity}}_data[{{field.name}}]" type="text" class="form-control input-sm">
+                                    <input id="{{ entity ~ '_' ~ field.name ~ '_field' }}" name="{{ entity }}_data[{{ field.name }}]" type="text" class="form-control input-sm">
                                 </div>
                             </div>{% endif %}
                             {% endfor %}
-                            {% raw %}
+                            {% verbatim %}
                             <div class="form-group">
                                 <div class="col-md-12">
-                                    <button id="btn-{% endraw %}{{entity|replace('_', '-')}}{% raw %}-save" class="btn btn-sm btn-primary pull-right" style="margin-right: 5px">Save</button>
-                                    <button id="btn-{% endraw %}{{entity|replace('_', '-')}}{% raw %}-cancel" class="btn btn-sm btn-danger pull-right" style="margin-right: 5px" data-dismiss="modal">Cancel</button>
+                                    <button id="btn_{% endverbatim %}{{ entity }}{% verbatim %}_save" class="btn btn-sm btn-primary pull-right" style="margin-right: 5px">Save</button>
+                                    <button id="btn_{% endverbatim %}{{ entity }}{% verbatim %}_cancel" class="btn btn-sm btn-danger pull-right" style="margin-right: 5px" data-dismiss="modal">Cancel</button>
                                 </div>
                             </div>
                         </form>
@@ -34,4 +34,4 @@
             </div>
         </div>
     </div>
-</div>{% endraw %}
+</div>{% endverbatim %}
